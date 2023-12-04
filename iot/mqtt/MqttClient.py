@@ -31,7 +31,6 @@ class MqttClient:
     def _loop_forever(self):
         try:
             self.mqtt_client.loop_forever()
-            print("Shutting down.")
         finally:
             self.mqtt_client.disconnect()
 
