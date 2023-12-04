@@ -49,7 +49,8 @@ class WashingMachineTest(unittest.TestCase):
 
     def test_to_dict_has_mandatory_fields(self):
         washing_machine = WashingMachine("test", 312.5)
-        self.assertDictEqual(washing_machine.to_dict(), {"name": "test", "watt": 312.5})
+        self.assertDictEqual(washing_machine.to_dict(),
+                             {"name": "test", "watt": 312.5, "power_state": PowerState.RUNNING})
 
 
 if __name__ == '__main__':

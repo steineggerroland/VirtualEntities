@@ -10,3 +10,9 @@ sources:
   consumption:
     # the Watt consumption is considered to be a floating point number
     topic: consumption/topic
+destinations:
+  scheduled_updates:
+    - topic: update/every-second/topic
+      cron: "*/1 * * * * *"
+    - topic: update/every-15-minutes/topic
+      cron: "* */15 * * * *"

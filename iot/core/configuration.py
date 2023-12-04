@@ -34,12 +34,23 @@ def _read_mqtt_credentials(mqtt_dict):
         return None
 
 
+def _read_destination_configuration(conf_dict):
+    if 'destinations' not in conf_dict or 'scheduled_updates' not in conf_dict['destinations']:
+        return Destinations(list())
+    planned_notifications = list()
+    for entry in conf_dict['destinations']['scheduled_updates']:
+        _verify_keys(entry, ['topic', 'cron'], 'destinations.scheduled_updates[]')
+        planned_notifications.append(PlannedNotification(entry['topic'], entry['cron']))
+    return Destinations(planned_notifications)
+
+
 def _read_configuration(conf_dict):
     _verify_keys(conf_dict, ['name', 'type', 'sources'])
     _verify_keys(conf_dict['sources'], ['consumption'], 'sources')
     _verify_keys(conf_dict['sources']['consumption'], ['topic'], 'sources.consumption')
     return Configuration(conf_dict['name'], conf_dict['type'], _read_mqtt_configuration(conf_dict),
-                         Sources(conf_dict['sources']['consumption']['topic']))
+                         Sources(conf_dict['sources']['consumption']['topic']),
+                         _read_destination_configuration(conf_dict))
 
 
 def _verify_keys(yaml_dict, keys, prefix=None):
@@ -49,11 +60,12 @@ def _verify_keys(yaml_dict, keys, prefix=None):
 
 
 class Configuration:
-    def __init__(self, name, type, mqtt, sources):
-        self.sources = sources
+    def __init__(self, name, type, mqtt, sources, destinations):
         self.name = name
         self.type = type
         self.mqtt = mqtt
+        self.sources = sources
+        self.destinations = destinations
 
     def __str__(self):
         return f"{self.name} ({self.type}), {self.mqtt}"
@@ -81,3 +93,19 @@ class MqttConfiguration:
 class Sources:
     def __init__(self, consumption_topic):
         self.consumption_topic = consumption_topic
+
+
+class PlannedNotification:
+    def __init__(self, mqtt_topic: str, cron_expression: str):
+        self.mqtt_topic = mqtt_topic
+        self.cron_expression = cron_expression
+
+    def __eq__(self, other):
+        if not isinstance(other, PlannedNotification):
+            return False
+        return self.mqtt_topic == other.mqtt_topic and self.cron_expression == other.cron_expression
+
+
+class Destinations:
+    def __init__(self, planned_notifications: list[PlannedNotification]):
+        self.planned_notifications = planned_notifications

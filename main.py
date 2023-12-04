@@ -2,8 +2,8 @@ import logging
 import sys
 from time import sleep
 
-from iot.core.configuration import load_configuration
 from iot.core.Storage import Storage
+from iot.core.configuration import load_configuration
 from iot.machine.MachineService import MachineService
 from iot.mqtt.MqttClient import MqttClient
 
@@ -22,11 +22,11 @@ class Main:
         self.logger.debug("Storage loaded")
         machine_service = MachineService(storage, config)
         self.logger.debug("Services loaded")
-        client = MqttClient(machine_service, config.mqtt, config.sources)
+        client = MqttClient(machine_service, config.mqtt, config.sources, config.destinations)
         self.logger.debug("Mqtt client loaded")
 
         try:
-            client.start_listening()
+            client.start()
             self.logger.info("Started.")
             while True:
                 sleep(1)

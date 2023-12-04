@@ -49,7 +49,7 @@ class DryerTest(unittest.TestCase):
 
     def test_to_dict_has_mandatory_fields(self):
         dryer = Dryer("test", 312.5)
-        self.assertDictEqual(dryer.to_dict(), {"name": "test", "watt": 312.5})
+        self.assertDictEqual(dryer.to_dict(), {"name": "test", "watt": 312.5, "power_state": PowerState.RUNNING})
 
 
 if __name__ == '__main__':

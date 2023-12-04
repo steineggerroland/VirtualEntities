@@ -11,6 +11,9 @@ class Dryer(IotMachine):
     def update_power_consumption(self, watt):
         self._power_state_decoration.update_power_consumption(watt)
 
+    def to_dict(self):
+        return {"name": self.name, "watt": self.watt, "power_state": self.power_state}
+
 
 def from_dict(dictionary: dict):
     return Dryer(dictionary['name'], dictionary['watt'] if 'watt' in dictionary else None)
