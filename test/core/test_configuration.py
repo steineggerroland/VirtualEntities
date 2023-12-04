@@ -1,6 +1,7 @@
 import unittest
 
 from iot.core import configuration
+from iot.core.configuration import PlannedNotification
 
 
 class ConfigurationTest(unittest.TestCase):
@@ -18,6 +19,11 @@ class ConfigurationTest(unittest.TestCase):
 
         self.assertEqual(config.sources.consumption_topic, "consumption/topic")
 
+        self.assertIn(PlannedNotification('update/every-second/topic', '*/1 * * * * *'),
+                      config.destinations.planned_notifications)
+        self.assertIn(PlannedNotification('update/every-15-minutes/topic', '* */15 * * * *'),
+                      config.destinations.planned_notifications)
+
     def test_min_config(self):
         min_config = configuration.load_configuration("min_test_config.yaml")
         self.assertEqual(min_config.name, "super_washer")
@@ -29,6 +35,8 @@ class ConfigurationTest(unittest.TestCase):
         self.assertIsNotNone(min_config.mqtt.client_id)
 
         self.assertEqual(min_config.sources.consumption_topic, "washer/consumption/topic")
+
+        self.assertTrue(len(min_config.destinations.planned_notifications) == 0)
 
 
 if __name__ == '__main__':

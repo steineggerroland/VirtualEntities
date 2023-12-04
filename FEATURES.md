@@ -8,10 +8,10 @@ List of implemented and planned features of an iot machine.
 * Log power consumption timeline
 * Calculate internal state using power consumption thresholds
   * States are _off_, _idle_, _running_ and _unknown_.
+* Propagate internal state to mqtt
 
 ## Planned
 
-* Propagate internal state to mqtt
 * Use analytics on power consumption to determine internal state
   * Calculate state clusters for power consumption
   * Let user label state clusters, whereby _off_, _idle_ and _working_ must be declared
