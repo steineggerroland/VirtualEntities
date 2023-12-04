@@ -1,0 +1,12 @@
+name: ${THING_NAME:-washing_machine}
+type: ${THING_TYPE:-washing_machine}
+mqtt:
+  url: ${MQTT_URL:-localhost}
+  port: ${MQTT_PORT:-1883}
+  username: ${MQTT_USERNAME:-admin}
+  password: ${MQTT_PASSWORD:-secret}
+  clientId: ${MQTT_CLIENT_ID:-client-id}
+sources:
+  consumption:
+    # the Watt consumption is considered to be a floating point number
+    topic: ${MQTT_INPUT_CONSUMPTION:-/measurements/thing/power}

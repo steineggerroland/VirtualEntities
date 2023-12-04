@@ -1,0 +1,83 @@
+import yamlenv
+
+CONFIG_FILE_NAME = 'config.yaml'
+
+
+def load_configuration(config_path=None):
+    conf_file = None
+    try:
+        conf_file = open(config_path if config_path else CONFIG_FILE_NAME)
+        conf_dict = yamlenv.load(conf_file)
+
+        config = _read_configuration(conf_dict)
+        return config
+    except FileNotFoundError:
+        raise Exception('Configuration file is missing. File "%s" is needed.' % CONFIG_FILE_NAME)
+    finally:
+        if conf_file:
+            conf_file.close()
+
+
+def _read_mqtt_configuration(conf_dict):
+    mqtt_dict = conf_dict['mqtt']
+    _verify_keys(mqtt_dict, ['url'], 'mqtt')
+    return MqttConfiguration(mqtt_dict['url'], mqtt_dict[
+        'clientId'] if 'clientId' in mqtt_dict else f"client-{conf_dict['name']}",
+                             mqtt_dict['port'] if 'port' in mqtt_dict else None,
+                             credentials=_read_mqtt_credentials(mqtt_dict))
+
+
+def _read_mqtt_credentials(mqtt_dict):
+    if 'username' in mqtt_dict and 'password' in mqtt_dict:
+        return {'username': mqtt_dict['username'], 'password': mqtt_dict['password']}
+    else:
+        return None
+
+
+def _read_configuration(conf_dict):
+    _verify_keys(conf_dict, ['name', 'type', 'sources'])
+    _verify_keys(conf_dict['sources'], ['consumption'], 'sources')
+    _verify_keys(conf_dict['sources']['consumption'], ['topic'], 'sources.consumption')
+    return Configuration(conf_dict['name'], conf_dict['type'], _read_mqtt_configuration(conf_dict),
+                         Sources(conf_dict['sources']['consumption']['topic']))
+
+
+def _verify_keys(yaml_dict, keys, prefix=None):
+    for key in keys:
+        if key not in yaml_dict:
+            raise Exception(f"Config is missing key '{prefix + '.' if prefix else ''}{key}'")
+
+
+class Configuration:
+    def __init__(self, name, type, mqtt, sources):
+        self.sources = sources
+        self.name = name
+        self.type = type
+        self.mqtt = mqtt
+
+    def __str__(self):
+        return f"{self.name} ({self.type}), {self.mqtt}"
+
+
+class MqttConfiguration:
+    def __init__(self, url, client_id, port=1883, credentials=None):
+        self.url = url
+        self.port = port if port is not None else 1883
+        if credentials is not None:
+            self.username = credentials['username']
+            self.password = credentials['password']
+            self.has_credentials = True
+        else:
+            self.has_credentials = False
+        self.client_id = client_id
+
+    def __str__(self):
+        if self.has_credentials:
+            return f"mqtt ({self.url}:{self.port}, {self.username}:<pw len {len(self.password)}>)"
+        else:
+            return f"mqtt ({self.url}:{self.port})"
+
+
+class Sources:
+    def __init__(self, consumption_topic):
+        self.consumption_topic = consumption_topic

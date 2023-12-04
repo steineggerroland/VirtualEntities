@@ -1,0 +1,9 @@
+
+#runtime data
+db.json
+
+#python specific parts
+venv
+
+#IDE settings
+.idea

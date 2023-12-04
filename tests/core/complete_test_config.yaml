@@ -1,0 +1,12 @@
+name: super_thing
+type: dryer
+mqtt:
+  url: my.machine.local
+  port: 1337
+  username: user
+  password: my-secret
+  clientId: my-client
+sources:
+  consumption:
+    # the Watt consumption is considered to be a floating point number
+    topic: consumption/topic
