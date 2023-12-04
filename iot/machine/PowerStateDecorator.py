@@ -1,6 +1,6 @@
 from enum import Enum
 
-from machine.IotMachine import IotMachine
+from iot.machine.IotMachine import IotMachine
 
 
 class PowerState(str, Enum):

@@ -1,8 +1,8 @@
 import unittest
 from random import randint
 
-from machine.PowerStateDecorator import PowerState
-from machine.WashingMachine import WashingMachine
+from iot.machine.PowerStateDecorator import PowerState
+from iot.machine.WashingMachine import WashingMachine
 
 
 class WashingMachineConstructionTest(unittest.TestCase):

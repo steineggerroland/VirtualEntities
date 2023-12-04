@@ -1,5 +1,5 @@
-from machine.IotMachine import IotMachine
-from machine.PowerStateDecorator import PowerState, SimplePowerStateDecorator
+from iot.machine.IotMachine import IotMachine
+from iot.machine.PowerStateDecorator import PowerState, SimplePowerStateDecorator
 
 
 class WashingMachine(IotMachine):
