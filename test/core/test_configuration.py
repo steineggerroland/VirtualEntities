@@ -1,6 +1,6 @@
 import unittest
 
-from core import configuration
+from iot.core import configuration
 
 
 class ConfigurationTest(unittest.TestCase):

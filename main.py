@@ -1,48 +1,44 @@
-import paho.mqtt.client as mqtt
+import logging
+import sys
+from time import sleep
 
-from machine.IotMachine import IotMachine
-from machine.Dryer import from_dict as d_from_dict
-from machine.WashingMachine import from_dict as wm_from_dict
-from core.configuration import load_configuration
-from core.storage import init as db_init, shutdown as db_shutdown, load_thing, update_thing, append_power_consumption
+from iot.core.configuration import load_configuration
+from iot.core.Storage import Storage
+from iot.machine.MachineService import MachineService
+from iot.mqtt.MqttClient import MqttClient
 
-thing: None | IotMachine
-
-
-def on_connect(client, userdata, flags, rc):
-    print("Connected with result code " + str(rc))
-    client.subscribe(config.sources.consumption_topic)
+DB_JSON_FILE = 'data/db.json'
 
 
-def on_message(client, userdata, msg):
-    global thing
-    if msg.topic == config.sources.consumption_topic:
-        new_power_consumption = float(msg.payload)
-        thing.update_power_consumption(new_power_consumption)
-        update_thing(thing)
-        append_power_consumption(new_power_consumption, thing)
+class Main:
+    def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__qualname__)
+
+    def run(self):
+        self.logger.debug("Starting")
+        config = load_configuration()
+        self.logger.debug("Configuration loaded")
+        storage = Storage(DB_JSON_FILE, config.name)
+        self.logger.debug("Storage loaded")
+        machine_service = MachineService(storage, config)
+        self.logger.debug("Services loaded")
+        client = MqttClient(machine_service, config.mqtt, config.sources)
+        self.logger.debug("Mqtt client loaded")
+
+        try:
+            client.start_listening()
+            self.logger.info("Started.")
+            while True:
+                sleep(1)
+        except KeyboardInterrupt:
+            self.logger.info("Shutting down.")
+        finally:
+            storage.shutdown()
+            client.stop()
 
 
 if __name__ == '__main__':
-    config = load_configuration()
-    db_init(config.name)
-    db_entry = load_thing(config.name)
-    if config.type == 'washing_machine':
-        thing = wm_from_dict(db_entry)
-    elif config.type == 'dryer':
-        thing = d_from_dict(db_entry)
-
-    client = mqtt.Client(client_id=config.mqtt.client_id)
-    if config.mqtt.has_credentials:
-        client.username_pw_set(config.mqtt.username, config.mqtt.password)
-    client.on_connect = on_connect
-    client.on_message = on_message
-    client.connect(config.mqtt.url, config.mqtt.port)
-
-    try:
-        client.loop_forever()
-    except KeyboardInterrupt:
-        print("Shutting down.")
-    finally:
-        db_shutdown()
-        client.disconnect()
+    logging.basicConfig(filename='data/default.log', encoding='utf-8',
+                        level=logging.DEBUG if sys.flags.debug else logging.INFO,
+                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    Main().run()
