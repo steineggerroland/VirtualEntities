@@ -25,6 +25,7 @@ class MyTestCase(unittest.TestCase):
         notify_every_second = "* * * * * *"
         destinations = Destinations(list([PlannedNotification("some/topic", notify_every_second)]))
         self.mqtt_client = MqttClient(self.machine_service_mock, self.mqtt_config_mock, self.sources_mock, destinations)
+        self.mqtt_client.machine_service.thing.to_dict = Mock(side_effect=[{},{}])
         self.mqtt_client.mqtt_client.publish = Mock()
         # when
         self.mqtt_client.start()

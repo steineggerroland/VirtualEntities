@@ -1,6 +1,9 @@
 import unittest
+from datetime import datetime
 from random import randint
+from unittest.mock import ANY
 
+from iot.machine.IotMachine import OnlineStatus
 from iot.machine.PowerStateDecorator import PowerState
 from iot.machine.WashingMachine import WashingMachine
 
@@ -48,9 +51,11 @@ class WashingMachineTest(unittest.TestCase):
         self.assertEqual(self.washing_machine.power_state, PowerState.RUNNING)
 
     def test_to_dict_has_mandatory_fields(self):
-        washing_machine = WashingMachine("test", 312.5)
+        last_updated_at = datetime.now()
+        washing_machine = WashingMachine("test", 312.5, last_updated_at=last_updated_at)
         self.assertDictEqual(washing_machine.to_dict(),
-                             {"name": "test", "watt": 312.5, "power_state": PowerState.RUNNING})
+                             {"name": "test", "watt": 312.5, "power_state": PowerState.RUNNING,
+                              "online_status": OnlineStatus.ONLINE, "last_updated_at": last_updated_at.isoformat()})
 
 
 if __name__ == '__main__':
