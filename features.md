@@ -9,6 +9,7 @@ List of implemented and planned features of an iot machine.
 * Calculate internal state using power consumption thresholds
   * States are _off_, _idle_, _running_ and _unknown_.
 * Propagate internal state to mqtt
+* Determine _online status_ based on date of last received message
 
 ## Planned
 
@@ -21,7 +22,6 @@ List of implemented and planned features of an iot machine.
   * False on startup
   * Set to true when switching from _working_ state to any other
   * Can be set to false by sending a command to mqtt
-* Determine _online status_ based on date of last received message
 * Manage things in web
   * Add eThings
   * Display eThing details
