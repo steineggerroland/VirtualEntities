@@ -8,6 +8,7 @@ from iot.machine.MachineService import MachineService
 from iot.mqtt.MqttClient import MqttClient
 
 DB_JSON_FILE = 'data/db.json'
+CONFIG_FILE_NAME = 'config.yaml'
 
 
 class Main:
@@ -16,7 +17,7 @@ class Main:
 
     def run(self):
         self.logger.debug("Starting")
-        config = load_configuration()
+        config = load_configuration(CONFIG_FILE_NAME)
         self.logger.debug("Configuration loaded")
         storage = Storage(DB_JSON_FILE, config.name)
         self.logger.debug("Storage loaded")
