@@ -14,4 +14,4 @@ destinations:
   scheduled_updates:
     - topic: ${MQTT_UPDATE_TOPIC:-things/washing_machine/state}
       # use cron expression to schedule the notification. seconds are supported as well.
-      cron: "*/30 * * * * *"
+      cron: "* * * * * */20"
