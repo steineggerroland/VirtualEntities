@@ -14,7 +14,7 @@ class DryerConstructionTest(unittest.TestCase):
 
     def test_online_status(self):
         self.assertEqual(IotMachine('machine').online_status(), OnlineStatus.UNKNOWN)
-        machine_updated_now_and_online_delta_ten_seconds = IotMachine('machine', online_delta_in_seconds=10,
+        machine_updated_now_and_online_delta_ten_seconds = IotMachine('machine',
                                                                       last_updated_at=datetime.now())
         self.assertEqual(machine_updated_now_and_online_delta_ten_seconds.online_status(), OnlineStatus.ONLINE)
         machine_without_online_delta = IotMachine('machine', online_delta_in_seconds=0,

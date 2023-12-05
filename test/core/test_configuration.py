@@ -2,11 +2,14 @@ import unittest
 
 from iot.core import configuration
 from iot.core.configuration import PlannedNotification
+from pathlib import Path
+
+DIR = Path(__file__).parent
 
 
 class ConfigurationTest(unittest.TestCase):
     def test_complete_config(self):
-        config = configuration.load_configuration("complete_test_config.yaml")
+        config = configuration.load_configuration(DIR / "complete_test_config.yaml")
         self.assertEqual(config.name, "super_thing")
         self.assertEqual(config.type, "dryer")
 
@@ -25,7 +28,7 @@ class ConfigurationTest(unittest.TestCase):
                       config.destinations.planned_notifications)
 
     def test_min_config(self):
-        min_config = configuration.load_configuration("min_test_config.yaml")
+        min_config = configuration.load_configuration(DIR / "min_test_config.yaml")
         self.assertEqual(min_config.name, "super_washer")
         self.assertEqual(min_config.type, "washing_machine")
 
