@@ -2,3 +2,4 @@ croniter==2.0.1
 paho_mqtt==1.6.1
 tinydb==4.8.0
 yamlenv==0.7.1
+paho-mqtt~=1.6.1

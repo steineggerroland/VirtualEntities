@@ -5,7 +5,7 @@ from datetime import datetime
 from threading import Thread
 
 import paho.mqtt.client as paho_mqtt
-from icron import croniter
+from croniter import croniter
 
 from iot.core.configuration import MqttConfiguration, Sources, Destinations, PlannedNotification
 from iot.machine.MachineService import MachineService
@@ -46,12 +46,13 @@ class MqttClient:
         cron = croniter(planned_notification.cron_expression, datetime.now())
         while True:
             delta = cron.get_next(datetime) - datetime.now()
-            time.sleep(delta.seconds)
+            time.sleep(delta.total_seconds())
             try:
                 self.mqtt_client.publish(planned_notification.mqtt_topic,
                                          json.dumps(self.machine_service.thing.to_dict()))
-            finally:
                 self.logger.info(f"Sent notification to '{planned_notification.mqtt_topic}'")
+            except:
+                self.logger.error(f"Failed to notify to '{planned_notification.mqtt_topic}'")
 
     def _loop_forever(self):
         try:
