@@ -1,18 +1,16 @@
 import yamlenv
 
-CONFIG_FILE_NAME = 'config.yaml'
 
-
-def load_configuration(config_path=None):
+def load_configuration(config_path: str):
     conf_file = None
     try:
-        conf_file = open(config_path if config_path else CONFIG_FILE_NAME)
+        conf_file = open(config_path)
         conf_dict = yamlenv.load(conf_file)
 
         config = _read_configuration(conf_dict)
         return config
     except FileNotFoundError:
-        raise Exception('Configuration file is missing. File "%s" is needed.' % CONFIG_FILE_NAME)
+        raise Exception('Configuration file is missing. File "%s" is needed.' % config_path)
     finally:
         if conf_file:
             conf_file.close()
