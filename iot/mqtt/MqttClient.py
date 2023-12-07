@@ -8,7 +8,7 @@ import paho.mqtt.client as paho_mqtt
 from croniter import croniter
 
 from iot.core.configuration import MqttConfiguration, Sources, Destinations, PlannedNotification
-from iot.machine.MachineService import MachineService
+from iot.machine.MachineService import MachineService, DatabaseException
 
 
 class MqttClient:
@@ -25,7 +25,7 @@ class MqttClient:
         self.mqtt_client.on_message = self.on_message
         self.mqtt_client.connect(self.mqtt_config.url, self.mqtt_config.port)
 
-        self.scheduled_update_threads = list()
+        self.scheduled_update_threads = []
         for planned_notification in destinations.planned_notifications:
             thread = Thread(target=self._scheduled_updates, args=[planned_notification])
             thread.daemon = True
@@ -49,9 +49,9 @@ class MqttClient:
             try:
                 self.mqtt_client.publish(planned_notification.mqtt_topic,
                                          json.dumps(self.machine_service.thing.to_dict()))
-                self.logger.info(f"Sent notification to '{planned_notification.mqtt_topic}'")
+                self.logger.info("Sent notification to '%s'", planned_notification.mqtt_topic)
             except Exception as e:
-                self.logger.error("Failed to notify to '%s'" % planned_notification.mqtt_topic, e)
+                self.logger.error("Failed to notify to '%s'", planned_notification.mqtt_topic, exc_info=e)
 
     def _loop_forever(self):
         try:
@@ -60,13 +60,18 @@ class MqttClient:
             self.mqtt_client.disconnect()
 
     def on_connect(self, client, userdata, flags, rc):
-        self.logger.debug(f"Connected with result code {str(rc)}")
+        self.logger.debug("Connected with result code %s", str(rc))
         client.subscribe(self.mqtt_sources.consumption_topic)
 
     def on_message(self, client, userdata, msg):
-        if msg.topic == self.mqtt_sources.consumption_topic:
-            self.machine_service.update_power_consumption(float(msg.payload))
-            self.logger.debug(f"Received power consumption {float(msg.payload)}")
+        try:
+            if msg.topic == self.mqtt_sources.consumption_topic:
+                self.machine_service.update_power_consumption(float(msg.payload))
+                self.logger.debug("Received power consumption %s", float(msg.payload))
+            else:
+                self.logger.debug("Received unknown message topic '%s' content '%s'", msg.topic, msg.payload)
+        except DatabaseException as e:
+            self.logger.error("Failed to handle message '%s' because of database error.", msg.topic, exc_info=e)
 
     def stop(self):
         self.loop_thread.join(5)

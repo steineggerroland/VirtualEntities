@@ -30,7 +30,7 @@ class Main:
             client.start()
             self.logger.info("Started.")
             while True:
-                sleep(1)
+                sleep(10)
         except KeyboardInterrupt:
             self.logger.info("Shutting down.")
         finally:
