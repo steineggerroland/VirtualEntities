@@ -23,7 +23,14 @@ class Storage:
         Thing = Query()
         self.db.update(thing.to_dict(), Thing.type == 'thing' and Thing.name == thing.name)
 
-    def append_power_consumption(self, watt: float, thing: IotMachine):
-        thing_measurements_table = self.db.table(f"{thing.name}.measurements")
+    def append_power_consumption(self, watt: float, thing_name):
+        thing_measurements_table = self.db.table(f"{thing_name}.measurements")
         thing_measurements_table.insert(
             {"watt": watt, "created_at": datetime.datetime.now().isoformat()})
+
+    def get_power_consumptions_for_last_seconds(self, seconds: int, thing_name):
+        thing_measurements_table = self.db.table(f"{thing_name}.measurements")
+        time_boundary = datetime.datetime.now() - datetime.timedelta(seconds=seconds)
+        PowerConsumption = Query()
+        return thing_measurements_table.search(
+            PowerConsumption.created_at.test(lambda dt: datetime.datetime.fromisoformat(dt) > time_boundary))

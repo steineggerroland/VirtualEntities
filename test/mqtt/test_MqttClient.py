@@ -1,5 +1,5 @@
 import unittest
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import patch, Mock, call
 
 from waiting import wait
@@ -29,17 +29,17 @@ class MyTestCase(unittest.TestCase):
         # given
         destinations = Destinations(list([PlannedNotification("some/topic", "* * * * * *")]))
         mqtt_client = MqttClient(self.machine_service_mock, self.mqtt_config_mock, self.sources_mock, destinations)
-        # cron is replaced to announce immediate response
+        # cron is replaced to announce two immediate responses and one in a week
         patcher = patch('iot.mqtt.MqttClient.croniter')
         croniter_mock = patcher.start()
         croniter = Mock()
-        croniter.get_next = lambda e: datetime.now()
+        croniter.get_next = Mock(side_effect=[datetime.now(), datetime.now(), datetime.now() + timedelta(weeks=1)])
         croniter_mock.return_value = croniter
         # when
         mqtt_client.start()
         # then
         wait(lambda: sum(publish_args == call("some/topic", "{}") for publish_args in
-                         self.paho_mqtt_client_mock.publish.call_args_list) > 10, timeout_seconds=1,
+                         self.paho_mqtt_client_mock.publish.call_args_list) >= 2, timeout_seconds=1,
              waiting_for="mqtt.publish called several times")
 
 

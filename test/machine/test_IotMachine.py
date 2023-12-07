@@ -1,16 +1,24 @@
 import unittest
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from iot.machine.IotMachine import OnlineStatus, IotMachine
+from iot.machine.PowerStateDecorator import PowerState
 
 
 class DryerConstructionTest(unittest.TestCase):
     def test_name(self):
         self.assertEqual(IotMachine('super machine').name, 'super machine')
 
-    def test_watt(self):
-        self.assertEqual(IotMachine('machine', None).watt, None)
-        self.assertEqual(IotMachine('machine', 354).watt, 354)
+    def test_watt_parameters(self):
+        test_cases = [(None, PowerState.UNKNOWN), (0, PowerState.OFF), (1.3, PowerState.IDLE),
+                      (1898, PowerState.RUNNING)]
+        for parameters in test_cases:
+            self._test_watt(parameters[0], parameters[1])
+
+    def _test_watt(self, watt, state):
+        machine = IotMachine('machine', watt)
+        self.assertEqual(machine.watt, watt)
+        self.assertEqual(machine.power_state, state)
 
     def test_online_status(self):
         self.assertEqual(IotMachine('machine').online_status(), OnlineStatus.UNKNOWN)
@@ -26,7 +34,28 @@ class DryerConstructionTest(unittest.TestCase):
         dryer = IotMachine("test", 312.5, last_updated_at=last_updated_at)
         self.assertDictEqual(dryer.to_dict(),
                              {"name": "test", "watt": 312.5, "online_status": OnlineStatus.ONLINE,
-                              "last_updated_at": last_updated_at.isoformat()})
+                              "power_state": PowerState.RUNNING, "last_updated_at": last_updated_at.isoformat()})
+
+
+class IotMachineTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.machine = IotMachine('machine')
+
+    def test_unknown_watt(self):
+        self.machine.update_power_consumption(None)
+        self.assertEqual(self.machine.power_state, PowerState.UNKNOWN)
+
+    def test_zero_watt_is_off(self):
+        self.machine.update_power_consumption(0)
+        self.assertEqual(self.machine.power_state, PowerState.OFF)
+
+    def test_low_watt_is_idle(self):
+        self.machine.update_power_consumption(5)
+        self.assertEqual(self.machine.power_state, PowerState.IDLE)
+
+    def test_high_watt_is_running(self):
+        self.machine.update_power_consumption(450)
+        self.assertEqual(self.machine.power_state, PowerState.RUNNING)
 
 
 if __name__ == '__main__':

@@ -9,8 +9,8 @@ def load_configuration(config_path: str):
 
         config = _read_configuration(conf_dict)
         return config
-    except FileNotFoundError:
-        raise Exception('Configuration file is missing. File "%s" is needed.' % config_path)
+    except FileNotFoundError as e:
+        raise Exception(f'Configuration file is missing. File "{config_path}" is needed.') from e
     finally:
         if conf_file:
             conf_file.close()
@@ -28,8 +28,7 @@ def _read_mqtt_configuration(conf_dict):
 def _read_mqtt_credentials(mqtt_dict):
     if 'username' in mqtt_dict and 'password' in mqtt_dict:
         return {'username': mqtt_dict['username'], 'password': mqtt_dict['password']}
-    else:
-        return None
+    return None
 
 
 def _read_destination_configuration(conf_dict):
@@ -84,8 +83,7 @@ class MqttConfiguration:
     def __str__(self):
         if self.has_credentials:
             return f"mqtt ({self.url}:{self.port}, {self.username}:<pw len {len(self.password)}>)"
-        else:
-            return f"mqtt ({self.url}:{self.port})"
+        return f"mqtt ({self.url}:{self.port})"
 
 
 class Sources:

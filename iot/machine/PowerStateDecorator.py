@@ -1,17 +1,15 @@
 from enum import Enum
 
-from iot.machine.IotMachine import IotMachine
-
 
 class PowerState(str, Enum):
-    UNKNOWN = 'UNKNOWN'
-    OFF = 'OFF'
-    IDLE = 'IDLE'
-    RUNNING = 'RUNNING'
+    UNKNOWN = 'unknown'
+    OFF = 'offline'
+    IDLE = 'idle'
+    RUNNING = 'running'
 
 
 class SimplePowerStateDecorator:
-    def __init__(self, component: IotMachine):
+    def __init__(self, component):
         self.component = component
         self.calculate_simple_state()
 

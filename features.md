@@ -10,18 +10,18 @@ List of implemented and planned features of an iot machine.
   * States are _off_, _idle_, _running_ and _unknown_.
 * Propagate internal state to mqtt
 * Determine _online status_ based on date of last received message
-
-## Planned
-
-* Use analytics on power consumption to determine internal state
-  * Calculate state clusters for power consumption
-  * Let user label state clusters, whereby _off_, _idle_ and _working_ must be declared
-  * Propagate label for current power consumption
 * Add optional _needs treatment status_
   * _needs treatment status_ is true or false
   * False on startup
   * Set to true when switching from _working_ state to any other
-  * Can be set to false by sending a command to mqtt
+
+## Planned
+
+* Handle mqtt messages to manipulate _needs treatment status_
+* Use analytics on power consumption to determine internal state
+  * Calculate state clusters for power consumption
+  * Let user label state clusters, whereby _off_, _idle_ and _working_ must be declared
+  * Propagate label for current power consumption
 * Manage things in web
   * Add eThings
   * Display eThing details
