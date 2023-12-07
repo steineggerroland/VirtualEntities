@@ -39,6 +39,7 @@ jobs:
         run: |
           coverage run -m unittest discover -s test -t test
           coverage report
+          coverage json
           coverage html
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v3
@@ -47,3 +48,4 @@ jobs:
           path: |
             htmlcov
             .coverage
+            coverage.json
