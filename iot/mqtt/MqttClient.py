@@ -30,8 +30,7 @@ class MqttClient:
             thread = Thread(target=self._scheduled_updates, args=[planned_notification])
             thread.daemon = True
             self.scheduled_update_threads.append(thread)
-        self.loop_thread: Thread = Thread(target=self._loop_forever)
-        self.loop_thread.daemon = True
+        self.loop_thread: Thread = Thread(target=self._loop_forever, daemon=True)
 
         self.logger = logging.getLogger(self.__class__.__qualname__)
 
@@ -46,13 +45,13 @@ class MqttClient:
         cron = croniter(planned_notification.cron_expression, datetime.now())
         while True:
             delta = cron.get_next(datetime) - datetime.now()
-            time.sleep(delta.total_seconds())
+            time.sleep(max(0, delta.total_seconds()))
             try:
                 self.mqtt_client.publish(planned_notification.mqtt_topic,
                                          json.dumps(self.machine_service.thing.to_dict()))
                 self.logger.info(f"Sent notification to '{planned_notification.mqtt_topic}'")
-            except:
-                self.logger.error(f"Failed to notify to '{planned_notification.mqtt_topic}'")
+            except Exception as e:
+                self.logger.error("Failed to notify to '%s'" % planned_notification.mqtt_topic, e)
 
     def _loop_forever(self):
         try:
