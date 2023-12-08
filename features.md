@@ -14,10 +14,10 @@ List of implemented and planned features of an iot machine.
   * _needs treatment status_ is true or false
   * False on startup
   * Set to true when switching from _working_ state to any other
+  * Handle mqtt messages to manipulate _needs treatment status_
 
 ## Planned
 
-* Handle mqtt messages to manipulate _needs treatment status_
 * Use analytics on power consumption to determine internal state
   * Calculate state clusters for power consumption
   * Let user label state clusters, whereby _off_, _idle_ and _working_ must be declared
