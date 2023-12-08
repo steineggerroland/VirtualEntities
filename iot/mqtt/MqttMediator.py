@@ -32,6 +32,10 @@ class MqttMediator:
             if not thread.is_alive():
                 thread.start()
         self.mqtt_client.subscribe(self.mqtt_sources.consumption_topic, self.power_consumption_update)
+        if self.mqtt_sources.loading_topic:
+            self.mqtt_client.subscribe(self.mqtt_sources.loading_topic, self.load_machine)
+        if self.mqtt_sources.unloading_topic:
+            self.mqtt_client.subscribe(self.mqtt_sources.unloading_topic, self.unload_machine)
 
     def _scheduled_updates(self, planned_notification: PlannedNotification):
         cron = croniter(planned_notification.cron_expression, datetime.now())
@@ -51,3 +55,17 @@ class MqttMediator:
             self.logger.debug("Updated power consumption '%s'", float(msg.payload))
         except DatabaseException as e:
             self.logger.error("Failed update power consumption '%s' because of database error.", msg.topic, exc_info=e)
+
+    def load_machine(self, msg):
+        try:
+            self.machine_service.loaded()
+            self.logger.debug("Set machine loaded.")
+        except DatabaseException as e:
+            self.logger.error("Failed set machine loaded because of database error.", msg.topic, exc_info=e)
+
+    def unload_machine(self, msg):
+        try:
+            self.machine_service.unloaded()
+            self.logger.debug("Set machine unloaded.")
+        except DatabaseException as e:
+            self.logger.error("Failed set machine unloaded because of database error.", msg.topic, exc_info=e)
