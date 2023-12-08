@@ -65,6 +65,42 @@ class MqttMediatorTest(unittest.TestCase):
         # then
         self.machine_service_mock.update_power_consumption.assert_called_with(watt)
 
+    def test_subscribes_for_un_loading_on_start(self):
+        # given
+        loading_topic = "loading/topic"
+        unloading_topic = "unloading/topic"
+        mqtt_mediator = MqttMediator(self.machine_service_mock, self.mqtt_config_mock, Sources(
+            "machine/consumption/topic", loading_topic, unloading_topic),
+                                     self.destinations_mock, self.mqtt_client_mock)
+        self.mqtt_client_mock.subscribe = Mock()
+        # when
+        mqtt_mediator.start()
+        # then
+        self.mqtt_client_mock.subscribe.assert_any_call(loading_topic, mqtt_mediator.load_machine)
+        self.mqtt_client_mock.subscribe.assert_any_call(unloading_topic, mqtt_mediator.unload_machine)
+
+    def test_loading_machine(self):
+        # given
+        msg = Mock(topic="load/topic", payload=None)
+        mqtt_mediator = MqttMediator(self.machine_service_mock, self.mqtt_config_mock, self.sources_mock,
+                                     self.destinations_mock, self.mqtt_client_mock)
+        self.machine_service_mock.loaded = Mock()
+        # when
+        mqtt_mediator.load_machine(msg)
+        # then
+        self.machine_service_mock.loaded.assert_called()
+
+    def test_unloading_machine(self):
+        # given
+        msg = Mock(topic="unload/topic", payload=None)
+        mqtt_mediator = MqttMediator(self.machine_service_mock, self.mqtt_config_mock, self.sources_mock,
+                                     self.destinations_mock, self.mqtt_client_mock)
+        self.machine_service_mock.unloaded = Mock()
+        # when
+        mqtt_mediator.unload_machine(msg)
+        # then
+        self.machine_service_mock.unloaded.assert_called()
+
 
 if __name__ == '__main__':
     unittest.main()
