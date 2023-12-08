@@ -1,0 +1,8 @@
+name: super_washer
+type: washing_machine
+mqtt:
+  username: "john"
+sources:
+  consumption:
+    # the Watt consumption is considered to be a floating point number
+    topic: washer/consumption/topic

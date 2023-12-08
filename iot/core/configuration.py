@@ -1,7 +1,7 @@
 import yamlenv
 
 
-def load_configuration(config_path: str):
+def load_configuration(config_path):
     conf_file = None
     try:
         conf_file = open(config_path)
@@ -43,17 +43,36 @@ def _read_destination_configuration(conf_dict):
 
 def _read_configuration(conf_dict):
     _verify_keys(conf_dict, ['name', 'type', 'sources'])
+    return Configuration(conf_dict['name'], conf_dict['type'], _read_mqtt_configuration(conf_dict),
+                         _read_sources_configuration(conf_dict),
+                         _read_destination_configuration(conf_dict))
+
+
+def _read_sources_configuration(conf_dict):
     _verify_keys(conf_dict['sources'], ['consumption'], 'sources')
     _verify_keys(conf_dict['sources']['consumption'], ['topic'], 'sources.consumption')
-    return Configuration(conf_dict['name'], conf_dict['type'], _read_mqtt_configuration(conf_dict),
-                         Sources(conf_dict['sources']['consumption']['topic']),
-                         _read_destination_configuration(conf_dict))
+    consumption_topic = conf_dict['sources']['consumption']['topic']
+    loading_topic = None
+    if 'loading' in conf_dict['sources']:
+        _verify_keys(conf_dict['sources']['loading'], ['topic'], 'sources.loading')
+        loading_topic = conf_dict['sources']['loading']['topic']
+    unloading_topic = None
+    if 'unloading' in conf_dict['sources']:
+        _verify_keys(conf_dict['sources']['unloading'], ['topic'], 'sources.unloading')
+        unloading_topic = conf_dict['sources']['unloading']['topic']
+
+    return Sources(consumption_topic, loading_topic, unloading_topic)
 
 
 def _verify_keys(yaml_dict, keys, prefix=None):
     for key in keys:
         if key not in yaml_dict:
-            raise Exception(f"Config is missing key '{prefix + '.' if prefix else ''}{key}'")
+            raise IncompleteConfiguration(f"Config is missing key '{prefix + '.' if prefix else ''}{key}'")
+
+
+class IncompleteConfiguration(Exception):
+    def __init__(self, msg):
+        super().__init__(msg)
 
 
 class Configuration:
@@ -87,8 +106,10 @@ class MqttConfiguration:
 
 
 class Sources:
-    def __init__(self, consumption_topic):
+    def __init__(self, consumption_topic, loading_topic=None, unloading_topic=None):
         self.consumption_topic = consumption_topic
+        self.loading_topic = loading_topic
+        self.unloading_topic = unloading_topic
 
 
 class PlannedNotification:
