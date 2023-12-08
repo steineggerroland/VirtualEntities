@@ -1,46 +1,75 @@
 import unittest
-from datetime import datetime, timedelta
-from unittest.mock import patch, Mock, call
+from unittest.mock import patch, Mock
 
-from waiting import wait
+import paho.mqtt.client
 
-from iot.core.configuration import PlannedNotification, Destinations
+from iot.core.configuration import MqttConfiguration
 from iot.mqtt.MqttClient import MqttClient
 
+patcher = patch('iot.mqtt.MqttClient.paho_mqtt', autospec=True)
+paho_mqtt = patcher.start()
+paho_mqtt_client_mock: Mock | paho.mqtt.client.Client = Mock()
+paho_mqtt.Client = Mock(return_value=paho_mqtt_client_mock)
 
-class MyTestCase(unittest.TestCase):
-    @patch('iot.core.configuration.Destinations')
-    @patch('iot.core.configuration.Sources')
+
+class MqttClientTest(unittest.TestCase):
     @patch('iot.core.configuration.MqttConfiguration')
-    @patch('iot.machine.MachineService.MachineService')
-    def setUp(self, machine_service_mock, mqtt_config_mock, sources_mock, destinations_mock):
-        self.machine_service_mock = machine_service_mock
-        self.machine_service_mock.thing.to_dict = Mock(return_value={})
-        self.mqtt_config_mock = mqtt_config_mock
-        self.sources_mock = sources_mock
-        self.destinations_mock = destinations_mock
+    def setUp(self, mqtt_config_mock):
+        self.mqtt_config_mock: Mock | MqttConfiguration = mqtt_config_mock
+        paho_mqtt_client_mock.reset_mock()
 
-        patcher = patch('iot.mqtt.MqttClient.paho_mqtt', autospec=True)
-        paho_mqtt = patcher.start()
-        self.paho_mqtt_client_mock = Mock()
-        paho_mqtt.Client = Mock(return_value=self.paho_mqtt_client_mock)
-
-    def test_notifies_every_second_when_specified_by_cron(self):
+    def test_mqtt_client_is_started(self):
         # given
-        destinations = Destinations(list([PlannedNotification("some/topic", "* * * * * *")]))
-        mqtt_client = MqttClient(self.machine_service_mock, self.mqtt_config_mock, self.sources_mock, destinations)
-        # cron is replaced to announce two immediate responses and one in a week
-        patcher = patch('iot.mqtt.MqttClient.croniter')
-        croniter_mock = patcher.start()
-        croniter = Mock()
-        croniter.get_next = Mock(side_effect=[datetime.now(), datetime.now(), datetime.now() + timedelta(weeks=1)])
-        croniter_mock.return_value = croniter
+        mqtt_client = MqttClient(self.mqtt_config_mock)
+        paho_mqtt_client_mock.loop_forever = Mock()
         # when
         mqtt_client.start()
         # then
-        wait(lambda: sum(publish_args == call("some/topic", "{}") for publish_args in
-                         self.paho_mqtt_client_mock.publish.call_args_list) >= 2, timeout_seconds=1,
-             waiting_for="mqtt.publish called several times")
+        paho_mqtt_client_mock.loop_forever.assert_called()
+
+    def test_forwards_sub_to_mqtt_client_when_subscribing(self):
+        # given
+        mqtt_client = MqttClient(self.mqtt_config_mock)
+        paho_mqtt_client_mock.subscribe = Mock()
+        topic = "my/important/topic"
+        # when
+        mqtt_client.subscribe(topic, lambda: "callback")
+        # then
+        paho_mqtt_client_mock.subscribe.assert_called()
+
+    def test_forwards_sub_on_connect_when_subscribed(self):
+        # given
+        mqtt_client = MqttClient(self.mqtt_config_mock)
+        topic = "my/important/topic"
+        mqtt_client.subscribe(topic, lambda: "callback")
+        paho_mqtt_client_mock.subscribe = Mock()
+        # when
+        mqtt_client.on_connect(paho_mqtt_client_mock, None, None, rc=0)
+        # then
+        paho_mqtt_client_mock.subscribe.assert_called()
+
+    def test_callback_invocation_when_message_matches(self):
+        # given
+        mqtt_client = MqttClient(self.mqtt_config_mock)
+        topic = "my/important/topic"
+        msg_mock = Mock(topic=topic, payload="important message")
+        callback_mock = Mock()
+        # when
+        mqtt_client.subscribe(topic, callback_mock)
+        mqtt_client.on_message(paho_mqtt_client_mock, None, msg=msg_mock)
+        # then
+        callback_mock.assert_called_once_with(msg_mock)
+
+    def test_forwards_msg_when_publishing(self):
+        # given
+        mqtt_client = MqttClient(self.mqtt_config_mock)
+        paho_mqtt_client_mock.publish = Mock()
+        msg_mock = Mock()
+        topic = 'my/important/topic'
+        # when
+        mqtt_client.publish(topic, msg=msg_mock)
+        # then
+        paho_mqtt_client_mock.publish.assert_called_once_with(topic, payload=msg_mock)
 
 
 if __name__ == '__main__':

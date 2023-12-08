@@ -6,6 +6,7 @@ from iot.core.Storage import Storage
 from iot.core.configuration import load_configuration
 from iot.machine.MachineService import MachineService
 from iot.mqtt.MqttClient import MqttClient
+from iot.mqtt.MqttMediator import MqttMediator
 
 DB_JSON_FILE = 'data/db.json'
 CONFIG_FILE_NAME = 'config.yaml'
@@ -23,11 +24,14 @@ class Main:
         self.logger.debug("Storage loaded")
         machine_service = MachineService(storage, config)
         self.logger.debug("Services loaded")
-        client = MqttClient(machine_service, config.mqtt, config.sources, config.destinations)
+        client = MqttClient(config.mqtt)
         self.logger.debug("Mqtt client loaded")
+        mqtt_mediator = MqttMediator(machine_service, config.mqtt, config.sources, config.destinations, client)
+        self.logger.debug("Mqtt mediator loaded")
 
         try:
             client.start()
+            mqtt_mediator.start()
             self.logger.info("Started.")
             while True:
                 sleep(10)
