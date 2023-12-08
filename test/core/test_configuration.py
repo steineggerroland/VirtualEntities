@@ -1,8 +1,8 @@
 import unittest
+from pathlib import Path
 
 from iot.core import configuration
-from iot.core.configuration import PlannedNotification
-from pathlib import Path
+from iot.core.configuration import PlannedNotification, IncompleteConfiguration
 
 DIR = Path(__file__).parent
 
@@ -21,6 +21,8 @@ class ConfigurationTest(unittest.TestCase):
         self.assertEqual(config.mqtt.client_id, "my-client")
 
         self.assertEqual(config.sources.consumption_topic, "consumption/topic")
+        self.assertEqual(config.sources.loading_topic, "loading/topic")
+        self.assertEqual(config.sources.unloading_topic, "unloading/topic")
 
         self.assertIn(PlannedNotification('update/every-second/topic', '*/1 * * * * *'),
                       config.destinations.planned_notifications)
@@ -38,8 +40,20 @@ class ConfigurationTest(unittest.TestCase):
         self.assertIsNotNone(min_config.mqtt.client_id)
 
         self.assertEqual(min_config.sources.consumption_topic, "washer/consumption/topic")
+        self.assertIsNone(min_config.sources.loading_topic)
+        self.assertIsNone(min_config.sources.unloading_topic)
 
         self.assertTrue(len(min_config.destinations.planned_notifications) == 0)
+
+    def test_incomplete_sources_produce_errors(self):
+        self.assertRaises(IncompleteConfiguration,
+                          configuration.load_configuration, (DIR / "incomplete_loading_source_config.yaml"))
+        self.assertRaises(IncompleteConfiguration,
+                          configuration.load_configuration, (DIR / "incomplete_unloading_source_config.yaml"))
+        self.assertRaises(IncompleteConfiguration,
+                          configuration.load_configuration, (DIR / "incomplete_mqtt_config.yaml"))
+        self.assertRaises(IncompleteConfiguration,
+                          configuration.load_configuration, (DIR / "incomplete_thing_config.yaml"))
 
 
 if __name__ == '__main__':

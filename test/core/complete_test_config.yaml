@@ -10,6 +10,10 @@ sources:
   consumption:
     # the Watt consumption is considered to be a floating point number
     topic: consumption/topic
+  loading:
+    topic: loading/topic
+  unloading:
+    topic: unloading/topic
 destinations:
   scheduled_updates:
     - topic: update/every-second/topic
