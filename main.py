@@ -9,7 +9,7 @@ from iot.mqtt.MqttClient import MqttClient
 from iot.mqtt.MqttMediator import MqttMediator
 
 DB_JSON_FILE = 'data/db.json'
-CONFIG_FILE_NAME = 'config.yaml'
+CONFIG_FILE_NAME = sys.argv[1] if len(sys.argv) >= 1 else 'config.yaml'
 
 
 def run():
