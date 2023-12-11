@@ -71,14 +71,35 @@ class MachineThatCanBeLoadedTest(unittest.TestCase):
         self.assertFalse(self.machine.is_loaded)
         self.assertFalse(self.machine.needs_unloading)
 
+    def test_not_online_when_un_loading(self):
+        # given
+        self.machine.last_seen_at = None
+        # when
+        self.machine.load()
+        self.machine.unload()
+        # then
+        self.assertNotEqual(self.machine.online_status(), OnlineStatus.ONLINE)
+
+    def test_not_online_when_starting_or_finishing(self):
+        # given
+        self.machine.last_seen_at = None
+        # when
+        self.machine.start_run()
+        self.machine.finish_run()
+        # then
+        self.assertNotEqual(self.machine.online_status(), OnlineStatus.ONLINE)
+
     def test_to_dict_has_mandatory_fields(self):
         last_updated_at = datetime.now()
-        power_state_machine = MachineThatCanBeLoaded("test", 312.5, last_updated_at=last_updated_at)
+        last_seen_at = datetime.now() - timedelta(seconds=5)
+        power_state_machine = MachineThatCanBeLoaded("test", 312.5, last_updated_at=last_updated_at,
+                                                     last_seen_at=last_seen_at)
         self.assertDictEqual(power_state_machine.to_dict(),
                              {"name": "test", "watt": 312.5, "power_state": PowerState.RUNNING,
                               "needs_unloading": False, "is_loaded": False,
                               "started_run_at": None, "finished_last_run_at": None,
-                              "online_status": OnlineStatus.ONLINE, "last_updated_at": last_updated_at.isoformat()})
+                              "online_status": OnlineStatus.ONLINE, "last_updated_at": last_updated_at.isoformat(),
+                              "last_seen_at": last_seen_at.isoformat()})
 
 
 if __name__ == '__main__':
