@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 import unittest
 
 from iot.machine.Dryer import from_dict
@@ -21,22 +21,27 @@ class DryerInitTest(unittest.TestCase):
         self.assertEqual(dryer.last_updated_at, None)
 
     def test_complete_dict(self):
-        last_updated_at = datetime.datetime.now()
-        started_run_at = datetime.datetime.now()
-        finished_last_run_at = datetime.datetime.now()
-        dict = {'name': 'my super dryer', 'watt': 255, 'last_updated_at': last_updated_at.isoformat(),
-                'started_run_at': started_run_at.isoformat(), 'finished_last_run_at': finished_last_run_at.isoformat(),
-                'is_loaded': True, 'needs_unloading': False}
-        dryer = from_dict(dict)
-        self.assertEqual(dryer.name, dict['name'])
-        self.assertEqual(dryer.started_run_at, started_run_at)
-        self.assertEqual(dryer.is_loaded, True)
-        self.assertEqual(dryer.needs_unloading, False)
-        self.assertEqual(dryer.power_state, PowerState.RUNNING)
-        self.assertEqual(dryer.watt, dict['watt'])
-        self.assertEqual(dryer.online_status(), OnlineStatus.ONLINE)
-        self.assertEqual(dryer.last_updated_at, last_updated_at)
-        self.assertEqual(dryer.finished_last_run_at, finished_last_run_at)
+        last_updated_at = datetime.now()
+        started_run_at = datetime.now()
+        finished_last_run_at = datetime.now()
+        last_seen_at = datetime.now() - timedelta(seconds=5)
+        name = 'my super washing_machine'
+        watt = 255
+        is_loaded = True
+        needs_unloading = False
+        washing_machine = from_dict(
+            {'name': name, 'watt': watt, 'last_updated_at': last_updated_at.isoformat(),
+             'started_run_at': started_run_at.isoformat(), 'finished_last_run_at': finished_last_run_at.isoformat(),
+             'is_loaded': is_loaded, 'needs_unloading': needs_unloading, "last_seen_at": last_seen_at.isoformat()})
+        self.assertEqual(washing_machine.name, name)
+        self.assertEqual(washing_machine.started_run_at, started_run_at)
+        self.assertEqual(washing_machine.is_loaded, is_loaded)
+        self.assertEqual(washing_machine.needs_unloading, needs_unloading)
+        self.assertEqual(washing_machine.power_state, PowerState.RUNNING)
+        self.assertEqual(washing_machine.watt, watt)
+        self.assertEqual(washing_machine.online_status(), OnlineStatus.ONLINE)
+        self.assertEqual(washing_machine.last_updated_at, last_updated_at)
+        self.assertEqual(washing_machine.finished_last_run_at, finished_last_run_at)
 
 
 if __name__ == '__main__':
