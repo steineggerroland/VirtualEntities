@@ -1,21 +1,22 @@
-name: ${THING_NAME:-washing_machine}
-type: ${THING_TYPE:-washing_machine}
 mqtt:
   url: ${MQTT_URL:-localhost}
   port: ${MQTT_PORT:-1883}
   username: ${MQTT_USERNAME:-admin}
   password: ${MQTT_PASSWORD:-secret}
   clientId: ${MQTT_CLIENT_ID:-client-id}
-sources:
-  consumption:
-    # the Watt consumption is considered to be a floating point number
-    topic: ${MQTT_INPUT_CONSUMPTION:-measurements/thing/power}
-  loading:
-    topic: ${MQTT_INPUT_LOADING:-things/washing_machine/load}
-  unloading:
-    topic: ${MQTT_INPUT_UNLOADING:-things/washing_machine/unload}
-destinations:
-  scheduled_updates:
-    - topic: ${MQTT_UPDATE_TOPIC:-things/washing_machine/state}
-      # use cron expression to schedule the notification. seconds are supported as well.
-      cron: "* * * * * */20"
+things:
+  - name: ${THING_NAME:-washing_machine}
+    type: ${THING_TYPE:-washing_machine}
+    sources:
+      consumption:
+        # the Watt consumption is considered to be a floating point number
+        topic: ${MQTT_INPUT_CONSUMPTION:-measurements/thing/power}
+      loading:
+        topic: ${MQTT_INPUT_LOADING:-things/washing_machine/load}
+      unloading:
+        topic: ${MQTT_INPUT_UNLOADING:-things/washing_machine/unload}
+    destinations:
+      scheduled_updates:
+        - topic: ${MQTT_UPDATE_TOPIC:-things/washing_machine/state}
+          # use cron expression to schedule the notification. seconds are supported as well.
+          cron: "* * * * * */20"

@@ -19,8 +19,8 @@ def load_configuration(config_path):
 def _read_mqtt_configuration(conf_dict):
     mqtt_dict = conf_dict['mqtt']
     _verify_keys(mqtt_dict, ['url'], 'mqtt')
-    return MqttConfiguration(mqtt_dict['url'], mqtt_dict[
-        'clientId'] if 'clientId' in mqtt_dict else f"client-{conf_dict['name']}",
+    return MqttConfiguration(mqtt_dict['url'],
+                             mqtt_dict['clientId'] if 'clientId' in mqtt_dict else f"iot-things-client",
                              mqtt_dict['port'] if 'port' in mqtt_dict else None,
                              credentials=_read_mqtt_credentials(mqtt_dict))
 
@@ -31,37 +31,46 @@ def _read_mqtt_credentials(mqtt_dict):
     return None
 
 
-def _read_destination_configuration(conf_dict):
-    if 'destinations' not in conf_dict or 'scheduled_updates' not in conf_dict['destinations']:
+def _read_destination_configuration(thing_dict):
+    if 'destinations' not in thing_dict or 'scheduled_updates' not in thing_dict['destinations']:
         return Destinations(list())
     planned_notifications = list()
-    for entry in conf_dict['destinations']['scheduled_updates']:
-        _verify_keys(entry, ['topic', 'cron'], 'destinations.scheduled_updates[]')
+    for entry in thing_dict['destinations']['scheduled_updates']:
+        _verify_keys(entry, ['topic', 'cron'], 'things[].destinations.scheduled_updates[]')
         planned_notifications.append(PlannedNotification(entry['topic'], entry['cron']))
     return Destinations(planned_notifications)
 
 
-def _read_configuration(conf_dict):
-    _verify_keys(conf_dict, ['name', 'type', 'sources'])
-    return Configuration(conf_dict['name'], conf_dict['type'], _read_mqtt_configuration(conf_dict),
-                         _read_sources_configuration(conf_dict),
-                         _read_destination_configuration(conf_dict))
-
-
-def _read_sources_configuration(conf_dict):
-    _verify_keys(conf_dict['sources'], ['consumption'], 'sources')
-    _verify_keys(conf_dict['sources']['consumption'], ['topic'], 'sources.consumption')
-    consumption_topic = conf_dict['sources']['consumption']['topic']
+def _read_sources_configuration(thing_dict):
+    _verify_keys(thing_dict['sources'], ['consumption'], 'things[].sources')
+    _verify_keys(thing_dict['sources']['consumption'], ['topic'], 'things[].sources.consumption')
+    consumption_topic = thing_dict['sources']['consumption']['topic']
     loading_topic = None
-    if 'loading' in conf_dict['sources']:
-        _verify_keys(conf_dict['sources']['loading'], ['topic'], 'sources.loading')
-        loading_topic = conf_dict['sources']['loading']['topic']
+    if 'loading' in thing_dict['sources']:
+        _verify_keys(thing_dict['sources']['loading'], ['topic'], 'sources.loading')
+        loading_topic = thing_dict['sources']['loading']['topic']
     unloading_topic = None
-    if 'unloading' in conf_dict['sources']:
-        _verify_keys(conf_dict['sources']['unloading'], ['topic'], 'sources.unloading')
-        unloading_topic = conf_dict['sources']['unloading']['topic']
+    if 'unloading' in thing_dict['sources']:
+        _verify_keys(thing_dict['sources']['unloading'], ['topic'], 'sources.unloading')
+        unloading_topic = thing_dict['sources']['unloading']['topic']
 
     return Sources(consumption_topic, loading_topic, unloading_topic)
+
+
+def _read_thing(thing_config):
+    _verify_keys(thing_config, ["name", "type", "sources"], "things[]")
+    return IotThing(thing_config['name'], thing_config['type'], _read_sources_configuration(thing_config),
+                    _read_destination_configuration(thing_config))
+
+
+def _read_items(conf_dict):
+    _verify_keys(conf_dict, ["things"])
+    return [_read_thing(thing_config) for thing_config in conf_dict['things']]
+
+
+def _read_configuration(conf_dict):
+    return Configuration(_read_mqtt_configuration(conf_dict),
+                         _read_items(conf_dict))
 
 
 def _verify_keys(yaml_dict, keys, prefix=None):
@@ -76,15 +85,12 @@ class IncompleteConfiguration(Exception):
 
 
 class Configuration:
-    def __init__(self, name, type, mqtt, sources, destinations):
-        self.name = name
-        self.type = type
+    def __init__(self, mqtt, items):
         self.mqtt = mqtt
-        self.sources = sources
-        self.destinations = destinations
+        self.items = items
 
     def __str__(self):
-        return f"{self.name} ({self.type}), {self.mqtt}"
+        return f"{self.mqtt}, {self.items}"
 
 
 class MqttConfiguration:
@@ -126,3 +132,15 @@ class PlannedNotification:
 class Destinations:
     def __init__(self, planned_notifications: list[PlannedNotification]):
         self.planned_notifications = planned_notifications
+
+
+class IotThing:
+    def __init__(self, name: None | str = None, thing_type: None | str = None, sources: None | Sources = None,
+                 destinations: None | Destinations = None):
+        self.name = name
+        self.type = thing_type
+        self.sources = sources
+        self.destinations = destinations
+
+    def __str__(self):
+        return f"{self.name} ({self.type}, {self.sources}, {self.destinations})"

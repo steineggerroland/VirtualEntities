@@ -1,22 +1,23 @@
-name: super_thing
-type: dryer
 mqtt:
   url: my.machine.local
   port: 1337
   username: user
   password: my-secret
   clientId: my-client
-sources:
-  consumption:
-    # the Watt consumption is considered to be a floating point number
-    topic: consumption/topic
-  loading:
-    topic: loading/topic
-  unloading:
-    topic: unloading/topic
-destinations:
-  scheduled_updates:
-    - topic: update/every-second/topic
-      cron: "*/1 * * * * *"
-    - topic: update/every-15-minutes/topic
-      cron: "* */15 * * * *"
+things:
+  - name: super_thing
+    type: dryer
+    sources:
+      consumption:
+        # the Watt consumption is considered to be a floating point number
+        topic: consumption/topic
+      loading:
+        topic: loading/topic
+      unloading:
+        topic: unloading/topic
+    destinations:
+      scheduled_updates:
+        - topic: update/every-second/topic
+          cron: "*/1 * * * * *"
+        - topic: update/every-15-minutes/topic
+          cron: "* */15 * * * *"
