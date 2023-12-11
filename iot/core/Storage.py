@@ -6,11 +6,12 @@ from iot.machine.IotMachine import IotMachine
 
 
 class Storage:
-    def __init__(self, db_name: str, thing_name: str):
+    def __init__(self, db_name: str, thing_names: [str]):
         self.db = TinyDB(db_name)
-        Thing = Query()
-        if not self.db.search(Thing.type == 'thing' and Thing.name == thing_name):
-            self.db.insert({'type': 'thing', 'name': thing_name})
+        for thing_name in thing_names:
+            Thing = Query()
+            if not self.db.search(Thing.type == 'thing' and Thing.name == thing_name):
+                self.db.insert({'type': 'thing', 'name': thing_name})
 
     def shutdown(self):
         self.db.close()

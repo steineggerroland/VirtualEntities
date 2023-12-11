@@ -12,38 +12,39 @@ DB_JSON_FILE = 'data/db.json'
 CONFIG_FILE_NAME = 'config.yaml'
 
 
-class Main:
-    def __init__(self):
-        self.logger = logging.getLogger(self.__class__.__qualname__)
+def run():
+    logger = logging.getLogger("main")
+    logger.debug("Starting")
+    config = load_configuration(CONFIG_FILE_NAME)
+    logger.debug("Configuration loaded")
+    storage = Storage(DB_JSON_FILE, [thing.name for thing in config.things])
+    logger.debug("Storage loaded")
+    client = MqttClient(config.mqtt)
+    logger.debug("Mqtt client loaded")
+    mqtt_mediators = []
+    for thing_config in config.things:
+        machine_service = MachineService(storage, thing_config)
+        logger.debug("Service for '%s' loaded" % thing_config.name)
+        mqtt_mediators.append(
+            MqttMediator(machine_service, config.mqtt, thing_config.sources, thing_config.destinations, client))
+        logger.debug("Mqtt mediator for '%s' loaded" % thing_config.name)
 
-    def run(self):
-        self.logger.debug("Starting")
-        config = load_configuration(CONFIG_FILE_NAME)
-        self.logger.debug("Configuration loaded")
-        storage = Storage(DB_JSON_FILE, config.name)
-        self.logger.debug("Storage loaded")
-        machine_service = MachineService(storage, config)
-        self.logger.debug("Services loaded")
-        client = MqttClient(config.mqtt)
-        self.logger.debug("Mqtt client loaded")
-        mqtt_mediator = MqttMediator(machine_service, config.mqtt, config.sources, config.destinations, client)
-        self.logger.debug("Mqtt mediator loaded")
-
-        try:
-            client.start()
+    try:
+        client.start()
+        for mqtt_mediator in mqtt_mediators:
             mqtt_mediator.start()
-            self.logger.info("Started.")
-            while True:
-                sleep(10)
-        except KeyboardInterrupt:
-            self.logger.info("Shutting down.")
-        finally:
-            storage.shutdown()
-            client.stop()
+        logger.info("Started.")
+        while True:
+            sleep(10)
+    except KeyboardInterrupt:
+        logger.info("Shutting down.")
+    finally:
+        storage.shutdown()
+        client.stop()
 
 
 if __name__ == '__main__':
     logging.basicConfig(filename='data/default.log', encoding='utf-8',
                         level=logging.DEBUG if sys.flags.debug else logging.INFO,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    Main().run()
+    run()
