@@ -11,9 +11,9 @@ sources:
     # the Watt consumption is considered to be a floating point number
     topic: ${MQTT_INPUT_CONSUMPTION:-measurements/thing/power}
   loading:
-    topic: ${MQTT_INPUT_LOADING:-things/washing_machine/loading}
+    topic: ${MQTT_INPUT_LOADING:-things/washing_machine/load}
   unloading:
-    topic: ${MQTT_INPUT_UNLOADING:-things/washing_machine/unloading}
+    topic: ${MQTT_INPUT_UNLOADING:-things/washing_machine/unload}
 destinations:
   scheduled_updates:
     - topic: ${MQTT_UPDATE_TOPIC:-things/washing_machine/state}
