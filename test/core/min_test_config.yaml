@@ -1,8 +1,9 @@
-name: super_washer
-type: washing_machine
 mqtt:
   url: mqtt.local
-sources:
-  consumption:
-    # the Watt consumption is considered to be a floating point number
-    topic: washer/consumption/topic
+things:
+  - name: super_washer
+    type: washing_machine
+    sources:
+      consumption:
+        # the Watt consumption is considered to be a floating point number
+        topic: washer/consumption/topic
