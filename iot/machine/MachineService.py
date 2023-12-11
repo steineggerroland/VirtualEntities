@@ -4,6 +4,7 @@ from threading import Thread
 
 from iot.core.Storage import Storage
 from iot.core.configuration import IotThingConfig
+from iot.machine.Dishwasher import from_dict as dw_from_dict
 from iot.machine.Dryer import from_dict as d_from_dict
 from iot.machine.PowerStateDecorator import PowerState
 from iot.machine.WashingMachine import from_dict as wm_from_dict
@@ -17,6 +18,8 @@ class MachineService:
             self.thing = wm_from_dict(db_entry)
         elif thing_config.type == 'dryer':
             self.thing = d_from_dict(db_entry)
+        elif thing_config.type == 'dishwasher':
+            self.thing = dw_from_dict(db_entry)
         else:
             raise InvalidThingType(thing_config)
         self.logger = logging.getLogger(self.__class__.__qualname__)
