@@ -1,7 +1,5 @@
-
 #runtime data
-data/*.json
-data/*.log
+data/**
 
 #python specific parts
 venv
