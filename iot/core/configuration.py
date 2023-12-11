@@ -59,8 +59,8 @@ def _read_sources_configuration(thing_dict):
 
 def _read_thing(thing_config):
     _verify_keys(thing_config, ["name", "type", "sources"], "things[]")
-    return IotThing(thing_config['name'], thing_config['type'], _read_sources_configuration(thing_config),
-                    _read_destination_configuration(thing_config))
+    return IotThingConfig(thing_config['name'], thing_config['type'], _read_sources_configuration(thing_config),
+                          _read_destination_configuration(thing_config))
 
 
 def _read_items(conf_dict):
@@ -85,12 +85,12 @@ class IncompleteConfiguration(Exception):
 
 
 class Configuration:
-    def __init__(self, mqtt, items):
+    def __init__(self, mqtt, things):
         self.mqtt = mqtt
-        self.items = items
+        self.things = things
 
     def __str__(self):
-        return f"{self.mqtt}, {self.items}"
+        return f"{self.mqtt}, {self.things}"
 
 
 class MqttConfiguration:
@@ -134,7 +134,7 @@ class Destinations:
         self.planned_notifications = planned_notifications
 
 
-class IotThing:
+class IotThingConfig:
     def __init__(self, name: None | str = None, thing_type: None | str = None, sources: None | Sources = None,
                  destinations: None | Destinations = None):
         self.name = name
