@@ -17,16 +17,16 @@ class ConfigurationTest(unittest.TestCase):
         self.assertEqual(config.mqtt.password, "my-secret")
         self.assertEqual(config.mqtt.client_id, "my-client")
 
-        self.assertEqual(config.items[0].name, "super_thing")
-        self.assertEqual(config.items[0].type, "dryer")
-        self.assertEqual(config.items[0].sources.consumption_topic, "consumption/topic")
-        self.assertEqual(config.items[0].sources.loading_topic, "loading/topic")
-        self.assertEqual(config.items[0].sources.unloading_topic, "unloading/topic")
+        self.assertEqual(config.things[0].name, "super_thing")
+        self.assertEqual(config.things[0].type, "dryer")
+        self.assertEqual(config.things[0].sources.consumption_topic, "consumption/topic")
+        self.assertEqual(config.things[0].sources.loading_topic, "loading/topic")
+        self.assertEqual(config.things[0].sources.unloading_topic, "unloading/topic")
 
         self.assertIn(PlannedNotification('update/every-second/topic', '*/1 * * * * *'),
-                      config.items[0].destinations.planned_notifications)
+                      config.things[0].destinations.planned_notifications)
         self.assertIn(PlannedNotification('update/every-15-minutes/topic', '* */15 * * * *'),
-                      config.items[0].destinations.planned_notifications)
+                      config.things[0].destinations.planned_notifications)
 
     def test_min_config(self):
         min_config = configuration.load_configuration(DIR / "min_test_config.yaml")
@@ -35,13 +35,13 @@ class ConfigurationTest(unittest.TestCase):
         self.assertFalse(min_config.mqtt.has_credentials)
         self.assertIsNotNone(min_config.mqtt.client_id)
 
-        self.assertEqual(min_config.items[0].name, "super_washer")
-        self.assertEqual(min_config.items[0].type, "washing_machine")
-        self.assertEqual(min_config.items[0].sources.consumption_topic, "washer/consumption/topic")
-        self.assertIsNone(min_config.items[0].sources.loading_topic)
-        self.assertIsNone(min_config.items[0].sources.unloading_topic)
+        self.assertEqual(min_config.things[0].name, "super_washer")
+        self.assertEqual(min_config.things[0].type, "washing_machine")
+        self.assertEqual(min_config.things[0].sources.consumption_topic, "washer/consumption/topic")
+        self.assertIsNone(min_config.things[0].sources.loading_topic)
+        self.assertIsNone(min_config.things[0].sources.unloading_topic)
 
-        self.assertTrue(len(min_config.items[0].destinations.planned_notifications) == 0)
+        self.assertTrue(len(min_config.things[0].destinations.planned_notifications) == 0)
 
     def test_incomplete_sources_produce_errors(self):
         self.assertRaises(IncompleteConfiguration,
