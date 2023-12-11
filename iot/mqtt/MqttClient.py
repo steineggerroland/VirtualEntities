@@ -59,5 +59,5 @@ class MqttClient:
     def publish(self, topic: str, msg=None):
         self.mqtt_client.publish(topic, payload=msg)
 
-    def stop(self):
-        self.loop_thread.join()
+    def stop(self, timeout=5):
+        self.loop_thread.join(timeout)
