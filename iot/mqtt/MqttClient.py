@@ -1,13 +1,10 @@
 import logging
 from threading import Thread
 
-import logging
-from threading import Thread
-
 import paho.mqtt.client as paho_mqtt
 
 from iot.core.configuration import MqttConfiguration
-from iot.machine.MachineService import DatabaseException
+from iot.infrastructure.machine.MachineService import DatabaseException
 
 
 class MqttClient:

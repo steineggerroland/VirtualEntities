@@ -5,7 +5,7 @@ from unittest.mock import patch, Mock, call
 from waiting import wait
 
 from iot.core.configuration import PlannedNotification, Destinations, Sources
-from iot.machine.MachineService import MachineService
+from iot.infrastructure.machine.MachineService import MachineService
 from iot.mqtt.MqttClient import MqttClient
 from iot.mqtt.MqttMediator import MqttMediator
 
@@ -15,7 +15,7 @@ class MqttMediatorTest(unittest.TestCase):
     @patch('iot.core.configuration.Destinations')
     @patch('iot.core.configuration.Sources')
     @patch('iot.core.configuration.MqttConfiguration')
-    @patch('iot.machine.MachineService.MachineService')
+    @patch('iot.infrastructure.machine.MachineService.MachineService')
     def setUp(self, machine_service_mock, mqtt_config_mock, sources_mock, destinations_mock, mqtt_client_mock):
         self.machine_service_mock: Mock | MachineService = machine_service_mock
         self.machine_service_mock.thing.to_dict = Mock(return_value={})

@@ -4,10 +4,10 @@ from threading import Thread
 
 from iot.core.Storage import Storage
 from iot.core.configuration import IotThingConfig
-from iot.machine.Dishwasher import from_dict as dw_from_dict
-from iot.machine.Dryer import from_dict as d_from_dict
-from iot.machine.PowerStateDecorator import PowerState
-from iot.machine.WashingMachine import from_dict as wm_from_dict
+from iot.infrastructure.machine.Dishwasher import from_dict as dw_from_dict
+from iot.infrastructure.machine.Dryer import from_dict as d_from_dict
+from iot.infrastructure.machine.PowerStateDecorator import PowerState
+from iot.infrastructure.machine.WashingMachine import from_dict as wm_from_dict
 
 
 class MachineService:

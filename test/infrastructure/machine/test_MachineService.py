@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 from unittest.mock import Mock, patch
 
 from iot.core.Storage import Storage
-from iot.machine.MachineService import MachineService, DatabaseException
-from iot.machine.WashingMachine import WashingMachine
+from iot.infrastructure.machine.MachineService import MachineService, DatabaseException
+from iot.infrastructure.machine.WashingMachine import WashingMachine
 
 
 class InitTest(unittest.TestCase):
@@ -21,7 +21,7 @@ class InitTest(unittest.TestCase):
         # given
         configuration_mock = Mock(type='dryer')
         storage_mock = Mock()
-        patcher = patch('iot.machine.MachineService.d_from_dict')
+        patcher = patch('iot.infrastructure.machine.MachineService.d_from_dict')
         croniter_mock = patcher.start()
         washing_machine_mock = Mock()
         croniter_mock.return_value = washing_machine_mock

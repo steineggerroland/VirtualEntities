@@ -1,7 +1,5 @@
-from datetime import datetime
-
-from iot.machine.IotMachine import _datetime_from_dict_key
-from iot.machine.MachineThatCanBeLoaded import MachineThatCanBeLoaded
+from iot.infrastructure.machine.IotMachine import _datetime_from_dict_key
+from iot.infrastructure.machine.MachineThatCanBeLoaded import MachineThatCanBeLoaded
 
 
 class Dryer(MachineThatCanBeLoaded):

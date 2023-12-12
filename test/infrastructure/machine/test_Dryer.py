@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 import unittest
 
-from iot.machine.Dryer import from_dict
-from iot.machine.IotMachine import OnlineStatus
-from iot.machine.PowerStateDecorator import PowerState
+from iot.infrastructure.machine.Dryer import from_dict
+from iot.infrastructure.machine.IotMachine import OnlineStatus
+from iot.infrastructure.machine.PowerStateDecorator import PowerState
 
 
 class DryerInitTest(unittest.TestCase):

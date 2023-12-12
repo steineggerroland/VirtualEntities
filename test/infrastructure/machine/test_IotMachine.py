@@ -2,8 +2,8 @@ import random
 import unittest
 from datetime import datetime, timedelta
 
-from iot.machine.IotMachine import OnlineStatus, IotMachine
-from iot.machine.PowerStateDecorator import PowerState
+from iot.infrastructure.machine.IotMachine import OnlineStatus, IotMachine
+from iot.infrastructure.machine.PowerStateDecorator import PowerState
 
 
 class ConstructionTest(unittest.TestCase):
