@@ -1,6 +1,5 @@
 import logging
 import sys
-from pathlib import Path
 from time import sleep
 
 from iot.core.Storage import Storage
@@ -18,7 +17,7 @@ def run():
     logger.debug("Starting")
     config = load_configuration(CONFIG_FILE_NAME)
     logger.debug("Configuration loaded")
-    storage = Storage(Path(DB_JSON_FILE), [thing.name for thing in config.things])
+    storage = Storage(DB_JSON_FILE, [thing.name for thing in config.things])
     logger.debug("Storage loaded")
     client = MqttClient(config.mqtt)
     logger.debug("Mqtt client loaded")

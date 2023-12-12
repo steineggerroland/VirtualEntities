@@ -1,15 +1,13 @@
 import datetime
-from pathlib import Path
 
 from tinydb import TinyDB, Query
-from BetterJSONStorage import BetterJSONStorage
 
 from iot.machine.IotMachine import IotMachine
 
 
 class Storage:
-    def __init__(self, db_name: Path, thing_names: [str]):
-        self.db = TinyDB(db_name, access_mode="r+", storage=BetterJSONStorage)
+    def __init__(self, db_name: str, thing_names: [str]):
+        self.db = TinyDB(db_name)
         for thing_name in thing_names:
             Thing = Query()
             if not self.db.search(Thing.type == 'thing' and Thing.name == thing_name):
