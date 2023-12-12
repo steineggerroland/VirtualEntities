@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from iot.machine.IotMachine import IotMachine
+from iot.infrastructure.machine.IotMachine import IotMachine
 
 
 class MachineThatCanBeLoaded(IotMachine):

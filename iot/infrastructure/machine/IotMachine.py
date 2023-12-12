@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from iot.machine.PowerStateDecorator import PowerState, SimplePowerStateDecorator
+from iot.infrastructure.machine.PowerStateDecorator import PowerState, SimplePowerStateDecorator
 
 
 class OnlineStatus(str, Enum):

@@ -4,7 +4,7 @@ from time import sleep
 
 from iot.core.Storage import Storage
 from iot.core.configuration import load_configuration
-from iot.machine.MachineService import MachineService
+from iot.infrastructure.machine.MachineService import MachineService
 from iot.mqtt.MqttClient import MqttClient
 from iot.mqtt.MqttMediator import MqttMediator
 
