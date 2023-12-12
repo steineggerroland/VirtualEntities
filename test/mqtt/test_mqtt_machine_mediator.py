@@ -7,7 +7,7 @@ from waiting import wait
 from iot.core.configuration import PlannedNotification, Destinations, Sources
 from iot.infrastructure.machine.machine_service import MachineService
 from iot.mqtt.mqtt_client import MqttClient
-from iot.mqtt.mqtt_mediator import MqttMediator
+from iot.mqtt.mqtt_machine_mediator import MqttMediator
 
 
 class MqttMediatorTest(unittest.TestCase):

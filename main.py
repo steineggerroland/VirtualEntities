@@ -6,7 +6,7 @@ from iot.core.storage import Storage
 from iot.core.configuration import load_configuration
 from iot.infrastructure.machine.machine_service import MachineService
 from iot.mqtt.mqtt_client import MqttClient
-from iot.mqtt.mqtt_mediator import MqttMediator
+from iot.mqtt.mqtt_machine_mediator import MqttMediator
 
 DB_JSON_FILE = 'data/db.json'
 CONFIG_FILE_NAME = sys.argv[1] if len(sys.argv) >= 1 else 'config.yaml'
