@@ -2,27 +2,27 @@ import datetime
 
 from tinydb import TinyDB, Query
 
-from iot.infrastructure.machine.iot_machine import IotMachine
+from iot.infrastructure.thing import Thing
 
 
 class Storage:
     def __init__(self, db_name: str, thing_names: [str]):
         self.db = TinyDB(db_name)
         for thing_name in thing_names:
-            Thing = Query()
-            if not self.db.search(Thing.type == 'thing' and Thing.name == thing_name):
+            thing_query = Query()
+            if not self.db.search(thing_query.type == 'thing' and thing_query.name == thing_name):
                 self.db.insert({'type': 'thing', 'name': thing_name})
 
     def shutdown(self):
         self.db.close()
 
     def load_thing(self, thing_name: str):
-        Thing = Query()
-        return self.db.search(Thing.type == 'thing' and Thing.name == thing_name)[0]
+        thing_query = Query()
+        return self.db.search(thing_query.type == 'thing' and thing_query.name == thing_name)[0]
 
-    def update_thing(self, thing: IotMachine):
-        Thing = Query()
-        self.db.update(thing.to_dict(), Thing.type == 'thing' and Thing.name == thing.name)
+    def update_thing(self, thing: Thing):
+        thing_query = Query()
+        self.db.update(thing.to_dict(), thing_query.type == 'thing' and thing_query.name == thing.name)
 
     def append_power_consumption(self, watt: float, thing_name):
         thing_measurements_table = self.db.table(f"{thing_name}.measurements")

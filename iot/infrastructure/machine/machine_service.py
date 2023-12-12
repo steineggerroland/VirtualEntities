@@ -8,6 +8,7 @@ from iot.infrastructure.machine.dishwasher import from_dict as dw_from_dict
 from iot.infrastructure.machine.dryer import from_dict as d_from_dict
 from iot.infrastructure.machine.power_state_decorator import PowerState
 from iot.infrastructure.machine.washing_machine import from_dict as wm_from_dict
+from iot.infrastructure.services import DatabaseException
 
 
 class MachineService:
@@ -82,14 +83,3 @@ class MachineService:
             self.storage.update_thing(self.thing)
         except ValueError as e:
             raise DatabaseException('Failed to save setting machine to loaded.', e) from e
-
-
-class DatabaseException(Exception):
-    def __init__(self, msg: str, cause: Exception | None = None):
-        self.msg = msg
-        self.cause = cause
-
-
-class InvalidThingType(Exception):
-    def __init__(self, thing_config: IotThingConfig):
-        self.msg = f"thing type '{thing_config.type}' is unknown"
