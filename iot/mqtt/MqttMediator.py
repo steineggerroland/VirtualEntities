@@ -45,7 +45,7 @@ class MqttMediator:
             try:
                 self.mqtt_client.publish(planned_notification.mqtt_topic,
                                          json.dumps(self.machine_service.thing.to_dict()))
-                self.logger.info("Sent update to '%s'", planned_notification.mqtt_topic)
+                self.logger.debug("Sent update to '%s'", planned_notification.mqtt_topic)
             except Exception as e:
                 self.logger.error("Failed to send updte to '%s'", planned_notification.mqtt_topic, exc_info=e)
 
