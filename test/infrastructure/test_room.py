@@ -4,8 +4,8 @@ from random import Random
 
 from _datetime import timedelta
 
-from iot.infrastructure.Room import Room
-from iot.infrastructure.Units import TemperatureUnit, Temperature
+from iot.infrastructure.room import Room
+from iot.infrastructure.units import TemperatureUnit, Temperature
 
 
 class InitTest(unittest.TestCase):

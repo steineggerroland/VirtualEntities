@@ -5,17 +5,17 @@ from unittest.mock import patch, Mock, call
 from waiting import wait
 
 from iot.core.configuration import PlannedNotification, Destinations, Sources
-from iot.infrastructure.machine.MachineService import MachineService
-from iot.mqtt.MqttClient import MqttClient
-from iot.mqtt.MqttMediator import MqttMediator
+from iot.infrastructure.machine.machine_service import MachineService
+from iot.mqtt.mqtt_client import MqttClient
+from iot.mqtt.mqtt_mediator import MqttMediator
 
 
 class MqttMediatorTest(unittest.TestCase):
-    @patch('iot.mqtt.MqttClient')
+    @patch('iot.mqtt.mqtt_client')
     @patch('iot.core.configuration.Destinations')
     @patch('iot.core.configuration.Sources')
     @patch('iot.core.configuration.MqttConfiguration')
-    @patch('iot.infrastructure.machine.MachineService.MachineService')
+    @patch('iot.infrastructure.machine.machine_service.MachineService')
     def setUp(self, machine_service_mock, mqtt_config_mock, sources_mock, destinations_mock, mqtt_client_mock):
         self.machine_service_mock: Mock | MachineService = machine_service_mock
         self.machine_service_mock.thing.to_dict = Mock(return_value={})
@@ -30,7 +30,7 @@ class MqttMediatorTest(unittest.TestCase):
         mqtt_mediator = MqttMediator(self.machine_service_mock, self.mqtt_config_mock, self.sources_mock, destinations,
                                      self.mqtt_client_mock)
         # cron is replaced to announce two immediate responses and one in a week
-        patcher = patch('iot.mqtt.MqttMediator.croniter')
+        patcher = patch('iot.mqtt.mqtt_mediator.croniter')
         croniter_mock = patcher.start()
         croniter = Mock()
         croniter.get_next = Mock(side_effect=[datetime.now(), datetime.now(), datetime.now() + timedelta(weeks=1)])

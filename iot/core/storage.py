@@ -2,7 +2,7 @@ import datetime
 
 from tinydb import TinyDB, Query
 
-from iot.infrastructure.machine.IotMachine import IotMachine
+from iot.infrastructure.machine.iot_machine import IotMachine
 
 
 class Storage:

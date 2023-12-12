@@ -1,6 +1,6 @@
 import unittest
 
-from iot.infrastructure.Units import Temperature, TemperatureUnit
+from iot.infrastructure.units import Temperature, TemperatureUnit
 
 
 class TemperatureTest(unittest.TestCase):

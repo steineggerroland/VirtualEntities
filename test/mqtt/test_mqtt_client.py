@@ -4,9 +4,9 @@ from unittest.mock import patch, Mock
 import paho.mqtt.client
 
 from iot.core.configuration import MqttConfiguration
-from iot.mqtt.MqttClient import MqttClient
+from iot.mqtt.mqtt_client import MqttClient
 
-patcher = patch('iot.mqtt.MqttClient.paho_mqtt', autospec=True)
+patcher = patch('iot.mqtt.mqtt_client.paho_mqtt', autospec=True)
 paho_mqtt = patcher.start()
 paho_mqtt_client_mock: Mock | paho.mqtt.client.Client = Mock()
 paho_mqtt.Client = Mock(return_value=paho_mqtt_client_mock)

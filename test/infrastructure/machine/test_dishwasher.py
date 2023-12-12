@@ -1,24 +1,24 @@
 import unittest
 from datetime import datetime, timedelta
 
-from iot.infrastructure.machine.IotMachine import OnlineStatus
-from iot.infrastructure.machine.PowerStateDecorator import PowerState
-from iot.infrastructure.machine.WashingMachine import from_dict
+from iot.infrastructure.machine.dishwasher import from_dict
+from iot.infrastructure.machine.iot_machine import OnlineStatus
+from iot.infrastructure.machine.power_state_decorator import PowerState
 
 
 class WashingMachineInitTest(unittest.TestCase):
     def test_minimal_dict(self):
-        name = "my super washing_machine"
-        washing_machine = from_dict({"name": name})
-        self.assertEqual(washing_machine.name, name)
-        self.assertEqual(washing_machine.started_run_at, None)
-        self.assertEqual(washing_machine.finished_last_run_at, None)
-        self.assertEqual(washing_machine.is_loaded, False)
-        self.assertEqual(washing_machine.needs_unloading, False)
-        self.assertEqual(washing_machine.power_state, PowerState.UNKNOWN)
-        self.assertEqual(washing_machine.watt, None)
-        self.assertEqual(washing_machine.online_status(), OnlineStatus.UNKNOWN)
-        self.assertEqual(washing_machine.last_updated_at, None)
+        name = "my super dishwasher"
+        dishwasher = from_dict({"name": name})
+        self.assertEqual(dishwasher.name, name)
+        self.assertEqual(dishwasher.started_run_at, None)
+        self.assertEqual(dishwasher.finished_last_run_at, None)
+        self.assertEqual(dishwasher.is_loaded, False)
+        self.assertEqual(dishwasher.needs_unloading, False)
+        self.assertEqual(dishwasher.power_state, PowerState.UNKNOWN)
+        self.assertEqual(dishwasher.watt, None)
+        self.assertEqual(dishwasher.online_status(), OnlineStatus.UNKNOWN)
+        self.assertEqual(dishwasher.last_updated_at, None)
 
     def test_complete_dict(self):
         last_updated_at = datetime.now()
