@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
+from iot.infrastructure.Thing import Thing
 from iot.infrastructure.machine.PowerStateDecorator import PowerState, SimplePowerStateDecorator
 
 
@@ -10,14 +11,12 @@ class OnlineStatus(str, Enum):
     ONLINE = 'online'
 
 
-class IotMachine:
-    def __init__(self, name, watt: float | None = None, last_updated_at: datetime | None = None,
+class IotMachine(Thing):
+    def __init__(self, name, watt: float | None = None, last_updated_at: datetime = datetime.now(),
                  online_delta_in_seconds=300, last_seen_at: None | datetime = None):
-        self.name = name
+        super().__init__(name, last_updated_at, last_seen_at)
         self.watt = watt
-        self.last_updated_at = last_updated_at
         self._online_delta_in_seconds = online_delta_in_seconds
-        self.last_seen_at = last_seen_at
         self.power_state = PowerState.UNKNOWN
         self._power_state_decoration = SimplePowerStateDecorator(self)
         self.started_run_at: datetime | None = None
