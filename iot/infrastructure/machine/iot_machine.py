@@ -45,7 +45,3 @@ class IotMachine(Thing):
                 "last_updated_at": self.last_updated_at.isoformat() if self.last_updated_at is not None else None,
                 "online_status": self.online_status(),
                 "last_seen_at": self.last_seen_at.isoformat() if self.last_seen_at is not None else None}
-
-
-def _datetime_from_dict_key(dictionary: dict, key: str):
-    return datetime.fromisoformat(dictionary[key]) if key in dictionary and dictionary[key] is not None else None

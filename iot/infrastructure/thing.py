@@ -11,3 +11,7 @@ class Thing(metaclass=ABCMeta):
     @abstractmethod
     def to_dict(self):
         pass
+
+
+def _datetime_from_dict_key(dictionary: dict, key: str):
+    return datetime.fromisoformat(dictionary[key]) if key in dictionary and dictionary[key] is not None else None
