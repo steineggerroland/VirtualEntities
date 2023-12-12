@@ -7,8 +7,8 @@ from threading import Thread
 from croniter import croniter
 
 from iot.core.configuration import MqttConfiguration, Sources, Destinations, PlannedNotification
-from iot.infrastructure.machine.MachineService import MachineService, DatabaseException
-from iot.mqtt.MqttClient import MqttClient
+from iot.infrastructure.machine.machine_service import MachineService, DatabaseException
+from iot.mqtt.mqtt_client import MqttClient
 
 
 class MqttMediator:

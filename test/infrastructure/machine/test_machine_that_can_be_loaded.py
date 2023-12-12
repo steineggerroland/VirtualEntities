@@ -1,9 +1,9 @@
 import unittest
 from datetime import datetime, timedelta
 
-from iot.infrastructure.machine.IotMachine import OnlineStatus
-from iot.infrastructure.machine.MachineThatCanBeLoaded import MachineThatCanBeLoaded
-from iot.infrastructure.machine.PowerStateDecorator import PowerState
+from iot.infrastructure.machine.iot_machine import OnlineStatus
+from iot.infrastructure.machine.machine_that_can_be_loaded import MachineThatCanBeLoaded
+from iot.infrastructure.machine.power_state_decorator import PowerState
 
 
 class InitTest(unittest.TestCase):

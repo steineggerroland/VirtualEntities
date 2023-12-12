@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from iot.infrastructure.Thing import Thing
-from iot.infrastructure.Units import Temperature
+from iot.infrastructure.thing import Thing
+from iot.infrastructure.units import Temperature
 
 
 class Room(Thing):

@@ -4,7 +4,7 @@ from threading import Thread
 import paho.mqtt.client as paho_mqtt
 
 from iot.core.configuration import MqttConfiguration
-from iot.infrastructure.machine.MachineService import DatabaseException
+from iot.infrastructure.machine.machine_service import DatabaseException
 
 
 class MqttClient:

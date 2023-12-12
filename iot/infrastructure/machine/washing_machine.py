@@ -1,5 +1,5 @@
-from iot.infrastructure.machine.IotMachine import _datetime_from_dict_key
-from iot.infrastructure.machine.MachineThatCanBeLoaded import MachineThatCanBeLoaded
+from iot.infrastructure.machine.iot_machine import _datetime_from_dict_key
+from iot.infrastructure.machine.machine_that_can_be_loaded import MachineThatCanBeLoaded
 
 
 class WashingMachine(MachineThatCanBeLoaded):

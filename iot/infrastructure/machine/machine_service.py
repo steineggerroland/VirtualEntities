@@ -2,12 +2,12 @@ import logging
 import time
 from threading import Thread
 
-from iot.core.Storage import Storage
+from iot.core.storage import Storage
 from iot.core.configuration import IotThingConfig
-from iot.infrastructure.machine.Dishwasher import from_dict as dw_from_dict
-from iot.infrastructure.machine.Dryer import from_dict as d_from_dict
-from iot.infrastructure.machine.PowerStateDecorator import PowerState
-from iot.infrastructure.machine.WashingMachine import from_dict as wm_from_dict
+from iot.infrastructure.machine.dishwasher import from_dict as dw_from_dict
+from iot.infrastructure.machine.dryer import from_dict as d_from_dict
+from iot.infrastructure.machine.power_state_decorator import PowerState
+from iot.infrastructure.machine.washing_machine import from_dict as wm_from_dict
 
 
 class MachineService:
@@ -92,4 +92,4 @@ class DatabaseException(Exception):
 
 class InvalidThingType(Exception):
     def __init__(self, thing_config: IotThingConfig):
-        self.msg = "thing type '%s' is unknown" % thing_config.type
+        self.msg = f"thing type '{thing_config.type}' is unknown"
