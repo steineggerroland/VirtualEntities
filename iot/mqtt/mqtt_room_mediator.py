@@ -13,6 +13,9 @@ class MqttRoomMediator(MqttMediator):
             if source.type == 'temperature':
                 mqtt_client.subscribe(source.topic, lambda msg: self.temperature_update(msg, source.path))
 
+    def start(self):
+        pass
+
     def temperature_update(self, msg, json_path=None):
         raw_temperature = self._read_value_from_message(msg, json_path)
         if raw_temperature:

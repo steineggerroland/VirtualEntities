@@ -83,3 +83,7 @@ class MachineService:
             self.storage.update_thing(self.thing)
         except ValueError as e:
             raise DatabaseException('Failed to save setting machine to loaded.', e) from e
+
+
+def supports_thing_type(thing_type) -> bool:
+    return thing_type in ['washing_machine', 'dryer', 'dishwasher']
