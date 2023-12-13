@@ -33,8 +33,8 @@ def _read_mqtt_credentials(mqtt_dict):
 
 def _read_destination_configuration(thing_dict):
     if 'destinations' not in thing_dict or 'scheduled_updates' not in thing_dict['destinations']:
-        return Destinations(list())
-    planned_notifications = list()
+        return Destinations([])
+    planned_notifications = []
     for entry in thing_dict['destinations']['scheduled_updates']:
         _verify_keys(entry, ['topic', 'cron'], 'things[].destinations.scheduled_updates[]')
         planned_notifications.append(PlannedNotification(entry['topic'], entry['cron']))
@@ -42,6 +42,8 @@ def _read_destination_configuration(thing_dict):
 
 
 def _read_sources_configuration(thing_dict):
+    if 'sources' not in thing_dict:
+        return Sources([])
     _verify_keys(thing_dict['sources'], ['consumption'], 'things[].sources')
     _verify_keys(thing_dict['sources']['consumption'], ['topic'], 'things[].sources.consumption')
     consumption_topic = thing_dict['sources']['consumption']['topic']
@@ -54,11 +56,12 @@ def _read_sources_configuration(thing_dict):
         _verify_keys(thing_dict['sources']['unloading'], ['topic'], 'sources.unloading')
         unloading_topic = thing_dict['sources']['unloading']['topic']
 
-    return Sources(consumption_topic, loading_topic, unloading_topic)
+    return Sources([], consumption_topic=consumption_topic, loading_topic=loading_topic,
+                   unloading_topic=unloading_topic)
 
 
 def _read_thing(thing_config):
-    _verify_keys(thing_config, ["name", "type", "sources"], "things[]")
+    _verify_keys(thing_config, ["name", "type"], "things[]")
     return IotThingConfig(thing_config['name'], thing_config['type'], _read_sources_configuration(thing_config),
                           _read_destination_configuration(thing_config))
 
