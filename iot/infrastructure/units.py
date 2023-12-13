@@ -14,3 +14,10 @@ class Temperature:
         if not isinstance(other, Temperature):
             return False
         return self.value == other.value and self.unit == other.unit
+
+    def to_dict(self):
+        return {"value": self.value, "unit": self.unit}
+
+
+def from_dict(dictionary: dict):
+    return Temperature(value=dictionary['value'], unit=dictionary['unit'])
