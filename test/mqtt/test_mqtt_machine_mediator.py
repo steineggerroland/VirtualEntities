@@ -4,7 +4,7 @@ from unittest.mock import patch, Mock, call, ANY
 
 from waiting import wait
 
-from iot.core.configuration import PlannedNotification, Destinations, Sources, Source
+from iot.core.configuration import PlannedNotification, Destinations, Sources, Source, Measure
 from iot.infrastructure.machine.machine_service import MachineService
 from iot.mqtt.mqtt_client import MqttClient
 from iot.mqtt.mqtt_machine_mediator import MqttMachineMediator
@@ -47,10 +47,10 @@ class MqttMediatorTest(unittest.TestCase):
         consumption_topic = "machine/consumption/topic"
         self.mqtt_client_mock.subscribe = Mock()
         # when
-        mqtt_mediator = MqttMachineMediator(self.machine_service_mock,
-                                            Sources([Source(consumption_topic, source_type='consumption')]),
-                                            self.destinations_mock,
-                                            self.mqtt_client_mock)
+        MqttMachineMediator(self.machine_service_mock,
+                            Sources([Source(consumption_topic, [Measure(source_type='consumption')])]),
+                            self.destinations_mock,
+                            self.mqtt_client_mock)
         # then
         self.mqtt_client_mock.subscribe.assert_called_with(consumption_topic, ANY)
 
@@ -73,8 +73,8 @@ class MqttMediatorTest(unittest.TestCase):
         self.mqtt_client_mock.subscribe = Mock()
         # when
         mqtt_mediator = MqttMachineMediator(self.machine_service_mock,
-                                            Sources([Source(loading_topic, source_type='loading'),
-                                                     Source(unloading_topic, source_type='unloading')]),
+                                            Sources([Source(loading_topic, [Measure(source_type='loading')]),
+                                                     Source(unloading_topic, [Measure(source_type='unloading')])]),
                                             self.destinations_mock, self.mqtt_client_mock)
         # then
         self.mqtt_client_mock.subscribe.assert_any_call(loading_topic, mqtt_mediator.load_machine)

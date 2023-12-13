@@ -45,25 +45,28 @@ class RoomTest(unittest.TestCase):
     def test_to_dict_contains_all_information(self):
         name = 'Hallway 42'
         temperature = 42.1337
+        humidity = 69.12
         last_updated_at = datetime.now() - timedelta(minutes=2)
         last_seen_at = datetime.now() - timedelta(minutes=4)
         # when
-        room = Room(name, Temperature(temperature), last_updated_at, last_seen_at)
+        room = Room(name, Temperature(temperature), humidity, last_updated_at, last_seen_at)
         # then
         self.assertEqual(room.to_dict(), {"name": name, "temperature": {"value": temperature, "unit": "degree_celsius"},
-                                          "last_updated_at": last_updated_at.isoformat(),
+                                          "humidity": humidity, "last_updated_at": last_updated_at.isoformat(),
                                           "last_seen_at": last_seen_at.isoformat()})
 
     def test_contains_all_info_when_creating_from_dict(self):
         name = 'Hallway 42'
         temperature = Temperature(42.1337)
+        humidity = 77.12
         last_updated_at = datetime.now() - timedelta(minutes=2)
         last_seen_at = datetime.now() - timedelta(minutes=4)
         # when
-        reconstructed_room = from_dict(Room(name, temperature, last_updated_at, last_seen_at).to_dict())
+        reconstructed_room = from_dict(Room(name, temperature, humidity, last_updated_at, last_seen_at).to_dict())
         # then
         self.assertEqual(name, reconstructed_room.name)
         self.assertEqual(temperature, reconstructed_room.temperature)
+        self.assertEqual(humidity, reconstructed_room.humidity)
         self.assertEqual(last_updated_at, reconstructed_room.last_updated_at)
         self.assertEqual(last_seen_at, reconstructed_room.last_seen_at)
 

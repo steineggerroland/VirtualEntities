@@ -4,7 +4,7 @@ from unittest.mock import Mock, ANY, patch, call
 
 from waiting import wait
 
-from iot.core.configuration import IotThingConfig, Sources, Source, Destinations, PlannedNotification
+from iot.core.configuration import IotThingConfig, Sources, Source, Destinations, PlannedNotification, Measure
 from iot.infrastructure.room_service import RoomService
 from iot.infrastructure.units import Temperature
 from iot.mqtt.mqtt_client import MqttClient
@@ -20,7 +20,8 @@ class TemperatureTest(unittest.TestCase):
     def test_subscribes_for_temp_when_init(self):
         thing_config = IotThingConfig("Kitchen", "room",
                                       sources=Sources(
-                                          [Source(topic="some/topic", source_type='temperature', path="$")]))
+                                          [Source(topic="some/topic",
+                                                  measures=[Measure(source_type='temperature', path="$")])]))
         self.mqtt_client_mock.subscribe = Mock()
         # when
         MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
@@ -29,8 +30,8 @@ class TemperatureTest(unittest.TestCase):
 
     def test_forwards_to_mediator_when_updating_temperature_with_jsonpath(self):
         thing_config = IotThingConfig("Kitchen", "room",
-                                      sources=Sources([Source(topic="some/topic", source_type='temperature',
-                                                              path="$.temperature")]))
+                                      sources=Sources([Source(topic="some/topic", measures=[
+                                          Measure(source_type='temperature', path="$.temperature")])]))
         self.mqtt_client_mock.subscribe = Mock()
         MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
         mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][1]
@@ -47,7 +48,8 @@ class TemperatureTest(unittest.TestCase):
 
     def test_forwards_to_mediator_when_updating_temperature_without_jsonpath(self):
         thing_config = IotThingConfig("Kitchen", "room",
-                                      sources=Sources([Source(topic="some/topic", source_type='temperature')]))
+                                      sources=Sources([Source(topic="some/topic", measures=[
+                                          Measure(source_type='temperature')])]))
         self.mqtt_client_mock.subscribe = Mock()
         MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
         mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][1]
@@ -64,8 +66,9 @@ class TemperatureTest(unittest.TestCase):
         unsupported_json_path = "$.unknownPath"
         thing_config = IotThingConfig("Kitchen", "room",
                                       sources=Sources(
-                                          [Source(topic="some/topic", source_type='temperature',
-                                                  path=unsupported_json_path)]))
+                                          [Source(topic="some/topic", measures=[
+                                              Measure(source_type='temperature',
+                                                      path=unsupported_json_path)])]))
         self.mqtt_client_mock.subscribe = Mock()
         MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
         mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][1]
@@ -80,8 +83,9 @@ class TemperatureTest(unittest.TestCase):
         unsupported_json_path = "$.unknownPath"
         thing_config = IotThingConfig("Kitchen", "room",
                                       sources=Sources(
-                                          [Source(topic="some/topic", source_type='temperature',
-                                                  path=unsupported_json_path)]))
+                                          [Source(topic="some/topic", measures=[
+                                              Measure(source_type='temperature',
+                                                      path=unsupported_json_path)])]))
         self.mqtt_client_mock.subscribe = Mock()
         MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
         mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][1]

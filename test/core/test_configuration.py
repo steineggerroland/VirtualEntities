@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 
 from iot.core import configuration
-from iot.core.configuration import PlannedNotification, IncompleteConfiguration, Source
+from iot.core.configuration import PlannedNotification, IncompleteConfiguration, Source, Measure
 
 DIR = Path(__file__).parent
 
@@ -19,9 +19,9 @@ class ConfigurationTest(unittest.TestCase):
 
         self.assertEqual("super_thing", config.things[0].name)
         self.assertEqual("dryer", config.things[0].type)
-        self.assertIn(Source('consumption/topic', source_type='consumption'), config.things[0].sources.list)
-        self.assertIn(Source('loading/topic', source_type='loading'), config.things[0].sources.list)
-        self.assertIn(Source('unloading/topic', source_type='unloading'), config.things[0].sources.list)
+        self.assertIn(Source('consumption/topic', [Measure(source_type='consumption')]), config.things[0].sources.list)
+        self.assertIn(Source('loading/topic', [Measure(source_type='loading')]), config.things[0].sources.list)
+        self.assertIn(Source('unloading/topic', [Measure(source_type='unloading')]), config.things[0].sources.list)
 
         self.assertIn(PlannedNotification('update/every-second/topic', '*/1 * * * * *'),
                       config.things[0].destinations.planned_notifications)
@@ -30,9 +30,17 @@ class ConfigurationTest(unittest.TestCase):
 
         self.assertEqual("Kitchen", config.things[1].name)
         self.assertEqual("room", config.things[1].type)
-        self.assertEqual("sensor/temperature", config.things[1].sources.list[0].topic)
-        self.assertEqual("temperature", config.things[1].sources.list[0].type)
-        self.assertEqual("$.update.temperature", config.things[1].sources.list[0].path)
+        self.assertEqual("kitchen/sensor/temperature", config.things[1].sources.list[0].topic)
+        self.assertEqual("temperature", config.things[1].sources.list[0].measures[0].type)
+        self.assertEqual("$.update.temperature", config.things[1].sources.list[0].measures[0].path)
+
+        self.assertEqual("Bathroom", config.things[2].name)
+        self.assertEqual("room", config.things[2].type)
+        self.assertEqual("bath/sensor/temperature", config.things[2].sources.list[0].topic)
+        self.assertEqual("temperature", config.things[2].sources.list[0].measures[0].type)
+        self.assertEqual("$.temperature", config.things[2].sources.list[0].measures[0].path)
+        self.assertEqual("humidity", config.things[2].sources.list[0].measures[1].type)
+        self.assertEqual("$.humidity", config.things[2].sources.list[0].measures[1].path)
 
     def test_min_config(self):
         min_config = configuration.load_configuration(DIR / "min_test_config.yaml")
