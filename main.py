@@ -4,9 +4,12 @@ from time import sleep
 
 from iot.core.configuration import load_configuration
 from iot.core.storage import Storage
-from iot.infrastructure.machine.machine_service import MachineService
+from iot.infrastructure.machine.machine_service import MachineService, \
+    supports_thing_type as machine_service_supports_thing_type
+from iot.infrastructure.room_service import RoomService, supports_thing_type as room_service_supports_thing_type
 from iot.mqtt.mqtt_client import MqttClient
 from iot.mqtt.mqtt_machine_mediator import MqttMachineMediator
+from iot.mqtt.mqtt_room_mediator import MqttRoomMediator
 
 DB_JSON_FILE = 'data/db.json'
 CONFIG_FILE_NAME = sys.argv[1] if len(sys.argv) >= 1 else 'config.yaml'
@@ -23,11 +26,20 @@ def run():
     logger.debug("Mqtt client loaded")
     mqtt_mediators = []
     for thing_config in config.things:
-        machine_service = MachineService(storage, thing_config)
-        logger.debug("Service for '%s' loaded" % thing_config.name)
-        mqtt_mediators.append(
-            MqttMachineMediator(machine_service, thing_config.sources, thing_config.destinations, client))
-        logger.debug("Mqtt mediator for '%s' loaded" % thing_config.name)
+        if machine_service_supports_thing_type(thing_type=thing_config.type):
+            machine_service = MachineService(storage, thing_config)
+            logger.debug("Machine service for '%s' loaded" % thing_config.name)
+            mqtt_mediators.append(
+                MqttMachineMediator(machine_service, thing_config.sources, thing_config.destinations, client))
+            logger.debug("Mqtt machine mediator for '%s' loaded" % thing_config.name)
+        elif room_service_supports_thing_type(thing_type=thing_config.type):
+            machine_service = RoomService(storage, thing_config)
+            logger.debug("Room service for '%s' loaded" % thing_config.name)
+            mqtt_mediators.append(
+                MqttRoomMediator(client, machine_service, thing_config))
+            logger.debug("Mqtt room mediator for '%s' loaded" % thing_config.name)
+        else:
+            logger.error('Unsupported thing of type %s' % thing_config.type)
 
     try:
         client.start()

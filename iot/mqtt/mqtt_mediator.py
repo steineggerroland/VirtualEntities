@@ -1,5 +1,6 @@
 import json
 import logging
+from abc import abstractmethod
 
 from jsonpath import JSONPath
 
@@ -8,6 +9,10 @@ class MqttMediator:
     def __init__(self, mqtt_client):
         self.mqtt_client = mqtt_client
         self.logger = logging.getLogger(self.__class__.__qualname__)
+
+    @abstractmethod
+    def start(self):
+        pass
 
     def _read_value_from_message(self, msg, json_path=None):
         payload = msg.payload
