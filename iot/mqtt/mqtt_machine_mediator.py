@@ -1,11 +1,4 @@
-import json
-import time
-from datetime import datetime
-from threading import Thread
-
-from croniter import croniter
-
-from iot.core.configuration import Sources, Destinations, PlannedNotification
+from iot.core.configuration import Sources, Destinations
 from iot.infrastructure.machine.machine_service import MachineService, DatabaseException
 from iot.mqtt.mqtt_client import MqttClient
 from iot.mqtt.mqtt_mediator import MqttMediator
@@ -25,28 +18,7 @@ class MqttMachineMediator(MqttMediator):
             if source.type == 'unloading':
                 mqtt_client.subscribe(source.topic, self.unload_machine)
 
-        self.scheduled_update_threads = []
-        for planned_notification in destinations.planned_notifications:
-            thread = Thread(target=self._scheduled_updates, args=[planned_notification])
-            thread.daemon = True
-            self.scheduled_update_threads.append(thread)
-
-    def start(self):
-        for thread in self.scheduled_update_threads:
-            if not thread.is_alive():
-                thread.start()
-
-    def _scheduled_updates(self, planned_notification: PlannedNotification):
-        cron = croniter(planned_notification.cron_expression, datetime.now())
-        while True:
-            delta = cron.get_next(datetime) - datetime.now()
-            time.sleep(max(0, delta.total_seconds()))
-            try:
-                self.mqtt_client.publish(planned_notification.mqtt_topic,
-                                         json.dumps(self.machine_service.thing.to_dict()))
-                self.logger.debug("Sent update to '%s'", planned_notification.mqtt_topic)
-            except Exception as e:
-                self.logger.error("Failed to send update to '%s'", planned_notification.mqtt_topic, exc_info=e)
+        self.handle_destinations(destinations, lambda: self.machine_service.thing.to_dict())
 
     def power_consumption_update(self, msg, json_path=None):
         try:
