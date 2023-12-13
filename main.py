@@ -26,7 +26,7 @@ def run():
         machine_service = MachineService(storage, thing_config)
         logger.debug("Service for '%s' loaded" % thing_config.name)
         mqtt_mediators.append(
-            MqttMediator(machine_service, config.mqtt, thing_config.sources, thing_config.destinations, client))
+            MqttMediator(machine_service, thing_config.sources, thing_config.destinations, client))
         logger.debug("Mqtt mediator for '%s' loaded" % thing_config.name)
 
     try:

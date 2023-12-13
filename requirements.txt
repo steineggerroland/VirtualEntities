@@ -4,3 +4,4 @@ tinydb==4.8.0
 yamlenv==0.7.1
 paho-mqtt~=1.6.1
 waiting~=1.4.1
+jsonpath-python~=1.0.6

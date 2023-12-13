@@ -13,4 +13,4 @@ class Temperature:
     def __eq__(self, other):
         if not isinstance(other, Temperature):
             return False
-        return self.value is other.value and self.unit == other.unit
+        return self.value == other.value and self.unit == other.unit
