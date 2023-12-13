@@ -6,16 +6,15 @@ from threading import Thread
 
 from croniter import croniter
 
-from iot.core.configuration import MqttConfiguration, Sources, Destinations, PlannedNotification
+from iot.core.configuration import Sources, Destinations, PlannedNotification
 from iot.infrastructure.machine.machine_service import MachineService, DatabaseException
 from iot.mqtt.mqtt_client import MqttClient
 
 
 class MqttMediator:
-    def __init__(self, machine_service: MachineService, mqtt_config: MqttConfiguration, mqtt_sources: Sources,
-                 destinations: Destinations, mqtt_client: MqttClient):
+    def __init__(self, machine_service: MachineService, mqtt_sources: Sources, destinations: Destinations,
+                 mqtt_client: MqttClient):
         self.machine_service = machine_service
-        self.mqtt_config = mqtt_config
         self.mqtt_sources = mqtt_sources
         self.mqtt_client = mqtt_client
 

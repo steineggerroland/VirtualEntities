@@ -17,3 +17,7 @@ class TemperatureTest(unittest.TestCase):
         temperature = Temperature(value=15.31, unit=TemperatureUnit.DEGREE_CELSIUS)
         different_temperature = Temperature(value=23, unit=TemperatureUnit.DEGREE_CELSIUS)
         self.assertNotEqual(temperature, different_temperature)
+
+
+if __name__ == '__main__':
+    unittest.main()

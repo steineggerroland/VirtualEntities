@@ -27,8 +27,7 @@ class MqttMediatorTest(unittest.TestCase):
     def test_updates_when_specified_by_cron(self):
         # given
         destinations = Destinations(list([PlannedNotification("some/topic", "* * * * * *")]))
-        mqtt_mediator = MqttMediator(self.machine_service_mock, self.mqtt_config_mock, self.sources_mock, destinations,
-                                     self.mqtt_client_mock)
+        mqtt_mediator = MqttMediator(self.machine_service_mock, self.sources_mock, destinations, self.mqtt_client_mock)
         # cron is replaced to announce two immediate responses and one in a week
         patcher = patch('iot.mqtt.mqtt_machine_mediator.croniter')
         croniter_mock = patcher.start()
@@ -45,8 +44,9 @@ class MqttMediatorTest(unittest.TestCase):
     def test_subscribes_for_consumption_on_start(self):
         # given
         consumption_topic = "machine/consumption/topic"
-        mqtt_mediator = MqttMediator(self.machine_service_mock, self.mqtt_config_mock, Sources(consumption_topic),
-                                     self.destinations_mock, self.mqtt_client_mock)
+        mqtt_mediator = MqttMediator(self.machine_service_mock, Sources([], consumption_topic=consumption_topic),
+                                     self.destinations_mock,
+                                     self.mqtt_client_mock)
         self.mqtt_client_mock.subscribe = Mock()
         # when
         mqtt_mediator.start()
@@ -57,8 +57,8 @@ class MqttMediatorTest(unittest.TestCase):
         # given
         watt = 45.0
         msg = Mock(topic="some/topic", payload=str(watt))
-        mqtt_mediator = MqttMediator(self.machine_service_mock, self.mqtt_config_mock, self.sources_mock,
-                                     self.destinations_mock, self.mqtt_client_mock)
+        mqtt_mediator = MqttMediator(self.machine_service_mock, self.sources_mock, self.destinations_mock,
+                                     self.mqtt_client_mock)
         self.machine_service_mock.update_power_consumption = Mock()
         # when
         mqtt_mediator.power_consumption_update(msg)
@@ -69,8 +69,9 @@ class MqttMediatorTest(unittest.TestCase):
         # given
         loading_topic = "loading/topic"
         unloading_topic = "unloading/topic"
-        mqtt_mediator = MqttMediator(self.machine_service_mock, self.mqtt_config_mock, Sources(
-            "machine/consumption/topic", loading_topic, unloading_topic),
+        mqtt_mediator = MqttMediator(self.machine_service_mock,
+                                     Sources([], consumption_topic="", loading_topic=loading_topic,
+                                             unloading_topic=unloading_topic),
                                      self.destinations_mock, self.mqtt_client_mock)
         self.mqtt_client_mock.subscribe = Mock()
         # when
@@ -82,8 +83,8 @@ class MqttMediatorTest(unittest.TestCase):
     def test_loading_machine(self):
         # given
         msg = Mock(topic="load/topic", payload=None)
-        mqtt_mediator = MqttMediator(self.machine_service_mock, self.mqtt_config_mock, self.sources_mock,
-                                     self.destinations_mock, self.mqtt_client_mock)
+        mqtt_mediator = MqttMediator(self.machine_service_mock, self.sources_mock, self.destinations_mock,
+                                     self.mqtt_client_mock)
         self.machine_service_mock.loaded = Mock()
         # when
         mqtt_mediator.load_machine(msg)
@@ -93,8 +94,8 @@ class MqttMediatorTest(unittest.TestCase):
     def test_unloading_machine(self):
         # given
         msg = Mock(topic="unload/topic", payload=None)
-        mqtt_mediator = MqttMediator(self.machine_service_mock, self.mqtt_config_mock, self.sources_mock,
-                                     self.destinations_mock, self.mqtt_client_mock)
+        mqtt_mediator = MqttMediator(self.machine_service_mock, self.sources_mock, self.destinations_mock,
+                                     self.mqtt_client_mock)
         self.machine_service_mock.unloaded = Mock()
         # when
         mqtt_mediator.unload_machine(msg)

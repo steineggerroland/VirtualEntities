@@ -111,8 +111,15 @@ class MqttConfiguration:
         return f"mqtt ({self.url}:{self.port})"
 
 
+class Source:
+    def __init__(self, topic: str, temperature_path: None | str = None):
+        self.topic = topic
+        self.temperature_path = temperature_path
+
+
 class Sources:
-    def __init__(self, consumption_topic, loading_topic=None, unloading_topic=None):
+    def __init__(self, sources: [Source], consumption_topic=None, loading_topic=None, unloading_topic=None):
+        self.list = sources
         self.consumption_topic = consumption_topic
         self.loading_topic = loading_topic
         self.unloading_topic = unloading_topic
