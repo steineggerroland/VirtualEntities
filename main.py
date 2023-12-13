@@ -2,11 +2,11 @@ import logging
 import sys
 from time import sleep
 
-from iot.core.storage import Storage
 from iot.core.configuration import load_configuration
+from iot.core.storage import Storage
 from iot.infrastructure.machine.machine_service import MachineService
 from iot.mqtt.mqtt_client import MqttClient
-from iot.mqtt.mqtt_machine_mediator import MqttMediator
+from iot.mqtt.mqtt_machine_mediator import MqttMachineMediator
 
 DB_JSON_FILE = 'data/db.json'
 CONFIG_FILE_NAME = sys.argv[1] if len(sys.argv) >= 1 else 'config.yaml'
@@ -26,7 +26,7 @@ def run():
         machine_service = MachineService(storage, thing_config)
         logger.debug("Service for '%s' loaded" % thing_config.name)
         mqtt_mediators.append(
-            MqttMediator(machine_service, thing_config.sources, thing_config.destinations, client))
+            MqttMachineMediator(machine_service, thing_config.sources, thing_config.destinations, client))
         logger.debug("Mqtt mediator for '%s' loaded" % thing_config.name)
 
     try:

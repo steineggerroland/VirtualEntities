@@ -8,16 +8,21 @@ things:
   - name: super_thing
     type: dryer
     sources:
-      consumption:
-        # the Watt consumption is considered to be a floating point number
-        topic: consumption/topic
-      loading:
-        topic: loading/topic
-      unloading:
-        topic: unloading/topic
+      - topic: consumption/topic
+        type: consumption
+      - topic: loading/topic
+        type: loading
+      - topic: unloading/topic
+        type: unloading
     destinations:
       scheduled_updates:
         - topic: update/every-second/topic
           cron: "*/1 * * * * *"
         - topic: update/every-15-minutes/topic
           cron: "* */15 * * * *"
+  - name: Kitchen
+    type: room
+    sources:
+      - topic: sensor/temperature
+        type: temperature
+        path: $.update.temperature
