@@ -2,13 +2,13 @@ import logging
 import time
 from threading import Thread
 
-from iot.core.storage import Storage
 from iot.core.configuration import IotThingConfig
+from iot.core.storage import Storage
 from iot.infrastructure.machine.dishwasher import from_dict as dw_from_dict
 from iot.infrastructure.machine.dryer import from_dict as d_from_dict
 from iot.infrastructure.machine.power_state_decorator import PowerState
 from iot.infrastructure.machine.washing_machine import from_dict as wm_from_dict
-from iot.infrastructure.services import DatabaseException
+from iot.infrastructure.services import DatabaseException, InvalidThingType
 
 
 class MachineService:

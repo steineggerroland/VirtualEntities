@@ -44,20 +44,14 @@ def _read_destination_configuration(thing_dict):
 def _read_sources_configuration(thing_dict):
     if 'sources' not in thing_dict:
         return Sources([])
-    _verify_keys(thing_dict['sources'], ['consumption'], 'things[].sources')
-    _verify_keys(thing_dict['sources']['consumption'], ['topic'], 'things[].sources.consumption')
-    consumption_topic = thing_dict['sources']['consumption']['topic']
-    loading_topic = None
-    if 'loading' in thing_dict['sources']:
-        _verify_keys(thing_dict['sources']['loading'], ['topic'], 'sources.loading')
-        loading_topic = thing_dict['sources']['loading']['topic']
-    unloading_topic = None
-    if 'unloading' in thing_dict['sources']:
-        _verify_keys(thing_dict['sources']['unloading'], ['topic'], 'sources.unloading')
-        unloading_topic = thing_dict['sources']['unloading']['topic']
+    sources = []
+    if thing_dict['sources']:
+        for source in thing_dict['sources']:
+            _verify_keys(source, ['topic', 'type'], "things[].sources[]")
+            sources.append(Source(topic=source['topic'], source_type=source['type'],
+                                  path=source['path'] if 'path' in source else None))
 
-    return Sources([], consumption_topic=consumption_topic, loading_topic=loading_topic,
-                   unloading_topic=unloading_topic)
+    return Sources(sources)
 
 
 def _read_thing(thing_config):
@@ -66,14 +60,14 @@ def _read_thing(thing_config):
                           _read_destination_configuration(thing_config))
 
 
-def _read_items(conf_dict):
+def _read_things(conf_dict):
     _verify_keys(conf_dict, ["things"])
     return [_read_thing(thing_config) for thing_config in conf_dict['things']]
 
 
 def _read_configuration(conf_dict):
     return Configuration(_read_mqtt_configuration(conf_dict),
-                         _read_items(conf_dict))
+                         _read_things(conf_dict))
 
 
 def _verify_keys(yaml_dict, keys, prefix=None):
@@ -115,17 +109,20 @@ class MqttConfiguration:
 
 
 class Source:
-    def __init__(self, topic: str, temperature_path: None | str = None):
+    def __init__(self, topic: str, source_type: str, path: None | str = None):
         self.topic = topic
-        self.temperature_path = temperature_path
+        self.type = source_type
+        self.path = path
+
+    def __eq__(self, other):
+        if not isinstance(other, Source):
+            return False
+        return vars(self) == vars(other)
 
 
 class Sources:
-    def __init__(self, sources: [Source], consumption_topic=None, loading_topic=None, unloading_topic=None):
+    def __init__(self, sources: [Source]):
         self.list = sources
-        self.consumption_topic = consumption_topic
-        self.loading_topic = loading_topic
-        self.unloading_topic = unloading_topic
 
 
 class PlannedNotification:
