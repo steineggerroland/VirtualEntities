@@ -9,12 +9,11 @@ class MqttRoomMediator(MqttMediator):
     def __init__(self, mqtt_client: MqttClient, room_service: RoomService, thing_config: IotThingConfig):
         super().__init__(mqtt_client)
         self.room_service = room_service
-        for source in thing_config.sources.list:
+        for source in thing_config.sources.list if thing_config.sources else []:
             if source.type == 'temperature':
                 mqtt_client.subscribe(source.topic, lambda msg: self.temperature_update(msg, source.path))
 
-    def start(self):
-        pass
+        self.handle_destinations(thing_config.destinations, lambda: self.room_service.room.to_dict())
 
     def temperature_update(self, msg, json_path=None):
         raw_temperature = self._read_value_from_message(msg, json_path)

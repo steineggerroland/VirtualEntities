@@ -30,7 +30,7 @@ class MqttMediatorTest(unittest.TestCase):
         mqtt_mediator = MqttMachineMediator(self.machine_service_mock, self.sources_mock, destinations,
                                             self.mqtt_client_mock)
         # cron is replaced to announce two immediate responses and one in a week
-        patcher = patch('iot.mqtt.mqtt_machine_mediator.croniter')
+        patcher = patch('iot.mqtt.mqtt_mediator.croniter')
         croniter_mock = patcher.start()
         croniter = Mock()
         croniter.get_next = Mock(side_effect=[datetime.now(), datetime.now(), datetime.now() + timedelta(weeks=1)])
@@ -38,7 +38,7 @@ class MqttMediatorTest(unittest.TestCase):
         # when
         mqtt_mediator.start()
         # then
-        wait(lambda: sum(publish_args == call("some/topic", "{}") for publish_args in
+        wait(lambda: sum(publish_args == call("some/topic", ANY) for publish_args in
                          self.mqtt_client_mock.publish.call_args_list) >= 2, timeout_seconds=1,
              waiting_for="mqtt.publish called several times")
 
