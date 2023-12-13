@@ -33,8 +33,7 @@ class MqttMediator:
             delta = cron.get_next(datetime) - datetime.now()
             time.sleep(max(0, delta.total_seconds()))
             try:
-                self.mqtt_client.publish(planned_notification.mqtt_topic,
-                                         json.dumps(get_dict_callback()))
+                self.mqtt_client.publish(planned_notification.mqtt_topic, get_dict_callback())
                 self.logger.debug("Sent update to '%s'", planned_notification.mqtt_topic)
             except Exception as e:
                 self.logger.error("Failed to send update to '%s'", planned_notification.mqtt_topic, exc_info=e)
