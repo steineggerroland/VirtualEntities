@@ -28,6 +28,10 @@ class Storage:
         thing_measurements_table = self.db.table(f"{thing_name}.measurements")
         thing_measurements_table.insert(
             {"watt": watt, "created_at": datetime.datetime.now().isoformat()})
+        query = Query()
+        before_30_minutes = datetime.datetime.now() - datetime.timedelta(minutes=30)
+        thing_measurements_table.remove(
+            query.created_at.test(lambda dt: datetime.datetime.fromisoformat(dt) > before_30_minutes))
 
     def get_power_consumptions_for_last_seconds(self, seconds: int, thing_name):
         thing_measurements_table = self.db.table(f"{thing_name}.measurements")
