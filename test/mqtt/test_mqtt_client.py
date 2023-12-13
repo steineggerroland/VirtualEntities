@@ -64,12 +64,11 @@ class MqttClientTest(unittest.TestCase):
         # given
         mqtt_client = MqttClient(self.mqtt_config_mock)
         paho_mqtt_client_mock.publish = Mock()
-        msg_mock = Mock()
         topic = 'my/important/topic'
         # when
-        mqtt_client.publish(topic, msg=msg_mock)
+        mqtt_client.publish(topic, {})
         # then
-        paho_mqtt_client_mock.publish.assert_called_once_with(topic, payload=msg_mock)
+        paho_mqtt_client_mock.publish.assert_called_once_with(topic, payload="{}")
 
 
 if __name__ == '__main__':
