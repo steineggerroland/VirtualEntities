@@ -17,6 +17,13 @@ class RoomService:
         except ValueError as e:
             raise DatabaseException('Failed to save updated temperature.', e) from e
 
+    def update_humidity(self, humidity):
+        try:
+            self.room.update_humidity(humidity)
+            self.storage.update_thing(self.room)
+        except ValueError as e:
+            raise DatabaseException('Failed to save updated humidity.', e) from e
+
 
 def supports_thing_type(thing_type) -> bool:
     return thing_type in ['room']

@@ -23,6 +23,15 @@ things:
   - name: Kitchen
     type: room
     sources:
-      - topic: sensor/temperature
+      - topic: kitchen/sensor/temperature
         type: temperature
         path: $.update.temperature
+  - name: Bathroom
+    type: room
+    sources:
+      - topic: bath/sensor/temperature
+        measures:
+          - type: temperature
+            path: $.temperature
+          - type: humidity
+            path: $.humidity

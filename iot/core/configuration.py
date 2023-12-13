@@ -47,9 +47,17 @@ def _read_sources_configuration(thing_dict):
     sources = []
     if thing_dict['sources']:
         for source in thing_dict['sources']:
-            _verify_keys(source, ['topic', 'type'], "things[].sources[]")
-            sources.append(Source(topic=source['topic'], source_type=source['type'],
-                                  path=source['path'] if 'path' in source else None))
+            measures = []
+            _verify_keys(source, ['topic'], "things[].sources[]")
+            if 'measures' in source:
+                for measure in source['measures']:
+                    _verify_keys(measure, ['type'], "things[].sources[].measures[]")
+                    measures.append(Measure(source_type=measure['type'],
+                                            path=measure['path'] if 'path' in measure else None))
+            else:
+                _verify_keys(source, ['type'], "things[].sources[]")
+                measures.append(Measure(source_type=source['type'], path=source['path'] if 'path' in source else None))
+            sources.append(Source(topic=source['topic'], measures=measures))
 
     return Sources(sources)
 
@@ -108,16 +116,24 @@ class MqttConfiguration:
         return f"mqtt ({self.url}:{self.port})"
 
 
-class Source:
-    def __init__(self, topic: str, source_type: str, path: None | str = None):
-        self.topic = topic
+class Measure:
+    def __init__(self, source_type: str, path: None | str = None):
         self.type = source_type
         self.path = path
 
+
+class Source:
+    def __init__(self, topic: str, measures: [Measure]):
+        self.topic = topic
+        self.measures = measures
+
     def __eq__(self, other):
-        if not isinstance(other, Source):
+        if not isinstance(other, Source) or self.topic != other.topic:
             return False
-        return vars(self) == vars(other)
+        for measure in self.measures:
+            if not any(vars(measure) == vars(other_measure) for other_measure in other.measures):
+                return False
+        return True
 
 
 class Sources:

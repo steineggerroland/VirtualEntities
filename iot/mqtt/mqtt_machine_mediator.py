@@ -11,11 +11,12 @@ class MqttMachineMediator(MqttMediator):
         self.machine_service = machine_service
 
         for source in mqtt_sources.list:
-            if source.type == 'consumption':
-                mqtt_client.subscribe(source.topic, lambda msg: self.power_consumption_update(msg, source.path))
-            if source.type == 'loading':
+            if source.measures[0].type == 'consumption':
+                mqtt_client.subscribe(source.topic,
+                                      lambda msg: self.power_consumption_update(msg, source.measures[0].path))
+            if source.measures[0].type == 'loading':
                 mqtt_client.subscribe(source.topic, self.load_machine)
-            if source.type == 'unloading':
+            if source.measures[0].type == 'unloading':
                 mqtt_client.subscribe(source.topic, self.unload_machine)
 
         self.handle_destinations(destinations, lambda: self.machine_service.thing.to_dict())
