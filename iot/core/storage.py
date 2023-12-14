@@ -1,41 +1,51 @@
 import datetime
-
-from tinydb import TinyDB, Query
+import json
+from pathlib import Path
 
 from iot.infrastructure.thing import Thing
 
 
 class Storage:
-    def __init__(self, db_name: str, thing_names: [str]):
-        self.db = TinyDB(db_name)
-        for thing_name in thing_names:
-            thing_query = Query()
-            if not self.db.search(thing_query.type == 'thing' and thing_query.name == thing_name):
-                self.db.insert({'type': 'thing', 'name': thing_name})
+    def __init__(self, db_path: Path, thing_names: [str]):
+        self.db_name = db_path
+        self.things = {}
+        self.power_consumption_values = {}
+        db_file = None
+        try:
+            db_file = open(db_path)
+            things_in_db = json.loads(db_file.read())
+            for thing_name in thing_names:
+                self.things[thing_name] = things_in_db[thing_name] \
+                    if thing_name in things_in_db \
+                    else {'type': 'thing', 'name': thing_name}
+        except FileNotFoundError:
+            for thing_name in thing_names:
+                self.things[thing_name] = {'type': 'thing', 'name': thing_name}
+        finally:
+            if db_file:
+                db_file.close()
 
     def shutdown(self):
-        self.db.close()
+        with open(self.db_name, 'w') as db_file:
+            json.dump(self.things, db_file)
 
     def load_thing(self, thing_name: str):
-        thing_query = Query()
-        return self.db.search(thing_query.type == 'thing' and thing_query.name == thing_name)[0]
+        return self.things[thing_name]
 
     def update_thing(self, thing: Thing):
-        thing_query = Query()
-        self.db.update(thing.to_dict(), thing_query.type == 'thing' and thing_query.name == thing.name)
+        self.things[thing.name] = thing.to_dict()
 
     def append_power_consumption(self, watt: float, thing_name):
-        thing_measurements_table = self.db.table(f"{thing_name}.measurements")
-        thing_measurements_table.insert(
-            {"watt": watt, "created_at": datetime.datetime.now().isoformat()})
-        query = Query()
-        before_30_minutes = datetime.datetime.now() - datetime.timedelta(minutes=30)
-        thing_measurements_table.remove(
-            query.created_at.test(lambda dt: datetime.datetime.fromisoformat(dt) > before_30_minutes))
+        power_consumption_values = self.power_consumption_values[thing_name] \
+            if thing_name in self.power_consumption_values else []
+        power_consumption_values.append({"watt": watt, "created_at": datetime.datetime.now().isoformat()})
+        if len(power_consumption_values) > 10:
+            power_consumption_values.pop()
+        self.power_consumption_values[thing_name] = power_consumption_values
 
     def get_power_consumptions_for_last_seconds(self, seconds: int, thing_name):
-        thing_measurements_table = self.db.table(f"{thing_name}.measurements")
+        power_consumption_values = self.power_consumption_values[thing_name] \
+            if thing_name in self.power_consumption_values else []
         time_boundary = datetime.datetime.now() - datetime.timedelta(seconds=seconds)
-        PowerConsumption = Query()
-        return thing_measurements_table.search(
-            PowerConsumption.created_at.test(lambda dt: datetime.datetime.fromisoformat(dt) > time_boundary))
+        return [power_consumption for power_consumption in power_consumption_values if
+                datetime.datetime.fromisoformat(power_consumption["created_at"]) > time_boundary]
