@@ -42,6 +42,7 @@ def run():
             logger.error('Unsupported thing of type %s' % thing_config.type)
 
     try:
+        storage.start()
         client.start()
         for mqtt_mediator in mqtt_mediators:
             mqtt_mediator.start()

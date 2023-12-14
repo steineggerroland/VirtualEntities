@@ -1,6 +1,8 @@
 import datetime
 import json
+import time
 from pathlib import Path
+from threading import Thread
 
 from iot.infrastructure.thing import Thing
 
@@ -24,8 +26,21 @@ class Storage:
         finally:
             if db_file:
                 db_file.close()
+        self._scheduled_snapshots_thread: Thread = Thread(target=self._scheduled_snapshots, daemon=True)
+
+    def start(self):
+        self._scheduled_snapshots_thread.start()
 
     def shutdown(self):
+        self._scheduled_snapshots_thread.join()
+        self._save_snapshot_to_file()
+
+    def _scheduled_snapshots(self):
+        while True:
+            time.sleep(60)
+            self._save_snapshot_to_file()
+
+    def _save_snapshot_to_file(self):
         with open(self.db_name, 'w') as db_file:
             json.dump(self.things, db_file)
 
