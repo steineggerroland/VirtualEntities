@@ -48,7 +48,7 @@ def run():
         logger.info("Started.")
         while True:
             sleep(10)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, SystemExit):
         logger.info("Shutting down.")
     finally:
         storage.shutdown()
