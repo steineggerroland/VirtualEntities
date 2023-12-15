@@ -2,8 +2,8 @@ import unittest
 from datetime import datetime, timedelta
 
 from iot.infrastructure.machine.dishwasher import from_dict
-from iot.infrastructure.machine.iot_machine import OnlineStatus
 from iot.infrastructure.machine.power_state_decorator import PowerState
+from iot.infrastructure.thing import OnlineStatus
 
 
 class WashingMachineInitTest(unittest.TestCase):

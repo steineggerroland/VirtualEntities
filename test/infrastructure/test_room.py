@@ -5,6 +5,7 @@ from random import Random
 from _datetime import timedelta
 
 from iot.infrastructure.room import Room, from_dict
+from iot.infrastructure.thing import OnlineStatus
 from iot.infrastructure.units import TemperatureUnit, Temperature
 
 
@@ -52,7 +53,8 @@ class RoomTest(unittest.TestCase):
         room = Room(name, Temperature(temperature), humidity, last_updated_at, last_seen_at)
         # then
         self.assertEqual(room.to_dict(), {"name": name, "temperature": {"value": temperature, "unit": "degree_celsius"},
-                                          "humidity": humidity, "last_updated_at": last_updated_at.isoformat(),
+                                          "humidity": humidity, "online_status": OnlineStatus.ONLINE,
+                                          "last_updated_at": last_updated_at.isoformat(),
                                           "last_seen_at": last_seen_at.isoformat()})
 
     def test_contains_all_info_when_creating_from_dict(self):

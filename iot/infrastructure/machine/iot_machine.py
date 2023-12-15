@@ -1,22 +1,14 @@
 from datetime import datetime
-from enum import Enum
 
-from iot.infrastructure.thing import Thing
 from iot.infrastructure.machine.power_state_decorator import PowerState, SimplePowerStateDecorator
-
-
-class OnlineStatus(str, Enum):
-    UNKNOWN = 'unknown'
-    OFFLINE = 'offline'
-    ONLINE = 'online'
+from iot.infrastructure.thing import Thing
 
 
 class IotMachine(Thing):
     def __init__(self, name, watt: float | None = None, last_updated_at: datetime = datetime.now(),
                  online_delta_in_seconds=300, last_seen_at: None | datetime = None):
-        super().__init__(name, last_updated_at, last_seen_at)
+        super().__init__(name, last_updated_at, last_seen_at, online_delta_in_seconds)
         self.watt = watt
-        self._online_delta_in_seconds = online_delta_in_seconds
         self.power_state = PowerState.UNKNOWN
         self._power_state_decoration = SimplePowerStateDecorator(self)
         self.started_run_at: datetime | None = None
@@ -32,13 +24,6 @@ class IotMachine(Thing):
 
     def finish_run(self):
         pass
-
-    def online_status(self):
-        if self.last_seen_at is None:
-            return OnlineStatus.UNKNOWN
-        if (datetime.now() - self.last_seen_at).total_seconds() <= self._online_delta_in_seconds:
-            return OnlineStatus.ONLINE
-        return OnlineStatus.OFFLINE
 
     def to_dict(self):
         return {"name": self.name, "watt": self.watt, "power_state": self.power_state,

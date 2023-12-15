@@ -7,7 +7,7 @@ from iot.infrastructure.units import Temperature, from_dict as temperature_from_
 class Room(Thing):
     def __init__(self, name: str, temperature: None | Temperature = None, humidity: None | float = None,
                  last_updated_at: datetime = datetime.now(), last_seen_at: None | datetime = None):
-        super().__init__(name, last_updated_at, last_seen_at)
+        super().__init__(name, last_updated_at, last_seen_at, 60 * 10)
         self.temperature = temperature
         self.humidity = humidity
 
@@ -23,6 +23,7 @@ class Room(Thing):
         return {"name": self.name,
                 "temperature": self.temperature.to_dict() if self.temperature else None,
                 "humidity": self.humidity,
+                "online_status": self.online_status(),
                 "last_updated_at": self.last_updated_at.isoformat() if self.last_updated_at is not None else None,
                 "last_seen_at": self.last_seen_at.isoformat() if self.last_seen_at is not None else None}
 
