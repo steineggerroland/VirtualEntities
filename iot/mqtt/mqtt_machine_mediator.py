@@ -31,7 +31,8 @@ class MqttMachineMediator(MqttMediator):
 
     def load_machine(self, msg):
         try:
-            self.machine_service.loaded()
+            needs_unloading = self._read_value_from_message(msg, value_type=bool) if msg.payload else True
+            self.machine_service.loaded(needs_unloading=needs_unloading)
             self.logger.debug("Set machine loaded.")
         except DatabaseException as e:
             self.logger.error("Failed set machine loaded because of database error.", msg.topic, exc_info=e)

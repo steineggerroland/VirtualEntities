@@ -77,9 +77,9 @@ class MachineService:
         except ValueError as e:
             raise DatabaseException('Failed to save unloading machine because of database error.', e) from e
 
-    def loaded(self):
+    def loaded(self, needs_unloading=False):
         try:
-            self.thing.load()
+            self.thing.load(needs_unloading)
             self.storage.update_thing(self.thing)
         except ValueError as e:
             raise DatabaseException('Failed to save setting machine to loaded.', e) from e

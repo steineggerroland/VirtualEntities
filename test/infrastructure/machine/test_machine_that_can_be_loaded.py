@@ -62,6 +62,15 @@ class MachineThatCanBeLoadedTest(unittest.TestCase):
         # then
         self.assertTrue(self.machine.is_loaded)
 
+    def test_loading_machine_needing_unload(self):
+        # given
+        self.machine.is_loaded = self.machine.needs_unloading = False
+        # when
+        self.machine.load(needs_unloading=True)
+        # then
+        self.assertTrue(self.machine.is_loaded)
+        self.assertTrue(self.machine.needs_unloading)
+
     def test_unloading_machine(self):
         # given
         self.machine.is_loaded = self.machine.needs_unloading = True

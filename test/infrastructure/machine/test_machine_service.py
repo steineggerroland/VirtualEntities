@@ -122,6 +122,16 @@ class MachinePowerTest(unittest.TestCase):
         self.machine_service.thing.load.assert_called()
         self.storage_mock.update_thing.assert_called()
 
+    def test_loade_needing_unload(self):
+        # given
+        self.machine_service.thing.load = Mock()
+        self.storage_mock.update_thing = Mock()
+        # when
+        self.machine_service.loaded(needs_unloading=True)
+        # then
+        self.machine_service.thing.load.assert_called_with(True)
+        self.storage_mock.update_thing.assert_called()
+
 
 class DatabaseExceptionTranslationTests(unittest.TestCase):
     def setUp(self) -> None:
