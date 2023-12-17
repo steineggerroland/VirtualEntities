@@ -18,8 +18,9 @@ class MachineThatCanBeLoaded(IotMachine):
         self.is_loaded = False
         self.last_updated_at = datetime.now()
 
-    def load(self):
+    def load(self, needs_unloading=False):
         self.is_loaded = True
+        self.needs_unloading = needs_unloading
         self.last_updated_at = datetime.now()
 
     def start_run(self):

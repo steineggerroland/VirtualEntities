@@ -91,6 +91,17 @@ class MqttMediatorTest(unittest.TestCase):
         # then
         self.machine_service_mock.loaded.assert_called()
 
+    def test_loading_machine_needing_unload(self):
+        # given
+        msg = Mock(topic="load/topic", payload=str(True))
+        mqtt_mediator = MqttMachineMediator(self.machine_service_mock, self.sources_mock, self.destinations_mock,
+                                            self.mqtt_client_mock)
+        self.machine_service_mock.loaded = Mock()
+        # when
+        mqtt_mediator.load_machine(msg)
+        # then
+        self.machine_service_mock.loaded.assert_called_with(needs_unloading=True)
+
     def test_unloading_machine(self):
         # given
         msg = Mock(topic="unload/topic", payload=None)

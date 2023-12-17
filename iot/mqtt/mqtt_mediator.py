@@ -38,10 +38,10 @@ class MqttMediator:
             except Exception as e:
                 self.logger.error("Failed to send update to '%s'", planned_notification.mqtt_topic, exc_info=e)
 
-    def _read_value_from_message(self, msg, json_path=None):
+    def _read_value_from_message(self, msg, json_path=None, value_type=float):
         payload = msg.payload
         if not json_path:
-            return float(payload)
+            return value_type(payload)
         try:
             matching_json_values = JSONPath(json_path).parse(json.loads(payload))
         except TypeError:
