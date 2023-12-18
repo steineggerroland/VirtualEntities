@@ -28,6 +28,18 @@ things:
         path: $.update.temperature
   - name: Bathroom
     type: room
+    temperature_thresholds:
+      optimal:
+        lower: 20
+        upper: 22
+      critical_lower: 15
+      critical_upper: 30
+    humidity_thresholds:
+      optimal:
+        lower: 65
+        upper: 75
+      critical_lower: 50
+      critical_upper: 90
     sources:
       - topic: bath/sensor/temperature
         measures:
