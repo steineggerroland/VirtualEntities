@@ -1,5 +1,6 @@
 import logging
 import sys
+from pathlib import Path
 from time import sleep
 
 from iot.core.configuration import load_configuration
@@ -20,7 +21,7 @@ def run():
     logger.debug("Starting")
     config = load_configuration(CONFIG_FILE_NAME)
     logger.debug("Configuration loaded")
-    storage = Storage(DB_JSON_FILE, [thing.name for thing in config.things])
+    storage = Storage(Path(DB_JSON_FILE), [thing.name for thing in config.things], config.time_series)
     logger.debug("Storage loaded")
     client = MqttClient(config.mqtt)
     logger.debug("Mqtt client loaded")
@@ -52,6 +53,8 @@ def run():
     except (KeyboardInterrupt, SystemExit):
         logger.info("Shutting down.")
     finally:
+        for mqtt_mediator in mqtt_mediators:
+            mqtt_mediator.shutdown()
         storage.shutdown()
         client.stop()
 
@@ -59,5 +62,5 @@ def run():
 if __name__ == '__main__':
     logging.basicConfig(filename='data/default.log', encoding='utf-8',
                         level=logging.DEBUG if sys.flags.debug else logging.INFO,
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+                        format='%(asctime)s - %(name)s(%(lineno)s) - %(levelname)s - %(message)s')
     run()

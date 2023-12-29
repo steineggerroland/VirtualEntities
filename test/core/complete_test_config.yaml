@@ -4,6 +4,12 @@ mqtt:
   username: user
   password: my-secret
   clientId: my-client
+time_series:
+  url: influxdb.url
+  username: influxdb
+  password: secret
+  org: my_org
+  bucket_name: bucket_to_save_to
 things:
   - name: super_thing
     type: dryer

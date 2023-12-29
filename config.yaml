@@ -4,6 +4,11 @@ mqtt:
   username: ${MQTT_USERNAME:-admin}
   password: ${MQTT_PASSWORD:-secret}
   clientId: ${MQTT_CLIENT_ID:-client-id}
+time_series:
+  url: ${INFLUXDB_URL:-localhost}
+  username: ${INFLUXDB_USERNAME:-user}
+  password: ${INFLUXDB_PASSWORD:-password}
+  bucket_name: ${INFLUXDB_BUCKET_NAME:-power-consumptions}
 things:
   - name: ${THING_NAME:-washing_machine}
     type: ${THING_TYPE:-washing_machine}

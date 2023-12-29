@@ -14,12 +14,17 @@ class MqttMediator:
     def __init__(self, mqtt_client):
         self.mqtt_client = mqtt_client
         self.logger = logging.getLogger(self.__class__.__qualname__)
-        self.scheduled_update_threads = []
+        self.scheduled_update_threads: [Thread] = []
 
     def start(self):
         for thread in self.scheduled_update_threads:
             if not thread.is_alive():
                 thread.start()
+
+    def shutdown(self, timeout=2):
+        for thread in self.scheduled_update_threads:
+            if not thread.is_alive():
+                thread.join(timeout)
 
     def handle_destinations(self, destinations: Destinations, get_dict_callback):
         for planned_notification in destinations.planned_notifications if destinations else []:

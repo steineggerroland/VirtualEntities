@@ -1,0 +1,11 @@
+mqtt:
+  url: mqtt.local
+time_series:
+  url: ts.lan
+things:
+  - name: super_washer
+    type: washing_machine
+    sources:
+      consumption:
+        # the Watt consumption is considered to be a floating point number
+        topic: washer/consumption/topic

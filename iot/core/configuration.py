@@ -2,21 +2,20 @@ import yamlenv
 
 
 class IncompleteConfiguration(Exception):
-    def __init__(self, msg):
+    def __init__(self, msg: str):
         super().__init__(msg)
 
 
-class Configuration:
-    def __init__(self, mqtt, things):
-        self.mqtt = mqtt
-        self.things = things
-
-    def __str__(self):
-        return f"{self.mqtt}, {self.things}"
+class TimeSeriesConfig:
+    def __init__(self, url: str, username: str, password: str, bucket_name: str):
+        self.url = url
+        self.username = username
+        self.password = password
+        self.bucket_name = bucket_name
 
 
 class MqttConfiguration:
-    def __init__(self, url, client_id, port=1883, credentials=None):
+    def __init__(self, url: str, client_id: str, port: int = 1883, credentials: str | None = None):
         self.url = url
         self.port = port if port is not None else 1883
         if credentials is not None:
@@ -102,6 +101,16 @@ class IotThingConfig:
 
     def __str__(self):
         return f"{self.name} ({self.type}, {self.sources}, {self.destinations})"
+
+
+class Configuration:
+    def __init__(self, mqtt: MqttConfiguration, things: [IotThingConfig], time_series: TimeSeriesConfig | None):
+        self.mqtt = mqtt
+        self.things = things
+        self.time_series = time_series
+
+    def __str__(self):
+        return f"{self.mqtt}, {self.things}, {self.time_series}"
 
 
 def load_configuration(config_path):
@@ -200,9 +209,16 @@ def _read_things(conf_dict):
     return [_read_thing(thing_config) for thing_config in conf_dict['things']]
 
 
+def _read_time_series_config(time_series_config):
+    _verify_keys(time_series_config, ['url', 'username', 'password', 'org', 'bucket_name'], 'time_series')
+    return TimeSeriesConfig(time_series_config['url'], time_series_config['username'], time_series_config['password'],
+                            time_series_config['bucket_name'])
+
+
 def _read_configuration(conf_dict):
     return Configuration(_read_mqtt_configuration(conf_dict),
-                         _read_things(conf_dict))
+                         _read_things(conf_dict),
+                         _read_time_series_config(conf_dict['time_series']) if 'time_series' in conf_dict else None)
 
 
 def _verify_keys(yaml_dict, keys, prefix=None):

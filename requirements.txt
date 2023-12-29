@@ -4,3 +4,4 @@ yamlenv==0.7.1
 paho-mqtt~=1.6.1
 waiting~=1.4.1
 jsonpath-python~=1.0.6
+influxdb~=5.3.1
