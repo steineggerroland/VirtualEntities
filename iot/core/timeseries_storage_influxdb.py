@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 from influxdb import InfluxDBClient
+from influxdb.exceptions import InfluxDBClientError
 
 from iot.core.configuration import TimeSeriesConfig
 from iot.core.time_series_storage import TimeSeriesStorage
@@ -34,7 +35,11 @@ class InfluxDbTimeSeriesStorage(TimeSeriesStorage):
     def append_power_consumption(self, watt: float, thing_name):
         point = {"measurement": POWER_CONSUMPTION_SERIES, "tags": {THING_NAME_TAG: thing_name},
                  "fields": {CONSUMPTION_FIELD: watt}}
-        self.influxdb.write_points([point])
+        try:
+            self.influxdb.write_points([point])
+        except InfluxDBClientError as e:
+            self.logger.error("Failed to write power consumption (%sW) for thing (%s) to influx db",
+                              watt, thing_name, exc_info=e)
 
     def get_power_consumptions_for_last_seconds(self, seconds: int, thing_name) -> [ConsumptionMeasurement]:
         rs = self.influxdb.query(f"SELECT * FROM {POWER_CONSUMPTION_SERIES} WHERE time >= now() - {seconds}s")
@@ -48,4 +53,8 @@ class InfluxDbTimeSeriesStorage(TimeSeriesStorage):
     def append_room_climate(self, temperature: Temperature, humidity: float, thing_name):
         point = {"measurement": INDOOR_CLIMATE_SERIES, "tags": {THING_NAME_TAG: thing_name},
                  "fields": {TEMPERATURE_FIELD: temperature.value, HUMIDITY_FIELD: humidity}}
-        self.influxdb.write_points([point])
+        try:
+            self.influxdb.write_points([point])
+        except InfluxDBClientError as e:
+            self.logger.error("Failed to write room climate (%s°C, %s%) for thing (%s) to influx db",
+                              temperature, humidity, thing_name, exc_info=e)
