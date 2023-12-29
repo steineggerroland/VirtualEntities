@@ -59,7 +59,7 @@ class MachineService:
         if self.thing.power_state is PowerState.RUNNING:
             return False
         power_consumptions = self.storage.get_power_consumptions_for_last_seconds(150, self.thing.name)
-        if any(power_consumption['watt'] > 10 for power_consumption in power_consumptions):
+        if any(power_consumption.consumption > 10 for power_consumption in power_consumptions):
             return False
         return True
 

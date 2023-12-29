@@ -17,6 +17,11 @@ class ConfigurationTest(unittest.TestCase):
         self.assertEqual("my-secret", config.mqtt.password)
         self.assertEqual("my-client", config.mqtt.client_id)
 
+        self.assertEqual("influxdb.url", config.time_series.url)
+        self.assertEqual("influxdb", config.time_series.username)
+        self.assertEqual("secret", config.time_series.password)
+        self.assertEqual("bucket_to_save_to", config.time_series.bucket_name)
+
         self.assertEqual("super_thing", config.things[0].name)
         self.assertEqual("dryer", config.things[0].type)
         self.assertIn(Source('consumption/topic', [Measure(source_type='consumption')]), config.things[0].sources.list)
@@ -76,6 +81,8 @@ class ConfigurationTest(unittest.TestCase):
                           configuration.load_configuration, (DIR / "incomplete_mqtt_config.yaml"))
         self.assertRaises(IncompleteConfiguration,
                           configuration.load_configuration, (DIR / "incomplete_thing_config.yaml"))
+        self.assertRaises(IncompleteConfiguration,
+                          configuration.load_configuration, (DIR / "incomplete_influxdb_config.yaml"))
 
 
 if __name__ == '__main__':
