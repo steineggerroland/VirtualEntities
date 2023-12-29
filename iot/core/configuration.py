@@ -210,7 +210,7 @@ def _read_things(conf_dict):
 
 
 def _read_time_series_config(time_series_config):
-    _verify_keys(time_series_config, ['url', 'username', 'password', 'org', 'bucket_name'], 'time_series')
+    _verify_keys(time_series_config, ['url', 'username', 'password', 'bucket_name'], 'time_series')
     return TimeSeriesConfig(time_series_config['url'], time_series_config['username'], time_series_config['password'],
                             time_series_config['bucket_name'])
 
