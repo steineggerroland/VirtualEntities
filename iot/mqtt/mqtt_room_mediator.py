@@ -1,4 +1,5 @@
 from iot.core.configuration import IotThingConfig, Measure
+from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.room_service import RoomService
 from iot.infrastructure.units import Temperature
 from iot.mqtt.mqtt_client import MqttClient
@@ -15,19 +16,31 @@ class MqttRoomMediator(MqttMediator):
         self.handle_destinations(thing_config.destinations, lambda: self.room_service.room.to_dict())
 
     def temperature_update(self, msg, json_path=None):
-        raw_temperature = self._read_value_from_message(msg, json_path, float)
-        if raw_temperature:
-            self.room_service.update_temperature(Temperature(raw_temperature))
+        try:
+            raw_temperature = self._read_value_from_message(msg, json_path, float)
+            if raw_temperature:
+                self.room_service.update_temperature(Temperature(raw_temperature))
+        except DatabaseException as e:
+            self.logger.error("Failed to save room's '%s' temperature because of database error '%s'",
+                              self.room_service.room.name, e, exc_info=True)
 
     def humidity_update(self, msg, json_path=None):
-        raw_humidity = self._read_value_from_message(msg, json_path, float)
-        if raw_humidity:
-            self.room_service.update_humidity(raw_humidity)
+        try:
+            raw_humidity = self._read_value_from_message(msg, json_path, float)
+            if raw_humidity:
+                self.room_service.update_humidity(raw_humidity)
+        except DatabaseException as e:
+            self.logger.error("Failed to save room's '%s' humidity because of database error '%s'",
+                              self.room_service.room.name, e, exc_info=True)
 
     def update_room_climate(self, msg, temperature_json_path=None, humidity_json_path=None):
-        self.room_service.update_room_climate(
-            Temperature(self._read_value_from_message(msg, temperature_json_path, float)),
-            self._read_value_from_message(msg, humidity_json_path, float))
+        try:
+            self.room_service.update_room_climate(
+                Temperature(self._read_value_from_message(msg, temperature_json_path, float)),
+                self._read_value_from_message(msg, humidity_json_path, float))
+        except DatabaseException as e:
+            self.logger.error("Failed to save room's '%s' climate because of database error '%s'",
+                              self.room_service.room.name, e, exc_info=True)
 
     def _handle_message(self, msg, measures: [Measure]):
         unhandled_measures = list(measures)
