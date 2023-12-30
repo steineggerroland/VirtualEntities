@@ -1,5 +1,8 @@
+from datetime import datetime
+
+
 class ConsumptionMeasurement:
-    def __init__(self, time, consumption):
+    def __init__(self, time: datetime, consumption: float):
         self.time = time
         self.consumption = consumption
 
@@ -8,7 +11,7 @@ class ConsumptionMeasurement:
 
 
 class TemperatureHumidityMeasurement:
-    def __init__(self, time, temperature, humidity):
+    def __init__(self, time: datetime, temperature: float, humidity: float):
         self.time = time
         self.temperature = temperature
         self.humidity = humidity
