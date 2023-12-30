@@ -27,7 +27,8 @@ class MqttMachineMediator(MqttMediator):
             self.machine_service.update_power_consumption(consumption)
             self.logger.debug("Updated power consumption '%s'", consumption)
         except DatabaseException as e:
-            self.logger.error("Failed update power consumption '%s' because of database error.", msg.topic, exc_info=e)
+            self.logger.error("Failed to update machine's %s power consumption because of database error '%s'",
+                              self.machine_service.thing.name, e, exc_info=True)
 
     def load_machine(self, msg):
         try:
@@ -35,11 +36,13 @@ class MqttMachineMediator(MqttMediator):
             self.machine_service.loaded(needs_unloading=needs_unloading)
             self.logger.debug("Set machine loaded.")
         except DatabaseException as e:
-            self.logger.error("Failed set machine loaded because of database error.", msg.topic, exc_info=e)
+            self.logger.error("Failed set machine %s loaded because of database error '%s'",
+                              self.machine_service.thing.name, e, exc_info=True)
 
     def unload_machine(self, msg):
         try:
             self.machine_service.unloaded()
             self.logger.debug("Set machine unloaded.")
         except DatabaseException as e:
-            self.logger.error("Failed set machine unloaded because of database error.", msg.topic, exc_info=e)
+            self.logger.error("Failed set machine %s unloaded because of database error '%s'",
+                              self.machine_service.thing.name, e, exc_info=True)
