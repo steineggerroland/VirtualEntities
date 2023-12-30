@@ -38,8 +38,8 @@ class InfluxDbTimeSeriesStorage(TimeSeriesStorage):
         try:
             self.influxdb.write_points([point])
         except InfluxDBClientError as e:
-            self.logger.error("Failed to write power consumption (%sW) for thing (%s) to influx db",
-                              watt, thing_name, exc_info=e)
+            self.logger.error("Failed to write power consumption (%sW) for thing (%s) to influx db: %s",
+                              watt, thing_name, e, exc_info=True)
 
     def get_power_consumptions_for_last_seconds(self, seconds: int, thing_name) -> [ConsumptionMeasurement]:
         rs = self.influxdb.query(f"SELECT * FROM {POWER_CONSUMPTION_SERIES} WHERE time >= now() - {seconds}s")
@@ -56,5 +56,5 @@ class InfluxDbTimeSeriesStorage(TimeSeriesStorage):
         try:
             self.influxdb.write_points([point])
         except InfluxDBClientError as e:
-            self.logger.error("Failed to write room climate (%s°C, %s%) for thing (%s) to influx db",
-                              temperature, humidity, thing_name, exc_info=e)
+            self.logger.error("Failed to write room climate (%s°C, %s%) for thing (%s) to influx db: %s",
+                              temperature, humidity, thing_name, e, exc_info=True)
