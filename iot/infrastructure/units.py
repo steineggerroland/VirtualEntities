@@ -15,6 +15,12 @@ class Temperature:
             return False
         return self.value == other.value and self.unit == other.unit
 
+    def __str__(self):
+        if self.unit == TemperatureUnit.DEGREE_CELSIUS:
+            return f"{self.value}°C"
+        else:
+            return f"{self.value} {self.unit}"
+
     def to_dict(self):
         return {"value": self.value, "unit": self.unit}
 
@@ -32,6 +38,9 @@ class Range:
         if not isinstance(other, Range):
             return False
         return self.lower_value == other.lower_value and self.upper_value == other.upper_value
+
+    def __str__(self):
+        return f"({self.lower_value}:{self.upper_value})"
 
 
 class TemperatureRating(str, Enum):
@@ -52,7 +61,12 @@ class TemperatureThresholds:
     def __eq__(self, other):
         if not isinstance(other, TemperatureThresholds):
             return False
-        return self.optimal == other.optimal and self.frostiness_threshold == other.frostiness_threshold and self.heat_threshold == other.heat_threshold
+        return self.optimal == other.optimal and self.frostiness_threshold == other.frostiness_threshold and \
+               self.heat_threshold == other.heat_threshold
+
+    def __str__(self):
+        return f"Temperature threshold with optimum at {self.optimal}, frostiness below {self.frostiness_threshold} " \
+               f"and heat above {self.heat_threshold}"
 
     def to_dict(self) -> dict:
         return {"optimal_lower": self.optimal.lower_value, "optimal_upper": self.optimal.upper_value,
@@ -86,6 +100,10 @@ class HumidityThresholds:
         if not isinstance(other, HumidityThresholds):
             return False
         return self.optimal == other.optimal and self.drought_threshold == other.drought_threshold and self.wetness_threshold == other.wetness_threshold
+
+    def __str__(self):
+        return f"Humidity threshold with optimum at {self.optimal}, drought below {self.drought_threshold} " \
+               f"and wetness above {self.wetness_threshold}"
 
     def to_dict(self) -> dict:
         return {"optimal_lower": self.optimal.lower_value, "optimal_upper": self.optimal.upper_value,
