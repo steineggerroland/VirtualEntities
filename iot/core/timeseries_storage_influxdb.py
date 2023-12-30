@@ -35,7 +35,7 @@ class InfluxDbTimeSeriesStorage(TimeSeriesStorage):
 
     def append_power_consumption(self, watt: float, thing_name):
         point = {"measurement": POWER_CONSUMPTION_SERIES, "tags": {THING_NAME_TAG: thing_name},
-                 "fields": {CONSUMPTION_FIELD: watt}}
+                 "fields": {CONSUMPTION_FIELD: float(watt)}}
         try:
             self.influxdb.write_points([point])
         except InfluxDBClientError as e:
@@ -55,7 +55,7 @@ class InfluxDbTimeSeriesStorage(TimeSeriesStorage):
 
     def append_room_climate(self, temperature: Temperature, humidity: float, thing_name):
         point = {"measurement": INDOOR_CLIMATE_SERIES, "tags": {THING_NAME_TAG: thing_name},
-                 "fields": {TEMPERATURE_FIELD: temperature.value, HUMIDITY_FIELD: humidity}}
+                 "fields": {TEMPERATURE_FIELD: float(temperature.value), HUMIDITY_FIELD: float(humidity)}}
         try:
             self.influxdb.write_points([point])
         except InfluxDBClientError as e:
