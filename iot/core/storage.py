@@ -5,6 +5,7 @@ from threading import Thread
 
 from iot.core.timeseries_storage_in_memory import InMemoryTimeSeriesStorage
 from iot.core.timeseries_storage_influxdb import InfluxDbTimeSeriesStorage
+from iot.core.timeseries_types import ConsumptionMeasurement
 from iot.infrastructure.thing import Thing
 from iot.infrastructure.units import Temperature
 
@@ -60,7 +61,7 @@ class Storage:
     def append_power_consumption(self, watt: float, thing_name: str):
         self.time_series_storage.append_power_consumption(watt, thing_name)
 
-    def get_power_consumptions_for_last_seconds(self, seconds: int, thing_name: str):
+    def get_power_consumptions_for_last_seconds(self, seconds: int, thing_name: str) -> [ConsumptionMeasurement]:
         return self.time_series_storage.get_power_consumptions_for_last_seconds(seconds, thing_name)
 
     def append_room_climate(self, temperature: Temperature, humidity: float, thing_name):
