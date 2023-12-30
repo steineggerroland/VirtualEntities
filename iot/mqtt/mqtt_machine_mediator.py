@@ -39,7 +39,7 @@ class MqttMachineMediator(MqttMediator):
             self.logger.error("Failed set machine %s loaded because of database error '%s'",
                               self.machine_service.thing.name, e, exc_info=True)
 
-    def unload_machine(self, msg):
+    def unload_machine(self):
         try:
             self.machine_service.unloaded()
             self.logger.debug("Set machine unloaded.")

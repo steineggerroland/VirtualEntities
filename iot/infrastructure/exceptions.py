@@ -2,7 +2,7 @@ from iot.core.configuration import IotThingConfig
 
 
 class DatabaseException(Exception):
-    def __init__(self, msg: str, cause: Exception | None = None):
+    def __init__(self, msg: str | None = None, cause: Exception | None = None):
         self.msg = msg
         self.cause = cause
 
