@@ -59,7 +59,7 @@ class InfluxDbTimeSeriesStorage(TimeSeriesStorage):
         try:
             self.influxdb.write_points([point])
         except InfluxDBClientError as e:
-            self.logger.debug("Failed to write room climate (%s°C, %s%) for thing (%s) to influx db: %s",
+            self.logger.debug("Failed to write room climate (%s, %s%) for thing (%s) to influx db: %s",
                               temperature, humidity, thing_name, e, exc_info=True)
-            raise DatabaseException("Failed to write room climate (%s°C, %d%%) for thing '%s' to influx db: %s" %
+            raise DatabaseException("Failed to write room climate (%s, %d%%) for thing '%s' to influx db: %s" %
                                     (temperature, humidity, thing_name, e), e) from e
