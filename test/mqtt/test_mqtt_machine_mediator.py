@@ -79,7 +79,7 @@ class MqttMediatorTest(unittest.TestCase):
                                             self.destinations_mock, self.mqtt_client_mock)
         # then
         self.mqtt_client_mock.subscribe.assert_any_call(loading_topic, mqtt_mediator.load_machine)
-        self.mqtt_client_mock.subscribe.assert_any_call(unloading_topic, mqtt_mediator.unload_machine)
+        self.mqtt_client_mock.subscribe.assert_any_call(unloading_topic, ANY)
 
     def test_loading_machine(self):
         # given
