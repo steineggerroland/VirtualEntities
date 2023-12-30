@@ -5,6 +5,7 @@ from unittest.mock import Mock, ANY, patch, call
 from waiting import wait
 
 from iot.core.configuration import IotThingConfig, Sources, Source, Destinations, PlannedNotification, Measure
+from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.room_service import RoomService
 from iot.infrastructure.units import Temperature
 from iot.mqtt.mqtt_client import MqttClient
@@ -114,6 +115,19 @@ class TemperatureTest(unittest.TestCase):
         wait(lambda: sum(publish_args == call("some/topic", ANY) for publish_args in
                          self.mqtt_client_mock.publish.call_args_list) >= 2, timeout_seconds=1,
              waiting_for="mqtt.publish called several times")
+
+    def test_handles_database_exceptions_without_breaking(self):
+        mqtt_mediator = MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, IotThingConfig())
+
+        self.room_service_mock.update_temperature = Mock(side_effect=DatabaseException)
+        mqtt_mediator.temperature_update(Mock(topic="temperature/topic", payload='23.1'))
+
+        self.room_service_mock.update_humidity = Mock(side_effect=DatabaseException)
+        mqtt_mediator.humidity_update(Mock(topic="humidity/topic", payload='45'))
+
+        self.room_service_mock.update_room_climate = Mock(side_effect=DatabaseException)
+        mqtt_mediator.update_room_climate(Mock(topic="climat/topic", payload='{"temperature": 12.1, "humidity": 44}'),
+                                          "$.temperature", "$.humidity")
 
 
 if __name__ == '__main__':

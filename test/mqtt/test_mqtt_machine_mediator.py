@@ -5,6 +5,7 @@ from unittest.mock import patch, Mock, call, ANY
 from waiting import wait
 
 from iot.core.configuration import PlannedNotification, Destinations, Sources, Source, Measure
+from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.machine.machine_service import MachineService
 from iot.mqtt.mqtt_client import MqttClient
 from iot.mqtt.mqtt_machine_mediator import MqttMachineMediator
@@ -104,14 +105,26 @@ class MqttMediatorTest(unittest.TestCase):
 
     def test_unloading_machine(self):
         # given
-        msg = Mock(topic="unload/topic", payload=None)
         mqtt_mediator = MqttMachineMediator(self.machine_service_mock, self.sources_mock, self.destinations_mock,
                                             self.mqtt_client_mock)
         self.machine_service_mock.unloaded = Mock()
         # when
-        mqtt_mediator.unload_machine(msg)
+        mqtt_mediator.unload_machine()
         # then
         self.machine_service_mock.unloaded.assert_called()
+
+    def test_handles_database_exceptions_without_breaking(self):
+        mqtt_mediator = MqttMachineMediator(self.machine_service_mock, self.sources_mock, self.destinations_mock,
+                                            self.mqtt_client_mock)
+
+        self.machine_service_mock.unloaded = Mock(side_effect=DatabaseException)
+        mqtt_mediator.unload_machine()
+
+        self.machine_service_mock.loaded = Mock(side_effect=DatabaseException)
+        mqtt_mediator.load_machine(Mock(topic="load/topic", payload=str(True)))
+
+        self.machine_service_mock.update_power_consumption = Mock(side_effect=DatabaseException)
+        mqtt_mediator.power_consumption_update(Mock(topic="some/topic", payload=str(45.0)))
 
 
 if __name__ == '__main__':
