@@ -7,6 +7,7 @@ from influxdb.exceptions import InfluxDBClientError
 from iot.core.configuration import TimeSeriesConfig
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.core.timeseries_types import ConsumptionMeasurement
+from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.units import Temperature
 
 CONSUMPTION_FIELD = "consumption"
@@ -38,8 +39,10 @@ class InfluxDbTimeSeriesStorage(TimeSeriesStorage):
         try:
             self.influxdb.write_points([point])
         except InfluxDBClientError as e:
-            self.logger.error("Failed to write power consumption (%sW) for thing (%s) to influx db: %s",
+            self.logger.debug("Failed to write power consumption (%sW) for thing (%s) to influx db: %s",
                               watt, thing_name, e, exc_info=True)
+            raise DatabaseException("Failed to write power consumption (%sW) for thing (%s) to influx db: %s" %
+                                    (watt, thing_name, e), e) from e
 
     def get_power_consumptions_for_last_seconds(self, seconds: int, thing_name) -> [ConsumptionMeasurement]:
         rs = self.influxdb.query(f"SELECT * FROM {POWER_CONSUMPTION_SERIES} WHERE time >= now() - {seconds}s")
@@ -56,5 +59,7 @@ class InfluxDbTimeSeriesStorage(TimeSeriesStorage):
         try:
             self.influxdb.write_points([point])
         except InfluxDBClientError as e:
-            self.logger.error("Failed to write room climate (%s°C, %s%) for thing (%s) to influx db: %s",
+            self.logger.debug("Failed to write room climate (%s°C, %s%) for thing (%s) to influx db: %s",
                               temperature, humidity, thing_name, e, exc_info=True)
+            raise DatabaseException("Failed to write room climate (%s°C, %d%%) for thing '%s' to influx db: %s" %
+                                    (temperature, humidity, thing_name, e), e) from e

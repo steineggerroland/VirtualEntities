@@ -1,8 +1,8 @@
 from iot.core.configuration import IotThingConfig
 from iot.core.storage import Storage
+from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.room import Room
 from iot.infrastructure.room import from_dict as r_from_dict
-from iot.infrastructure.services import DatabaseException
 from iot.infrastructure.units import TemperatureThresholds, Range, HumidityThresholds, Temperature
 
 
@@ -35,12 +35,9 @@ class RoomService:
             raise DatabaseException('Failed to save updated humidity.', e) from e
 
     def update_room_climate(self, temperature: Temperature, humidity: float):
-        try:
-            self.update_temperature(temperature)
-            self.update_humidity(humidity)
-            self.storage.append_room_climate(temperature, humidity, self.room.name)
-        except DatabaseException as e:
-            raise DatabaseException('Failed to save room climate.', e) from e
+        self.update_temperature(temperature)
+        self.update_humidity(humidity)
+        self.storage.append_room_climate(temperature, humidity, self.room.name)
 
 
 def supports_thing_type(thing_type) -> bool:
