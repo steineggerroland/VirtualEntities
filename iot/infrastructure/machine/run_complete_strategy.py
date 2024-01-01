@@ -17,6 +17,7 @@ class SimpleHistoryRunCompleteStrategy:
             return False
         measures = self.storage.get_power_consumptions_for_last_seconds(self.duration_to_be_below_threshold, thing.name)
         if any(measure.consumption > self.power_consumption_threshold for measure in measures):
-            self.logger.info("Run is complete based on history: {}", measures)
+            self.logger.debug("Thing '%s' is still running based on history: %s", thing.name, measures)
             return False
+        self.logger.debug("Run of thing '%s' is complete based on history: %s", thing.name, measures)
         return True
