@@ -8,5 +8,6 @@
   "is_loaded": true,
   "needs_unloading": false,
   "started_run_at": "2024-01-02T01:01:01.111111",
+  "running_state": "running",
   "finished_last_run_at": "2023-12-31T23:59:02.133742"
 }

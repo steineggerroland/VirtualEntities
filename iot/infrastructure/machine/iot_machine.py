@@ -6,12 +6,14 @@ from iot.infrastructure.thing import Thing
 
 class IotMachine(Thing):
     def __init__(self, name, watt: float | None = None, last_updated_at: datetime = datetime.now(),
-                 online_delta_in_seconds=300, last_seen_at: None | datetime = None):
+                 online_delta_in_seconds=300, started_last_run_at=None, finished_last_run_at=None,
+                 last_seen_at: None | datetime = None):
         super().__init__(name, last_updated_at, last_seen_at, online_delta_in_seconds)
         self.watt = watt
         self.power_state = PowerState.UNKNOWN
         self._power_state_decoration = SimplePowerStateDecorator(self)
-        self.started_run_at: datetime | None = None
+        self.started_run_at: datetime | None = started_last_run_at
+        self.finished_last_run_at: datetime | None = finished_last_run_at
 
     def update_power_consumption(self, watt):
         self._power_state_decoration.update_power_consumption(watt)
@@ -20,10 +22,15 @@ class IotMachine(Thing):
         self.last_seen_at = now
 
     def start_run(self):
-        pass
+        now = datetime.now()
+        self.started_run_at = now
+        self.last_updated_at = now
 
     def finish_run(self):
-        pass
+        self.started_run_at = None
+        now = datetime.now()
+        self.finished_last_run_at = now
+        self.last_updated_at = now
 
     def to_dict(self):
         return {"name": self.name, "watt": self.watt, "power_state": self.power_state,
