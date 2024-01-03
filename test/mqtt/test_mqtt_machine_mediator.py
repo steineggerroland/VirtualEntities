@@ -1,14 +1,29 @@
+import json
 import unittest
 from datetime import datetime, timedelta
+from pathlib import Path
 from unittest.mock import patch, Mock, call, ANY
 
 from waiting import wait
 
 from iot.core.configuration import PlannedNotification, Destinations, Sources, Source, Measure
 from iot.infrastructure.exceptions import DatabaseException
+from iot.infrastructure.machine.dryer import Dryer
 from iot.infrastructure.machine.machine_service import MachineService
+from iot.infrastructure.machine.power_state_decorator import PowerState
+from iot.infrastructure.thing import OnlineStatus
 from iot.mqtt.mqtt_client import MqttClient
 from iot.mqtt.mqtt_machine_mediator import MqttMachineMediator
+
+DIR = Path(__file__).parent
+
+
+def _set_up_croniter(responses: [datetime]):
+    patcher = patch('iot.mqtt.mqtt_mediator.croniter')
+    croniter_mock = patcher.start()
+    croniter = Mock()
+    croniter.get_next = Mock(side_effect=responses)
+    croniter_mock.return_value = croniter
 
 
 class MqttMediatorTest(unittest.TestCase):
@@ -25,23 +40,44 @@ class MqttMediatorTest(unittest.TestCase):
         self.destinations_mock: Mock | Destinations = destinations_mock
         self.mqtt_client_mock: Mock | MqttClient = mqtt_client_mock
 
-    def test_updates_when_specified_by_cron(self):
+    def test_publishing_updates_when_specified_by_cron(self):
         # given
         destinations = Destinations(list([PlannedNotification("some/topic", "* * * * * *")]))
         mqtt_mediator = MqttMachineMediator(self.machine_service_mock, self.sources_mock, destinations,
                                             self.mqtt_client_mock)
-        # cron is replaced to announce two immediate responses and one in a week
-        patcher = patch('iot.mqtt.mqtt_mediator.croniter')
-        croniter_mock = patcher.start()
-        croniter = Mock()
-        croniter.get_next = Mock(side_effect=[datetime.now(), datetime.now(), datetime.now() + timedelta(weeks=1)])
-        croniter_mock.return_value = croniter
+        _set_up_croniter(responses=[datetime.now(), datetime.now(), datetime.now() + timedelta(weeks=1)])
         # when
         mqtt_mediator.start()
         # then
         wait(lambda: sum(publish_args == call("some/topic", ANY) for publish_args in
                          self.mqtt_client_mock.publish.call_args_list) >= 2, timeout_seconds=1,
              waiting_for="mqtt.publish called several times")
+
+    def test_update_format_when_publishing(self):
+        # given
+        destinations = Destinations(list([PlannedNotification("some/topic", "* * * * * *")]))
+        mqtt_mediator = MqttMachineMediator(self.machine_service_mock, self.sources_mock, destinations,
+                                            self.mqtt_client_mock)
+        self._set_up_thing_matching_json_file()
+        _set_up_croniter(responses=[datetime.now(), datetime.now() + timedelta(weeks=1)])
+        # when
+        mqtt_mediator.start()
+        # then
+        expected_json = json.loads(Path.open(DIR / "machine-update.json").read())
+        # enums have to be converted
+        expected_json['online_status'] = OnlineStatus(expected_json['online_status'])
+        expected_json['power_state'] = PowerState(expected_json['power_state'])
+        wait(lambda: sum(publish_args == call(ANY, ANY) for publish_args in
+                         self.mqtt_client_mock.publish.call_args_list) >= 1, timeout_seconds=1,
+             waiting_for="mqtt.publish called several times")
+        self.assertDictEqual(expected_json, self.mqtt_client_mock.publish.call_args_list[0].args[1])
+
+    def _set_up_thing_matching_json_file(self):
+        # matches the values of the json file
+        self.machine_service_mock.thing = Dryer("dryer", 2400.121, datetime.fromisoformat("2024-01-02T03:04:05.678910"),
+                                                False, True, datetime.fromisoformat("2024-01-02T01:01:01.111111"),
+                                                datetime.fromisoformat("2023-12-31T23:59:02.133742"),
+                                                datetime.fromisoformat("2024-01-02T03:04:05.678910"))
 
     def test_subscribes_for_consumption_on_start(self):
         # given
