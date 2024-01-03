@@ -10,6 +10,7 @@ from iot.core.configuration import PlannedNotification, Destinations, Sources, S
 from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.machine.dryer import Dryer
 from iot.infrastructure.machine.machine_service import MachineService
+from iot.infrastructure.machine.machine_that_can_be_loaded import RunningState
 from iot.infrastructure.machine.power_state_decorator import PowerState
 from iot.infrastructure.thing import OnlineStatus
 from iot.mqtt.mqtt_client import MqttClient
@@ -67,15 +68,18 @@ class MqttMediatorTest(unittest.TestCase):
         # enums have to be converted
         expected_json['online_status'] = OnlineStatus(expected_json['online_status'])
         expected_json['power_state'] = PowerState(expected_json['power_state'])
+        expected_json['running_state'] = RunningState(expected_json['running_state'])
         wait(lambda: sum(publish_args == call(ANY, ANY) for publish_args in
                          self.mqtt_client_mock.publish.call_args_list) >= 1, timeout_seconds=1,
              waiting_for="mqtt.publish called several times")
+        self.maxDiff = None
         self.assertDictEqual(expected_json, self.mqtt_client_mock.publish.call_args_list[0].args[1])
 
     def _set_up_thing_matching_json_file(self):
         # matches the values of the json file
         self.machine_service_mock.thing = Dryer("dryer", 2400.121, datetime.fromisoformat("2024-01-02T03:04:05.678910"),
                                                 False, True, datetime.fromisoformat("2024-01-02T01:01:01.111111"),
+                                                RunningState.RUNNING,
                                                 datetime.fromisoformat("2023-12-31T23:59:02.133742"),
                                                 datetime.fromisoformat("2024-01-02T03:04:05.678910"))
 
