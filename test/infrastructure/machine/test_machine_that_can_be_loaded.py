@@ -32,6 +32,22 @@ class MachineThatCanBeLoadedTest(unittest.TestCase):
     def setUp(self):
         self.machine = MachineThatCanBeLoaded('my-power_state_machine', 0)
 
+    def test_sets_running_state_idle_when_off_after_updating_power_consumption(self):
+        # given
+        machine = MachineThatCanBeLoaded('unknown machine', running_state=RunningState.UNKNOWN)
+        # when
+        machine.update_power_consumption(0)
+        # then
+        self.assertEqual(RunningState.IDLE, machine.running_state)
+
+    def test_sets_running_state_run_when_running_after_updating_power_consumption(self):
+        # given
+        machine = MachineThatCanBeLoaded('unknown machine', running_state=RunningState.UNKNOWN)
+        # when
+        machine.update_power_consumption(2000)
+        # then
+        self.assertEqual(RunningState.RUNNING, machine.running_state)
+
     def test_sets_start_at_when_starting_run(self):
         # given
         self.machine.update_power_consumption(2000)
