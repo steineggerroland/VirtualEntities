@@ -2,6 +2,7 @@ from datetime import datetime
 from enum import Enum
 
 from iot.infrastructure.machine.iot_machine import IotMachine
+from iot.infrastructure.machine.power_state_decorator import PowerState
 
 
 class RunningState(str, Enum):
@@ -20,6 +21,13 @@ class MachineThatCanBeLoaded(IotMachine):
         self.needs_unloading = needs_unloading
         self.is_loaded = is_loaded or needs_unloading
         self.running_state = running_state if running_state else RunningState.UNKNOWN
+
+    def update_power_consumption(self, watt):
+        super().update_power_consumption(watt)
+        if self.running_state == RunningState.UNKNOWN and self.power_state == PowerState.OFF:
+            self.running_state = RunningState.IDLE
+        elif self.running_state == RunningState.UNKNOWN and self.power_state == PowerState.RUNNING:
+            self.running_state = RunningState.RUNNING
 
     def unload(self):
         self.needs_unloading = False
