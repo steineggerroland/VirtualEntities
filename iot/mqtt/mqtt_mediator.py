@@ -53,7 +53,7 @@ class MqttMediator:
             self.logger.error('Unsupported non-json message, msg %s' % payload)
             return
         if matching_json_values:
-            return matching_json_values[0]
+            return value_type(matching_json_values[0])
         else:
             self.logger.debug('Received message not matching json path, msg %s, path %s' % (payload, json_path))
             return
