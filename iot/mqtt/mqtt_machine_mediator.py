@@ -23,7 +23,7 @@ class MqttMachineMediator(MqttMediator):
 
     def power_consumption_update(self, msg, json_path=None):
         try:
-            consumption = self._read_value_from_message(msg, json_path)
+            consumption = self._read_value_from_message(msg, json_path, float)
             self.machine_service.update_power_consumption(consumption)
             self.logger.debug("Updated power consumption '%s'", consumption)
         except DatabaseException as e:
