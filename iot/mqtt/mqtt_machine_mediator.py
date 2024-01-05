@@ -12,9 +12,11 @@ class MqttMachineMediator(MqttMediator):
 
         for source in mqtt_sources.list:
             if source.measures[0].type == 'consumption':
-                mqtt_client.subscribe(source.topic,
-                                      lambda msg: self.power_consumption_update(msg, str(source.measures[0].path)
-                                      if source.measures[0].path else None))
+                if source.measures[0].path:
+                    json_path = str(source.measures[0].path)
+                    mqtt_client.subscribe(source.topic, lambda msg: self.power_consumption_update(msg, json_path))
+                else:
+                    mqtt_client.subscribe(source.topic, lambda msg: self.power_consumption_update(msg))
             if source.measures[0].type == 'loading':
                 mqtt_client.subscribe(source.topic, self.load_machine)
             if source.measures[0].type == 'unloading':
