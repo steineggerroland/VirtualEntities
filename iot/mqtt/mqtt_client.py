@@ -46,8 +46,11 @@ class MqttClient:
             try:
                 callback(msg)
             except DatabaseException as e:
-                self.logger.error("Failed to handle message '%s' by one subscriber because of database error.",
-                                  msg.topic, exc_info=e)
+                self.logger.error("Failed to handle message '%s' by one subscriber because of database error: %s",
+                                  msg.topic, e, exc_info=True)
+            except Exception as e:
+                self.logger.error("Failed to handle message '%s' by one subscriber with error: %s",
+                                  msg.topic, e, exc_info=True)
 
     def subscribe(self, topic: str, callback):
         self.subscriptions.setdefault(topic, [])
