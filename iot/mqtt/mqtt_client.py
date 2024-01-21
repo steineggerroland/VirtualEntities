@@ -58,20 +58,8 @@ class MqttClient:
         self.mqtt_client.subscribe(topic)
 
     def publish(self, topic: str, payload: str | dict = None):
-        msg = json.dumps(_del_none(payload)) if isinstance(payload, dict) else payload
+        msg = json.dumps(payload) if isinstance(payload, dict) else payload
         self.mqtt_client.publish(topic, payload=msg)
 
     def stop(self, timeout=5):
         self.loop_thread.join(timeout)
-
-
-def _del_none(d):
-    """
-    Deletes keys with the value ``None`` in the dictionary.
-    """
-    for key, value in list(d.items()):
-        if value is None:
-            del d[key]
-        elif isinstance(value, dict):
-            _del_none(value)
-    return d
