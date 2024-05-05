@@ -22,7 +22,7 @@ class Appointment:
 
 
 class Calendar(Thing):
-    def __init__(self, name: str, appointments: List[Appointment] = (), last_updated_at: datetime = datetime.now(),
+    def __init__(self, name: str, appointments: List[Appointment] = [], last_updated_at: datetime = datetime.now(),
                  last_seen_at: None | datetime = None):
         super().__init__(name, last_updated_at, last_seen_at, online_delta_in_seconds=60 * 30)
         self.appointments = appointments

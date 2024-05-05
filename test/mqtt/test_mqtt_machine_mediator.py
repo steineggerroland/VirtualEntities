@@ -6,7 +6,7 @@ from unittest.mock import patch, Mock, call, ANY
 
 from waiting import wait
 
-from iot.core.configuration import PlannedNotification, Destinations, Sources, Source, Measure
+from iot.core.configuration import PlannedNotification, Destinations, Sources, MqttMeasureSource, Measure
 from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.machine.dryer import Dryer
 from iot.infrastructure.machine.machine_service import MachineService
@@ -89,7 +89,7 @@ class MqttMediatorTest(unittest.TestCase):
         self.mqtt_client_mock.subscribe = Mock()
         # when
         MqttMachineMediator(self.machine_service_mock,
-                            Sources([Source(consumption_topic, [Measure(source_type='consumption')])]),
+                            Sources([MqttMeasureSource(consumption_topic, [Measure(source_type='consumption')])]),
                             self.destinations_mock,
                             self.mqtt_client_mock)
         # then
@@ -114,8 +114,8 @@ class MqttMediatorTest(unittest.TestCase):
         self.mqtt_client_mock.subscribe = Mock()
         # when
         mqtt_mediator = MqttMachineMediator(self.machine_service_mock,
-                                            Sources([Source(loading_topic, [Measure(source_type='loading')]),
-                                                     Source(unloading_topic, [Measure(source_type='unloading')])]),
+                                            Sources([MqttMeasureSource(loading_topic, [Measure(source_type='loading')]),
+                                                     MqttMeasureSource(unloading_topic, [Measure(source_type='unloading')])]),
                                             self.destinations_mock, self.mqtt_client_mock)
         # then
         self.mqtt_client_mock.subscribe.assert_any_call(loading_topic, mqtt_mediator.load_machine)
