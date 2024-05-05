@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 
 from iot.core import configuration
-from iot.core.configuration import PlannedNotification, IncompleteConfiguration, Source, Measure
+from iot.core.configuration import PlannedNotification, IncompleteConfiguration, MqttMeasureSource, Measure
 
 DIR = Path(__file__).parent
 
@@ -24,9 +24,12 @@ class ConfigurationTest(unittest.TestCase):
 
         self.assertEqual("super_thing", config.things[0].name)
         self.assertEqual("dryer", config.things[0].type)
-        self.assertIn(Source('consumption/topic', [Measure(source_type='consumption')]), config.things[0].sources.list)
-        self.assertIn(Source('loading/topic', [Measure(source_type='loading')]), config.things[0].sources.list)
-        self.assertIn(Source('unloading/topic', [Measure(source_type='unloading')]), config.things[0].sources.list)
+        self.assertIn(MqttMeasureSource('consumption/topic', [Measure(source_type='consumption')]),
+                      config.things[0].sources.list)
+        self.assertIn(MqttMeasureSource('loading/topic', [Measure(source_type='loading')]),
+                      config.things[0].sources.list)
+        self.assertIn(MqttMeasureSource('unloading/topic', [Measure(source_type='unloading')]),
+                      config.things[0].sources.list)
 
         self.assertIn(PlannedNotification('update/every-second/topic', '*/1 * * * * *'),
                       config.things[0].destinations.planned_notifications)
@@ -55,6 +58,14 @@ class ConfigurationTest(unittest.TestCase):
         self.assertEqual("humidity", config.things[2].sources.list[0].measures[1].type)
         self.assertEqual("$.humidity", config.things[2].sources.list[0].measures[1].path)
 
+        self.assertEqual("Jane", config.things[3].name)
+        self.assertEqual("person", config.things[3].type)
+        self.assertEqual("calendar", config.things[3].sources.list[0].application)
+        self.assertEqual("calendar.jane.private", config.things[3].sources.list[0].url)
+        self.assertEqual("calendar-user", config.things[3].sources.list[0].username)
+        self.assertEqual("secret-calendar", config.things[3].sources.list[0].password)
+        self.assertEqual("* * * * */15 0", config.things[3].sources.list[0].update_cron)
+
     def test_min_config(self):
         min_config = configuration.load_configuration(DIR / "min_test_config.yaml")
         self.assertEqual("mqtt.local", min_config.mqtt.url)
@@ -73,16 +84,24 @@ class ConfigurationTest(unittest.TestCase):
         self.assertFalse(min_config.things[1].destinations.planned_notifications)
 
     def test_incomplete_sources_produce_errors(self):
-        self.assertRaises(IncompleteConfiguration,
-                          configuration.load_configuration, (DIR / "incomplete_loading_source_config.yaml"))
-        self.assertRaises(IncompleteConfiguration,
-                          configuration.load_configuration, (DIR / "incomplete_unloading_source_config.yaml"))
-        self.assertRaises(IncompleteConfiguration,
-                          configuration.load_configuration, (DIR / "incomplete_mqtt_config.yaml"))
-        self.assertRaises(IncompleteConfiguration,
-                          configuration.load_configuration, (DIR / "incomplete_thing_config.yaml"))
-        self.assertRaises(IncompleteConfiguration,
-                          configuration.load_configuration, (DIR / "incomplete_influxdb_config.yaml"))
+        with self.subTest("incomplete loading source"):
+            self.assertRaises(IncompleteConfiguration,
+                              configuration.load_configuration, (DIR / "incomplete_loading_source_config.yaml"))
+        with self.subTest("incomplete unloading source"):
+            self.assertRaises(IncompleteConfiguration,
+                              configuration.load_configuration, (DIR / "incomplete_unloading_source_config.yaml"))
+        with self.subTest("incomplete mqtt conf"):
+            self.assertRaises(IncompleteConfiguration,
+                              configuration.load_configuration, (DIR / "incomplete_mqtt_config.yaml"))
+        with self.subTest("incomplete thing conf"):
+            self.assertRaises(IncompleteConfiguration,
+                              configuration.load_configuration, (DIR / "incomplete_thing_config.yaml"))
+        with self.subTest("incomplete influxdb conf"):
+            self.assertRaises(IncompleteConfiguration,
+                              configuration.load_configuration, (DIR / "incomplete_influxdb_config.yaml"))
+        with self.subTest("incomplete person conf"):
+            self.assertRaises(IncompleteConfiguration,
+                              configuration.load_configuration, (DIR / "incomplete_person_calendar_config.yaml"))
 
 
 if __name__ == '__main__':

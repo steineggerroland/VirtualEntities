@@ -53,3 +53,11 @@ things:
             path: $.temperature
           - type: humidity
             path: $.humidity
+  - name: Jane
+    type: person
+    sources:
+      - application: calendar
+        url: calendar.jane.private
+        username: calendar-user
+        password: secret-calendar
+        update_cron: "* * * * */15 0"

@@ -1,0 +1,7 @@
+mqtt:
+  url: mqtt.local
+things:
+  - name: rld
+    type: person
+    sources:
+      - application: calendar
