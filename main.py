@@ -44,8 +44,7 @@ def run():
         elif person_service_supports_thing_type(thing_type=thing_config.type):
             person_service = PersonService(storage, thing_config)
             logger.debug("Person service for '%s' loaded" % thing_config.name)
-            mqtt_mediators.append(
-                MqttPersonMediator(client, person_service))
+            mqtt_mediators.append(MqttPersonMediator(client, person_service, thing_config))
             logger.debug("Mqtt person mediator for '%s' loaded" % thing_config.name)
         else:
             logger.error('Unsupported thing of type %s' % thing_config.type)

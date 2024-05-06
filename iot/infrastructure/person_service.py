@@ -1,3 +1,5 @@
+from typing import List
+
 from iot.core.configuration import IotThingConfig, UrlConf
 from iot.core.storage import Storage
 from iot.infrastructure.person import Person
@@ -11,6 +13,15 @@ class PersonService:
                                                  source.application == "calendar", config.sources.list)
         self.person = Person(config.name,
                              list(map(lambda calendar_conf: Calendar(calendar_conf.url), calendar_sources)))
+
+    def update_calendars(self, calendars: List[Calendar]):
+        if not calendars:
+            return self.person
+        unchanged_calendars = list(
+            filter(lambda old_cal: old_cal.name not in map(lambda new_cal: new_cal.name, calendars),
+                   self.person.calendars))
+        calendars.extend(unchanged_calendars)
+        self.person = self.person.set_calendars(calendars)
 
 
 def supports_thing_type(thing_type) -> bool:
