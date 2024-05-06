@@ -22,3 +22,7 @@ class Person(Thing):
                 "online_status": self.online_status(),
                 "last_updated_at": self.last_updated_at.isoformat() if self.last_updated_at is not None else None,
                 "last_seen_at": self.last_seen_at.isoformat() if self.last_seen_at is not None else None}
+
+    def set_calendars(self, calendars):
+        now = datetime.now()
+        return Person(self.name, calendars, now, now)

@@ -62,7 +62,7 @@ class UrlConf(Source):
         self.url = url
         self.username = username
         self.password = password
-        self.update_cron = update_cron if update_cron else "* * * * * 0 0" # update hourly by default
+        self.update_cron = update_cron if update_cron else "* * * * 0 0" # update hourly by default
 
     def __eq__(self, other):
         if not isinstance(other, UrlConf):
