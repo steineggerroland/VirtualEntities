@@ -1,13 +1,15 @@
 import unittest
 from datetime import datetime, timedelta
 
+import pytz
+
 from iot.infrastructure.thing import OnlineStatus
 from iot.infrastructure.time.calendar import Appointment, Calendar
 
 
 class CalendarTest(unittest.TestCase):
     def test_get_appointments(self):
-        now = datetime.now()
+        now = datetime.now().astimezone(pytz.timezone("Europe/Berlin"))
         start = now
         appointments = [Appointment("", now - timedelta(days=1, hours=1), now - timedelta(days=1)),
                         Appointment("", now + timedelta(days=1), now + timedelta(days=1, hours=1)),

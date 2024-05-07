@@ -20,8 +20,7 @@ class PersonService:
         unchanged_calendars = list(
             filter(lambda old_cal: old_cal.name not in map(lambda new_cal: new_cal.name, calendars),
                    self.person.calendars))
-        calendars.extend(unchanged_calendars)
-        self.person = self.person.set_calendars(calendars)
+        self.person = self.person.set_calendars(calendars + unchanged_calendars)
 
 
 def supports_thing_type(thing_type) -> bool:

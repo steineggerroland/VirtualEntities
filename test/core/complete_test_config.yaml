@@ -61,3 +61,8 @@ things:
         username: calendar-user
         password: secret-calendar
         update_cron: "* * * * */15 0"
+    destinations:
+      scheduled_updates:
+        - topic: persons/jane/appointments
+          cron: "* * * * */5 0"
+          subject: daily-appointments

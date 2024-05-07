@@ -13,8 +13,7 @@ class Person(Thing):
         self.calendars = calendars
 
     def get_appointments_for(self, start: datetime, delta: timedelta):
-        return reduce(lambda a, b: a.extend(b), list(map(lambda c: c.find_appointments(start, delta), self.calendars)),
-                      list())
+        return list(reduce(lambda a, b: a + b, map(lambda c: c.find_appointments(start, delta), self.calendars), []))
 
     def to_dict(self):
         return {"name": self.name,

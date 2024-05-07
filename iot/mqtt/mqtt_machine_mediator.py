@@ -22,7 +22,8 @@ class MqttMachineMediator(MqttMediator):
             if source.measures[0].type == 'unloading':
                 mqtt_client.subscribe(source.topic, lambda msg: self.unload_machine())
 
-        self.handle_destinations(destinations, lambda: self.machine_service.thing.to_dict())
+        self.handle_destinations(destinations.planned_notifications if destinations else [],
+                                 lambda: self.machine_service.thing.to_dict())
 
     def power_consumption_update(self, msg, json_path=None):
         try:
