@@ -3,6 +3,7 @@ import logging
 import time
 from datetime import datetime
 from threading import Thread
+from typing import List
 
 from croniter import croniter
 from jsonpath import JSONPath
@@ -26,8 +27,8 @@ class MqttMediator:
             if not thread.is_alive():
                 thread.join(timeout)
 
-    def handle_destinations(self, destinations: Destinations, get_dict_callback):
-        for planned_notification in destinations.planned_notifications if destinations else []:
+    def handle_destinations(self, planned_notifications: List[PlannedNotification], get_dict_callback):
+        for planned_notification in planned_notifications:
             thread = Thread(target=self._scheduled_updates, args=[planned_notification, get_dict_callback])
             thread.daemon = True
             self.scheduled_update_threads.append(thread)
