@@ -62,7 +62,7 @@ class UrlConf(Source):
         self.url = url
         self.username = username
         self.password = password
-        self.update_cron = update_cron if update_cron else "* * * * 0 0" # update hourly by default
+        self.update_cron = update_cron if update_cron else "* * * * 0 0"  # update hourly by default
 
     def __eq__(self, other):
         if not isinstance(other, UrlConf):
@@ -76,14 +76,15 @@ class Sources:
 
 
 class PlannedNotification:
-    def __init__(self, mqtt_topic: str, cron_expression: str):
+    def __init__(self, mqtt_topic: str, cron_expression: str, subject: str | None = None):
         self.mqtt_topic = mqtt_topic
         self.cron_expression = cron_expression
+        self.subject = subject
 
     def __eq__(self, other):
         if not isinstance(other, PlannedNotification):
             return False
-        return self.mqtt_topic == other.mqtt_topic and self.cron_expression == other.cron_expression
+        return self.mqtt_topic == other.mqtt_topic and self.cron_expression == other.cron_expression and self.subject == other.subject
 
 
 class Destinations:
@@ -167,7 +168,8 @@ def _read_destination_configuration(thing_dict):
     planned_notifications = []
     for entry in thing_dict['destinations']['scheduled_updates']:
         _verify_keys(entry, ['topic', 'cron'], 'things[].destinations.scheduled_updates[]')
-        planned_notifications.append(PlannedNotification(entry['topic'], entry['cron']))
+        planned_notifications.append(
+            PlannedNotification(entry['topic'], entry['cron'], entry['subject'] if 'subject' in entry else None))
     return Destinations(planned_notifications)
 
 
@@ -185,7 +187,7 @@ def _read_sources_configuration(thing_dict):
             sources.append(_read_mqtt_source(source))
         elif "application" in source and source["application"] == "calendar":
             sources.append(_read_url_conf((source),
-                           "things[%s].sources[%s]" % (thing_dict['name'], source["application"])))
+                                          "things[%s].sources[%s]" % (thing_dict['name'], source["application"])))
         else:
             raise IncompleteConfiguration("Unknown source '%s' of thing '%s'" % (source, thing_dict['name']))
 

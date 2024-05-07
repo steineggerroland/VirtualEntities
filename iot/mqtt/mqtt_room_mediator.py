@@ -13,7 +13,8 @@ class MqttRoomMediator(MqttMediator):
         for source in thing_config.sources.list if thing_config.sources else []:
             mqtt_client.subscribe(source.topic, lambda msg: self._handle_message(msg, source.measures))
 
-        self.handle_destinations(thing_config.destinations, lambda: self.room_service.room.to_dict())
+        self.handle_destinations(thing_config.destinations.planned_notifications if thing_config.destinations else [],
+                                 lambda: self.room_service.room.to_dict())
 
     def temperature_update(self, msg, json_path=None):
         try:

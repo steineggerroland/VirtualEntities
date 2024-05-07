@@ -65,6 +65,9 @@ class ConfigurationTest(unittest.TestCase):
         self.assertEqual("calendar-user", config.things[3].sources.list[0].username)
         self.assertEqual("secret-calendar", config.things[3].sources.list[0].password)
         self.assertEqual("* * * * */15 0", config.things[3].sources.list[0].update_cron)
+        self.assertEqual("persons/jane/appointments", config.things[3].destinations.planned_notifications[0].mqtt_topic)
+        self.assertEqual("* * * * */5 0", config.things[3].destinations.planned_notifications[0].cron_expression)
+        self.assertEqual("daily-appointments", config.things[3].destinations.planned_notifications[0].subject)
 
     def test_min_config(self):
         min_config = configuration.load_configuration(DIR / "min_test_config.yaml")
