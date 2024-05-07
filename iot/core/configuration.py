@@ -39,17 +39,35 @@ class Measure:
 
 
 class Source:
+    pass
+
+
+class MqttMeasureSource(Source):
     def __init__(self, topic: str, measures: [Measure]):
         self.topic = topic
         self.measures = measures
 
     def __eq__(self, other):
-        if not isinstance(other, Source) or self.topic != other.topic:
+        if not isinstance(other, MqttMeasureSource) or self.topic != other.topic:
             return False
         for measure in self.measures:
             if not any(vars(measure) == vars(other_measure) for other_measure in other.measures):
                 return False
         return True
+
+
+class UrlConf(Source):
+    def __init__(self, application: str, url: str, username: str = None, password: str = None, update_cron: str = None):
+        self.application = application
+        self.url = url
+        self.username = username
+        self.password = password
+        self.update_cron = update_cron if update_cron else "* * * * 0 0"  # update hourly by default
+
+    def __eq__(self, other):
+        if not isinstance(other, UrlConf):
+            return False
+        return self.url == other.url and self.username == other.username and self.password == other.username
 
 
 class Sources:
@@ -58,14 +76,15 @@ class Sources:
 
 
 class PlannedNotification:
-    def __init__(self, mqtt_topic: str, cron_expression: str):
+    def __init__(self, mqtt_topic: str, cron_expression: str, subject: str | None = None):
         self.mqtt_topic = mqtt_topic
         self.cron_expression = cron_expression
+        self.subject = subject
 
     def __eq__(self, other):
         if not isinstance(other, PlannedNotification):
             return False
-        return self.mqtt_topic == other.mqtt_topic and self.cron_expression == other.cron_expression
+        return self.mqtt_topic == other.mqtt_topic and self.cron_expression == other.cron_expression and self.subject == other.subject
 
 
 class Destinations:
@@ -149,29 +168,51 @@ def _read_destination_configuration(thing_dict):
     planned_notifications = []
     for entry in thing_dict['destinations']['scheduled_updates']:
         _verify_keys(entry, ['topic', 'cron'], 'things[].destinations.scheduled_updates[]')
-        planned_notifications.append(PlannedNotification(entry['topic'], entry['cron']))
+        planned_notifications.append(
+            PlannedNotification(entry['topic'], entry['cron'], entry['subject'] if 'subject' in entry else None))
     return Destinations(planned_notifications)
 
 
 def _read_sources_configuration(thing_dict):
     if 'sources' not in thing_dict:
         return Sources([])
+
+    if not thing_dict['sources']:
+        raise IncompleteConfiguration("Sources configuration is not a list")
+
     sources = []
-    if thing_dict['sources']:
-        for source in thing_dict['sources']:
-            measures = []
-            _verify_keys(source, ['topic'], "things[].sources[]")
-            if 'measures' in source:
-                for measure in source['measures']:
-                    _verify_keys(measure, ['type'], "things[].sources[].measures[]")
-                    measures.append(Measure(source_type=measure['type'],
-                                            path=measure['path'] if 'path' in measure else None))
-            else:
-                _verify_keys(source, ['type'], "things[].sources[]")
-                measures.append(Measure(source_type=source['type'], path=source['path'] if 'path' in source else None))
-            sources.append(Source(topic=source['topic'], measures=measures))
+    for source in thing_dict['sources']:
+        measures = []
+        if "topic" in source:
+            sources.append(_read_mqtt_source(source))
+        elif "application" in source and source["application"] == "calendar":
+            sources.append(_read_url_conf((source),
+                                          "things[%s].sources[%s]" % (thing_dict['name'], source["application"])))
+        else:
+            raise IncompleteConfiguration("Unknown source '%s' of thing '%s'" % (source, thing_dict['name']))
 
     return Sources(sources)
+
+
+def _read_url_conf(url_conf, path):
+    _verify_keys(url_conf, ['url'], path)
+    update_cron = url_conf["update_cron"] if "update_cron" in url_conf else None
+    return UrlConf(url_conf["application"], url_conf["url"], update_cron=update_cron) if "username" not in url_conf \
+        else UrlConf(url_conf["application"], url_conf["url"], url_conf["username"], url_conf["password"], update_cron)
+
+
+def _read_mqtt_source(source):
+    measures = []
+    if 'measures' in source:
+        for measure in source['measures']:
+            _verify_keys(measure, ['type'], "things[].sources[].measures[]")
+            measures.append(Measure(source_type=measure['type'],
+                                    path=measure['path'] if 'path' in measure else None))
+    else:
+        _verify_keys(source, ['type'], "things[].sources[]")
+        measures.append(
+            Measure(source_type=source['type'], path=source['path'] if 'path' in source else None))
+    return MqttMeasureSource(topic=source['topic'], measures=measures)
 
 
 def _read_thresholds_config(thresholds_config: dict, prefix) -> ThresholdsConfig:
