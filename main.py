@@ -68,6 +68,6 @@ def run():
 
 if __name__ == '__main__':
     logging.basicConfig(filename='data/default.log', encoding='utf-8',
-                        level=logging.DEBUG if sys.flags.debug else logging.DEBUG,
+                        level=logging.DEBUG if sys.flags.debug else logging.INFO,
                         format='%(asctime)s - %(name)s(%(lineno)s) - %(levelname)s - %(message)s')
     run()
