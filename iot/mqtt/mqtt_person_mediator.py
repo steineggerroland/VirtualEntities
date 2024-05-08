@@ -1,6 +1,5 @@
 import time
 from datetime import datetime, timedelta
-from functools import reduce
 from threading import Thread
 from typing import List
 
@@ -22,12 +21,8 @@ class MqttPersonMediator(MqttMediator):
         self.person_service = person_service
         self.scheduled_caldav_download_threads = []
 
-        if any(filter(lambda dest: dest.subject == DAILY_APPOINTMENTS, config.destinations.planned_notifications)):
-            self.relevant_interval_start_cb = lambda: datetime.combine(datetime.now(), datetime.min.time())
-            self.relevant_interval_end_cb = lambda: datetime.combine(datetime.now(), datetime.max.time())
-        else:
-            self.relevant_interval_start_cb = lambda: datetime.now()
-            self.relevant_interval_end_cb = lambda: datetime.now()
+        self.has_daily_appointment_notification = any(
+            filter(lambda dest: dest.subject == DAILY_APPOINTMENTS, config.destinations.planned_notifications))
 
         self.handle_destinations(
             list(
@@ -64,9 +59,15 @@ class MqttPersonMediator(MqttMediator):
                     password=calendar_source.password) if calendar_source.username
                   else caldav.DAVClient(url=calendar_source.url)
                   as client):
+                if self.has_daily_appointment_notification:
+                    start = datetime.combine(datetime.now(), datetime.min.time())
+                    end = datetime.combine(datetime.now(), datetime.max.time())
+                else:
+                    self.logger.debug("There are no planned updates for the calendar, therefore, no data is requested")
+                    return
                 caldav_calendar = client.calendar(url=calendar_source.url)
-                relevant_events = caldav_calendar.search(start=self.relevant_interval_start_cb(),
-                                                         end=self.relevant_interval_end_cb(),
+                relevant_events = caldav_calendar.search(start=start,
+                                                         end=end,
                                                          event=True, expand=True)
                 updated_calendar = Calendar.from_caldav_events(caldav_calendar.name, relevant_events)
                 self.person_service.update_calendars([updated_calendar])
