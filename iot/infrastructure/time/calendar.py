@@ -49,7 +49,7 @@ class Calendar(Thing):
                 "last_seen_at": self.last_seen_at.isoformat() if self.last_seen_at is not None else None}
 
     @classmethod
-    def from_caldav_events(cls, name:str, caldav_events: caldav.Event):
+    def from_caldav_events(cls, name: str, caldav_events: List[caldav.CalendarObjectResource]):
         appointments = []
         for event in caldav_events:
             summary = str(event.icalendar_component["SUMMARY"])
