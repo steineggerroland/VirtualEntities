@@ -69,6 +69,9 @@ class UrlConf(Source):
             return False
         return self.url == other.url and self.username == other.username and self.password == other.username
 
+    def has_credentials(self):
+        return self.username is not None
+
 
 class Sources:
     def __init__(self, sources: [Source]):
