@@ -51,12 +51,12 @@ class MqttPersonMediator(MqttMediator):
             delta = cron.get_next(datetime) - datetime.now()
             time.sleep(max(0, delta.total_seconds()))
 
-    def _update_calendars_from_caldav(self, calendar_source):
+    def _update_calendars_from_caldav(self, calendar_source: UrlConf):
         try:
             with (caldav.DAVClient(
                     url=calendar_source.url,
                     username=calendar_source.username,
-                    password=calendar_source.password) if calendar_source.username
+                    password=calendar_source.password) if calendar_source.has_credentials()
                   else caldav.DAVClient(url=calendar_source.url)
                   as client):
                 if self.has_daily_appointment_notification:
