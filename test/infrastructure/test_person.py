@@ -11,7 +11,7 @@ class PersonTest(unittest.TestCase):
         name = "Harry"
         last_updated_at = datetime.now() - timedelta(minutes=23)
         last_seen_at = datetime.now()
-        calendars = [Calendar("nextcloud", "nextcloud.url"), Calendar("caldav", "dav://url")]
+        calendars = [Calendar("nextcloud", "nextcloud.url", "#FFFFF0"), Calendar("caldav", "dav://url", "#F9F898")]
         person = Person(name, calendars, last_updated_at, last_seen_at)
         # when
         to_dict = person.to_dict()

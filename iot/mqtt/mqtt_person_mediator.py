@@ -6,7 +6,7 @@ from typing import List
 import caldav
 from croniter import croniter
 
-from iot.core.configuration import IotThingConfig, UrlConf
+from iot.core.configuration import IotThingConfig, CalendarConfig
 from iot.infrastructure.person_service import PersonService
 from iot.infrastructure.time.calendar import Calendar
 from iot.mqtt.mqtt_client import MqttClient
@@ -28,8 +28,7 @@ class MqttPersonMediator(MqttMediator):
             list(
                 filter(lambda dest: dest.subject == DAILY_APPOINTMENTS, config.destinations.planned_notifications)),
             lambda: self._get_appointments_for_today())
-        self._handle_calendar_sources(filter(lambda source: type(source) is UrlConf and
-                                                            source.application == "calendar", config.sources.list))
+        self._handle_calendar_sources(filter(lambda source: type(source) is CalendarConfig, config.sources.list))
 
     def _get_appointments_for_today(self):
         start_of_today = datetime.combine(datetime.now(), datetime.min.time())
@@ -38,20 +37,20 @@ class MqttPersonMediator(MqttMediator):
                                                                                          timedelta(hours=23, minutes=59,
                                                                                                    seconds=59))))}
 
-    def _handle_calendar_sources(self, sources: List[UrlConf]):
+    def _handle_calendar_sources(self, sources: List[CalendarConfig]):
         for calendar_source in sources:
             thread = Thread(target=self._scheduled_caldav_download, args=[calendar_source])
             thread.daemon = True
             self.scheduled_update_threads.append(thread)
 
-    def _scheduled_caldav_download(self, calendar_source: UrlConf):
+    def _scheduled_caldav_download(self, calendar_source: CalendarConfig):
         cron = croniter(calendar_source.update_cron, datetime.now())
         while True:
             self._update_calendars_from_caldav(calendar_source)
             delta = cron.get_next(datetime) - datetime.now()
             time.sleep(max(0, delta.total_seconds()))
 
-    def _update_calendars_from_caldav(self, calendar_source: UrlConf):
+    def _update_calendars_from_caldav(self, calendar_source: CalendarConfig):
         try:
             with (caldav.DAVClient(
                     url=calendar_source.url,
@@ -70,7 +69,7 @@ class MqttPersonMediator(MqttMediator):
                                                          end=end,
                                                          event=True, expand=True)
                 updated_calendar = Calendar.from_caldav_events(calendar_source.name, caldav_calendar.name,
-                                                               relevant_events)
+                                                               calendar_source.color_hex, relevant_events)
                 self.person_service.update_calendars([updated_calendar])
                 self.logger.debug(
                     "Updated calendar '%s' with %s appointments of person %s from %s", caldav_calendar.name,

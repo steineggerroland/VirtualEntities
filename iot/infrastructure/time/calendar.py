@@ -8,10 +8,11 @@ from iot.infrastructure.thing import Thing
 
 
 class Appointment:
-    def __init__(self, summary: str, start_at: datetime | date, end_at: datetime | date):
+    def __init__(self, summary: str, start_at: datetime | date, end_at: datetime | date, color: str):
         self.summary = summary
         self.start_at = start_at.astimezone(pytz.timezone("Europe/Berlin"))
         self.end_at = end_at.astimezone(pytz.timezone("Europe/Berlin"))
+        self.color = color.lower()
         self.last_updated_at = datetime.now()
 
     def covers_interval(self, start: datetime, end: datetime):
@@ -30,15 +31,17 @@ class Appointment:
         return {"summary": self.summary,
                 "start_at": self.start_at.isoformat() if self.start_at is not None else None,
                 "end_at": self.end_at.isoformat() if self.end_at is not None else None,
+                "color": self.color,
                 "last_updated_at": self.last_updated_at.isoformat() if self.last_updated_at is not None else None}
 
 
 class Calendar(Thing):
-    def __init__(self, name: str, url: str, appointments: List[Appointment] = [],
+    def __init__(self, name: str, url: str, color: str, appointments: List[Appointment] = [],
                  last_updated_at: datetime = datetime.now(),
                  last_seen_at: None | datetime = None):
         super().__init__(name, last_updated_at, last_seen_at, online_delta_in_seconds=60 * 30)
         self.url = url
+        self.color = color.lower()
         self.appointments = appointments
 
     def find_appointments(self, start: datetime, delta: timedelta):
@@ -49,16 +52,17 @@ class Calendar(Thing):
         return {"name": self.name,
                 "url": self.url,
                 "appointments": list(map(lambda appointment: appointment.to_dict(), self.appointments)),
+                "color": self.color,
                 "online_status": self.online_status(),
                 "last_updated_at": self.last_updated_at.isoformat() if self.last_updated_at is not None else None,
                 "last_seen_at": self.last_seen_at.isoformat() if self.last_seen_at is not None else None}
 
     @classmethod
-    def from_caldav_events(cls, name: str, url: str, caldav_events: List[caldav.CalendarObjectResource]):
+    def from_caldav_events(cls, name: str, url: str, color: str, caldav_events: List[caldav.CalendarObjectResource]):
         appointments = []
         for event in caldav_events:
             summary = str(event.icalendar_component["SUMMARY"])
             start_at = event.icalendar_component["DTSTART"].dt
             end_at = event.icalendar_component["DTEND"].dt
-            appointments.append(Appointment(summary, start_at, end_at))
-        return Calendar(name, url, appointments)
+            appointments.append(Appointment(summary, start_at, end_at, color))
+        return Calendar(name, url, color, appointments)
