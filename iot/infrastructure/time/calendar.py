@@ -12,8 +12,8 @@ from iot.infrastructure.thing import Thing
 class Appointment:
     def __init__(self, summary: str, start_at: datetime | date, end_at: datetime | date):
         self.summary = summary
-        self.start_at = start_at
-        self.end_at = end_at
+        self.start_at = start_at.astimezone(pytz.timezone("Europe/Berlin"))
+        self.end_at = end_at.astimezone(pytz.timezone("Europe/Berlin"))
         self.last_updated_at = datetime.now()
 
     def covers_interval(self, start: datetime, end: datetime):
