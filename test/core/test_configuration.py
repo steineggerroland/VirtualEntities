@@ -61,12 +61,21 @@ class ConfigurationTest(unittest.TestCase):
         self.assertEqual("Jane", config.things[3].name)
         self.assertEqual("person", config.things[3].type)
         self.assertEqual("calendar", config.things[3].sources.list[0].application)
+        self.assertEqual("jane private", config.things[3].sources.list[0].name)
         self.assertEqual("calendar.jane.private", config.things[3].sources.list[0].url)
         self.assertEqual("calendar-user", config.things[3].sources.list[0].username)
         self.assertEqual("secret-calendar", config.things[3].sources.list[0].password)
-        self.assertEqual("* * * * */15 0", config.things[3].sources.list[0].update_cron)
+        self.assertEqual("*/15 * * * *", config.things[3].sources.list[0].update_cron)
+        # referenced calendar
+        self.assertEqual("calendar", config.things[3].sources.list[1].application)
+        self.assertEqual("jane job", config.things[3].sources.list[1].name)
+        self.assertEqual("calendar.job/jane", config.things[3].sources.list[1].url)
+        self.assertEqual("jane", config.things[3].sources.list[1].username)
+        self.assertEqual("secret", config.things[3].sources.list[1].password)
+        self.assertEqual("0 0 * * * *", config.things[3].sources.list[1].update_cron)
+        # notifications
         self.assertEqual("persons/jane/appointments", config.things[3].destinations.planned_notifications[0].mqtt_topic)
-        self.assertEqual("* * * * */5 0", config.things[3].destinations.planned_notifications[0].cron_expression)
+        self.assertEqual("*/15 * * * * 0", config.things[3].destinations.planned_notifications[0].cron_expression)
         self.assertEqual("daily-appointments", config.things[3].destinations.planned_notifications[0].subject)
 
     def test_min_config(self):

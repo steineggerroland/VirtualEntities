@@ -14,7 +14,7 @@ class CalendarTest(unittest.TestCase):
         appointments = [Appointment("", now - timedelta(days=1, hours=1), now - timedelta(days=1)),
                         Appointment("", now + timedelta(days=1), now + timedelta(days=1, hours=1)),
                         Appointment("", now - timedelta(minutes=30), now + timedelta(minutes=30))]
-        calendar = Calendar("nextcloud", appointments)
+        calendar = Calendar("nextcloud", "url", appointments)
 
         self.assertEqual(1, len(calendar.find_appointments(start, timedelta(hours=1))))
 
@@ -29,13 +29,15 @@ class CalendarTest(unittest.TestCase):
                                     datetime.fromisoformat("2020-05-10T00:00:00"),
                                     datetime.fromisoformat("2020-05-15T00:00:00"))]
         name = "nextcloud"
+        url = "url"
         last_updated_at = datetime.now() - timedelta(minutes=23)
         last_seen_at = datetime.now()
-        calendar = Calendar(name, appointments, last_updated_at, last_seen_at)
+        calendar = Calendar(name, url, appointments, last_updated_at, last_seen_at)
         # then
         self.assertIn("appointments", calendar.to_dict())
         self.assertEqual(3, len(calendar.to_dict()["appointments"]))
         self.assertEqual(name, calendar.to_dict()["name"])
+        self.assertEqual(url, calendar.to_dict()["url"])
         self.assertEqual(OnlineStatus.ONLINE, calendar.to_dict()["online_status"])
         self.assertEqual(last_seen_at.isoformat(), calendar.to_dict()["last_seen_at"])
         self.assertEqual(last_updated_at.isoformat(), calendar.to_dict()["last_updated_at"])

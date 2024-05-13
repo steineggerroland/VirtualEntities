@@ -12,7 +12,8 @@ class PersonService:
         calendar_sources = filter(lambda source: type(source) is UrlConf and
                                                  source.application == "calendar", config.sources.list)
         self.person = Person(config.name,
-                             list(map(lambda calendar_conf: Calendar(calendar_conf.url), calendar_sources)))
+                             list(map(lambda calendar_conf: Calendar(calendar_conf.name, calendar_conf.url),
+                                      calendar_sources)))
 
     def update_calendars(self, calendars: List[Calendar]):
         if not calendars:
