@@ -1,10 +1,8 @@
 from datetime import datetime, timedelta, date
 from typing import List
-import pytz
 
-import icalendar
-from caldav import DAVObject, Event as CaldavEvent
 import caldav
+import pytz
 
 from iot.infrastructure.thing import Thing
 
@@ -20,6 +18,10 @@ class Appointment:
         if (type(self.start_at) is not datetime and type(self.start_at) is not date) or \
                 (type(self.end_at) is not datetime and type(self.end_at) is not date):
             return False
+        if start.tzname() is None:
+            start = start.astimezone(pytz.timezone("Europe/Berlin"))
+        if end.tzname() is None:
+            end = end.astimezone(pytz.timezone("Europe/Berlin"))
         start = start if type(self.end_at) is datetime else date(start.year, start.month, start.day)
         end = end if type(self.start_at) is datetime else date(end.year, end.month, end.day)
         return not (end < self.start_at or start > self.end_at)
