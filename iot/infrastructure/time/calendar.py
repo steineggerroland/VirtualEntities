@@ -34,9 +34,11 @@ class Appointment:
 
 
 class Calendar(Thing):
-    def __init__(self, name: str, appointments: List[Appointment] = [], last_updated_at: datetime = datetime.now(),
+    def __init__(self, name: str, url: str, appointments: List[Appointment] = [],
+                 last_updated_at: datetime = datetime.now(),
                  last_seen_at: None | datetime = None):
         super().__init__(name, last_updated_at, last_seen_at, online_delta_in_seconds=60 * 30)
+        self.url = url
         self.appointments = appointments
 
     def find_appointments(self, start: datetime, delta: timedelta):
@@ -45,17 +47,18 @@ class Calendar(Thing):
 
     def to_dict(self):
         return {"name": self.name,
+                "url": self.url,
                 "appointments": list(map(lambda appointment: appointment.to_dict(), self.appointments)),
                 "online_status": self.online_status(),
                 "last_updated_at": self.last_updated_at.isoformat() if self.last_updated_at is not None else None,
                 "last_seen_at": self.last_seen_at.isoformat() if self.last_seen_at is not None else None}
 
     @classmethod
-    def from_caldav_events(cls, name: str, caldav_events: List[caldav.CalendarObjectResource]):
+    def from_caldav_events(cls, name: str, url: str, caldav_events: List[caldav.CalendarObjectResource]):
         appointments = []
         for event in caldav_events:
             summary = str(event.icalendar_component["SUMMARY"])
             start_at = event.icalendar_component["DTSTART"].dt
             end_at = event.icalendar_component["DTEND"].dt
             appointments.append(Appointment(summary, start_at, end_at))
-        return Calendar(name, appointments)
+        return Calendar(name, url, appointments)

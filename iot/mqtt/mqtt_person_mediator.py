@@ -69,7 +69,8 @@ class MqttPersonMediator(MqttMediator):
                 relevant_events = caldav_calendar.search(start=start,
                                                          end=end,
                                                          event=True, expand=True)
-                updated_calendar = Calendar.from_caldav_events(caldav_calendar.name, relevant_events)
+                updated_calendar = Calendar.from_caldav_events(calendar_source.name, caldav_calendar.name,
+                                                               relevant_events)
                 self.person_service.update_calendars([updated_calendar])
                 self.logger.debug(
                     "Updated calendar '%s' with %s appointments of person %s from %s", caldav_calendar.name,

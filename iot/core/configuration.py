@@ -1,3 +1,5 @@
+from typing import List
+
 import yamlenv
 
 
@@ -57,8 +59,10 @@ class MqttMeasureSource(Source):
 
 
 class UrlConf(Source):
-    def __init__(self, application: str, url: str, username: str = None, password: str = None, update_cron: str = None):
+    def __init__(self, application: str, name: str, url: str, username: str = None, password: str = None,
+                 update_cron: str = None):
         self.application = application
+        self.name = name
         self.url = url
         self.username = username
         self.password = password
@@ -67,7 +71,7 @@ class UrlConf(Source):
     def __eq__(self, other):
         if not isinstance(other, UrlConf):
             return False
-        return self.url == other.url and self.username == other.username and self.password == other.username
+        return self.name == other.name and self.url == other.url and self.username == other.username and self.password == other.username
 
     def has_credentials(self):
         return self.username is not None
@@ -176,7 +180,7 @@ def _read_destination_configuration(thing_dict):
     return Destinations(planned_notifications)
 
 
-def _read_sources_configuration(thing_dict):
+def _read_sources_configuration(thing_dict, calendars: List[UrlConf]):
     if 'sources' not in thing_dict:
         return Sources([])
 
@@ -185,23 +189,42 @@ def _read_sources_configuration(thing_dict):
 
     sources = []
     for source in thing_dict['sources']:
-        measures = []
         if "topic" in source:
             sources.append(_read_mqtt_source(source))
         elif "application" in source and source["application"] == "calendar":
-            sources.append(_read_url_conf((source),
-                                          "things[%s].sources[%s]" % (thing_dict['name'], source["application"])))
+            sources.append(_read_url_conf(source,
+                                          "things[%s].sources[%s]" % (thing_dict['name'], source["application"]),
+                                          "calendar",
+                                          calendars))
         else:
             raise IncompleteConfiguration("Unknown source '%s' of thing '%s'" % (source, thing_dict['name']))
 
     return Sources(sources)
 
 
-def _read_url_conf(url_conf, path):
-    _verify_keys(url_conf, ['url'], path)
+def _read_url_conf(url_conf, path, application, url_confs=[]):
+    _verify_keys_set(url_conf, [['reference_name'], ['url', 'name']], path)
+    if 'reference_name' in url_conf:
+        return _get_referenced_url_config(url_conf, url_confs, path)
+    else:
+        return _read_new_url_conf(url_conf, application)
+
+
+def _get_referenced_url_config(url_conf, url_confs, path):
+    name_of_calendar = url_conf["reference_name"]
+    referenced_configs = list(filter(lambda c: c.name == name_of_calendar, url_confs))
+    if len(referenced_configs) < 1:
+        raise IncompleteConfiguration(f"No general calendar configuration '{name_of_calendar}' referenced in '{path}'")
+    else:
+        return referenced_configs[0]
+
+
+def _read_new_url_conf(url_conf, application):
     update_cron = url_conf["update_cron"] if "update_cron" in url_conf else None
-    return UrlConf(url_conf["application"], url_conf["url"], update_cron=update_cron) if "username" not in url_conf \
-        else UrlConf(url_conf["application"], url_conf["url"], url_conf["username"], url_conf["password"], update_cron)
+    return UrlConf(application, url_conf["name"], url_conf["url"],
+                   update_cron=update_cron) if "username" not in url_conf \
+        else UrlConf(application, url_conf["name"], url_conf["url"], url_conf["username"], url_conf["password"],
+                     update_cron)
 
 
 def _read_mqtt_source(source):
@@ -239,18 +262,27 @@ def _read_humidity_thresholds_configuration(thing_config: dict) -> None | Thresh
         return None
 
 
-def _read_thing(thing_config):
+def _read_calendars_configuration(thing_config: dict) -> List[UrlConf]:
+    if "calendars" not in thing_config:
+        return []
+    calendars_config = thing_config["calendars"]
+    if type(calendars_config) is not list:
+        raise IncompleteConfiguration("'calendars' must be a list")
+    return list(map(lambda calendar_config: _read_url_conf(calendar_config, 'calendars', "calendar"), calendars_config))
+
+
+def _read_thing(thing_config, calendars):
     _verify_keys(thing_config, ["name", "type"], "things[]")
     return IotThingConfig(thing_config['name'], thing_config['type'],
                           _read_temperature_thresholds_configuration(thing_config),
                           _read_humidity_thresholds_configuration(thing_config),
-                          _read_sources_configuration(thing_config),
+                          _read_sources_configuration(thing_config, calendars),
                           _read_destination_configuration(thing_config))
 
 
-def _read_things(conf_dict):
+def _read_things(conf_dict, calendars):
     _verify_keys(conf_dict, ["things"])
-    return [_read_thing(thing_config) for thing_config in conf_dict['things']]
+    return [_read_thing(thing_config, calendars) for thing_config in conf_dict['things']]
 
 
 def _read_time_series_config(time_series_config):
@@ -260,12 +292,19 @@ def _read_time_series_config(time_series_config):
 
 
 def _read_configuration(conf_dict):
+    calendars = _read_calendars_configuration(conf_dict)
     return Configuration(_read_mqtt_configuration(conf_dict),
-                         _read_things(conf_dict),
+                         _read_things(conf_dict, calendars),
                          _read_time_series_config(conf_dict['time_series']) if 'time_series' in conf_dict else None)
 
 
+def _verify_keys_set(yaml_dict, key_sets, prefix=None):
+    if not any(all(key in yaml_dict for key in keys) for keys in key_sets):
+        raise IncompleteConfiguration(
+            f"Config is missing key(s) in '{prefix + '.' if prefix else ''}'. There must any set of keys: {key_sets}")
+
+
 def _verify_keys(yaml_dict, keys, prefix=None):
-    for key in keys:
-        if key not in yaml_dict:
-            raise IncompleteConfiguration(f"Config is missing key '{prefix + '.' if prefix else ''}{key}'")
+    if any(key not in yaml_dict for key in keys):
+        raise IncompleteConfiguration(
+            f"Config is missing key(s) in '{prefix + '.' if prefix else ''}'. Mandatory are {keys}")

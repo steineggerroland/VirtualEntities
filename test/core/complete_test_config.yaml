@@ -57,12 +57,21 @@ things:
     type: person
     sources:
       - application: calendar
+        name: jane private
         url: calendar.jane.private
         username: calendar-user
         password: secret-calendar
-        update_cron: "* * * * */15 0"
+        update_cron: "*/15 * * * *"
+      - application: calendar
+        reference_name: jane job
     destinations:
       scheduled_updates:
         - topic: persons/jane/appointments
-          cron: "* * * * */5 0"
+          cron: "*/15 * * * * 0"
           subject: daily-appointments
+calendars:
+  - name: jane job
+    url: calendar.job/jane
+    username: jane
+    password: secret
+    update_cron: "0 0 * * * *"
