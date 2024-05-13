@@ -66,15 +66,23 @@ class UrlConf(Source):
         self.url = url
         self.username = username
         self.password = password
-        self.update_cron = update_cron if update_cron else "* * * * 0 0"  # update hourly by default
+        self.update_cron = update_cron if update_cron is not None else "0 */15 * * * *"  # update hourly by default
 
     def __eq__(self, other):
         if not isinstance(other, UrlConf):
             return False
-        return self.name == other.name and self.url == other.url and self.username == other.username and self.password == other.username
+        return self.application == other.application and self.name == other.name and self.url == other.url and \
+            self.username == other.username and self.password == other.username
 
     def has_credentials(self):
         return self.username is not None
+
+
+class CalendarConfig(UrlConf):
+    def __init__(self, url_conf: UrlConf, color_hex: str = None):
+        super().__init__("calendar", url_conf.name, url_conf.url, url_conf.username, url_conf.password,
+                         url_conf.update_cron)
+        self.color_hex = color_hex.lower() if color_hex is not None else "ffffff"
 
 
 class Sources:
@@ -180,7 +188,7 @@ def _read_destination_configuration(thing_dict):
     return Destinations(planned_notifications)
 
 
-def _read_sources_configuration(thing_dict, calendars: List[UrlConf]):
+def _read_sources_configuration(thing_dict, calendars: List[CalendarConfig]):
     if 'sources' not in thing_dict:
         return Sources([])
 
@@ -192,10 +200,10 @@ def _read_sources_configuration(thing_dict, calendars: List[UrlConf]):
         if "topic" in source:
             sources.append(_read_mqtt_source(source))
         elif "application" in source and source["application"] == "calendar":
-            sources.append(_read_url_conf(source,
-                                          "things[%s].sources[%s]" % (thing_dict['name'], source["application"]),
-                                          "calendar",
-                                          calendars))
+            conf = _read_url_conf(source, "things[%s].sources[%s]" % (thing_dict['name'], source["application"]),
+                                  "calendar", calendars)
+            sources.append(conf if type(conf) == CalendarConfig else CalendarConfig(conf, source[
+                "color_hex"] if "color_hex" in source else None))
         else:
             raise IncompleteConfiguration("Unknown source '%s' of thing '%s'" % (source, thing_dict['name']))
 
@@ -262,16 +270,19 @@ def _read_humidity_thresholds_configuration(thing_config: dict) -> None | Thresh
         return None
 
 
-def _read_calendars_configuration(thing_config: dict) -> List[UrlConf]:
+def _read_calendars_configuration(thing_config: dict) -> List[CalendarConfig]:
     if "calendars" not in thing_config:
         return []
     calendars_config = thing_config["calendars"]
     if type(calendars_config) is not list:
         raise IncompleteConfiguration("'calendars' must be a list")
-    return list(map(lambda calendar_config: _read_url_conf(calendar_config, 'calendars', "calendar"), calendars_config))
+    return list(map(lambda calendar_config: CalendarConfig(_read_url_conf(calendar_config, 'calendars', "calendar"),
+                                                           calendar_config[
+                                                               "color_hex"] if "color_hex" in calendar_config else None),
+                    calendars_config))
 
 
-def _read_thing(thing_config, calendars):
+def _read_thing(thing_config, calendars) -> IotThingConfig:
     _verify_keys(thing_config, ["name", "type"], "things[]")
     return IotThingConfig(thing_config['name'], thing_config['type'],
                           _read_temperature_thresholds_configuration(thing_config),
@@ -280,18 +291,18 @@ def _read_thing(thing_config, calendars):
                           _read_destination_configuration(thing_config))
 
 
-def _read_things(conf_dict, calendars):
+def _read_things(conf_dict, calendars) -> List[IotThingConfig]:
     _verify_keys(conf_dict, ["things"])
     return [_read_thing(thing_config, calendars) for thing_config in conf_dict['things']]
 
 
-def _read_time_series_config(time_series_config):
+def _read_time_series_config(time_series_config) -> TimeSeriesConfig:
     _verify_keys(time_series_config, ['url', 'username', 'password', 'bucket_name'], 'time_series')
     return TimeSeriesConfig(time_series_config['url'], time_series_config['username'], time_series_config['password'],
                             time_series_config['bucket_name'])
 
 
-def _read_configuration(conf_dict):
+def _read_configuration(conf_dict) -> Configuration:
     calendars = _read_calendars_configuration(conf_dict)
     return Configuration(_read_mqtt_configuration(conf_dict),
                          _read_things(conf_dict, calendars),

@@ -65,7 +65,8 @@ class ConfigurationTest(unittest.TestCase):
         self.assertEqual("calendar.jane.private", config.things[3].sources.list[0].url)
         self.assertEqual("calendar-user", config.things[3].sources.list[0].username)
         self.assertEqual("secret-calendar", config.things[3].sources.list[0].password)
-        self.assertEqual("*/15 * * * *", config.things[3].sources.list[0].update_cron)
+        self.assertEqual("*/16 * * * *", config.things[3].sources.list[0].update_cron)
+        self.assertEqual("ffffff", config.things[3].sources.list[0].color_hex)
         # referenced calendar
         self.assertEqual("calendar", config.things[3].sources.list[1].application)
         self.assertEqual("jane job", config.things[3].sources.list[1].name)
@@ -73,6 +74,7 @@ class ConfigurationTest(unittest.TestCase):
         self.assertEqual("jane", config.things[3].sources.list[1].username)
         self.assertEqual("secret", config.things[3].sources.list[1].password)
         self.assertEqual("0 0 * * * *", config.things[3].sources.list[1].update_cron)
+        self.assertEqual("f0f0f0", config.things[3].sources.list[1].color_hex)
         # notifications
         self.assertEqual("persons/jane/appointments", config.things[3].destinations.planned_notifications[0].mqtt_topic)
         self.assertEqual("*/15 * * * * 0", config.things[3].destinations.planned_notifications[0].cron_expression)

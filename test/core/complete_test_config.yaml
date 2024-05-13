@@ -61,7 +61,7 @@ things:
         url: calendar.jane.private
         username: calendar-user
         password: secret-calendar
-        update_cron: "*/15 * * * *"
+        update_cron: "*/16 * * * *"
       - application: calendar
         reference_name: jane job
     destinations:
@@ -75,3 +75,4 @@ calendars:
     username: jane
     password: secret
     update_cron: "0 0 * * * *"
+    color_hex: F0F0F0
