@@ -70,9 +70,15 @@ things:
           cron: "*/15 * * * * 0"
           subject: daily-appointments
 calendars:
-  - name: jane job
-    url: calendar.job/jane
-    username: jane
-    password: secret
-    update_cron: "0 0 * * * *"
-    color_hex: F0F0F0
+  categories:
+    - name: Special
+      color_hex: ffff00
+    - name: Important
+      color_hex: ff0000
+  caldav:
+    - name: jane job
+      url: calendar.job/jane
+      username: jane
+      password: secret
+      update_cron: "0 0 * * * *"
+      color_hex: F0F0F0

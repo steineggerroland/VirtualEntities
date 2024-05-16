@@ -78,11 +78,23 @@ class UrlConf(Source):
         return self.username is not None
 
 
-class CalendarConfig(UrlConf):
+class CaldavConfig(UrlConf):
     def __init__(self, url_conf: UrlConf, color_hex: str = None):
         super().__init__("calendar", url_conf.name, url_conf.url, url_conf.username, url_conf.password,
                          url_conf.update_cron)
-        self.color_hex = color_hex.lower() if color_hex is not None else "ffffff"
+        self.color = color_hex.lower() if color_hex is not None else "ffffff"
+
+
+class CategoryConfig:
+    def __init__(self, name: str, color: str):
+        self.name = name
+        self.color = color.lower()
+
+
+class CalendarsConfig:
+    def __init__(self, categories: List[CategoryConfig], calendars: List[CaldavConfig]):
+        self.categories = categories
+        self.calendars = calendars
 
 
 class Sources:
@@ -138,13 +150,15 @@ class IotThingConfig:
 
 
 class Configuration:
-    def __init__(self, mqtt: MqttConfiguration, things: [IotThingConfig], time_series: TimeSeriesConfig | None):
+    def __init__(self, mqtt: MqttConfiguration, things: [IotThingConfig], time_series: TimeSeriesConfig | None,
+                 calendars_config: CalendarsConfig):
         self.mqtt = mqtt
         self.things = things
         self.time_series = time_series
+        self.calendars_config = calendars_config
 
     def __str__(self):
-        return f"{self.mqtt}, {self.things}, {self.time_series}"
+        return f"{self.mqtt}, {self.things}, {self.time_series}, {self.calendars_config}"
 
 
 def load_configuration(config_path):
@@ -188,7 +202,7 @@ def _read_destination_configuration(thing_dict):
     return Destinations(planned_notifications)
 
 
-def _read_sources_configuration(thing_dict, calendars: List[CalendarConfig]):
+def _read_sources_configuration(thing_dict, calendars: List[CaldavConfig]):
     if 'sources' not in thing_dict:
         return Sources([])
 
@@ -202,7 +216,7 @@ def _read_sources_configuration(thing_dict, calendars: List[CalendarConfig]):
         elif "application" in source and source["application"] == "calendar":
             conf = _read_url_conf(source, "things[%s].sources[%s]" % (thing_dict['name'], source["application"]),
                                   "calendar", calendars)
-            sources.append(conf if type(conf) == CalendarConfig else CalendarConfig(conf, source[
+            sources.append(conf if type(conf) == CaldavConfig else CaldavConfig(conf, source[
                 "color_hex"] if "color_hex" in source else None))
         else:
             raise IncompleteConfiguration("Unknown source '%s' of thing '%s'" % (source, thing_dict['name']))
@@ -270,16 +284,35 @@ def _read_humidity_thresholds_configuration(thing_config: dict) -> None | Thresh
         return None
 
 
-def _read_calendars_configuration(thing_config: dict) -> List[CalendarConfig]:
+def _read_caldav_configuration(caldav_config: dict) -> List[CaldavConfig]:
+    if type(caldav_config) is not list:
+        raise IncompleteConfiguration("'calendars.dav' must be a list")
+    return list(
+        map(lambda calendar_config: CaldavConfig(_read_url_conf(calendar_config, 'calendars', "calendar"),
+                                                 calendar_config[
+                                                     "color_hex"] if "color_hex" in calendar_config else None),
+            caldav_config))
+
+
+def _read_category_config(category_config: dict) -> CategoryConfig:
+    _verify_keys(category_config, ["name", "color_hex"], 'calendars.categories')
+    return CategoryConfig(category_config["name"], category_config["color_hex"])
+
+
+def _read_calendar_categories_configuration(categories_config):
+    if type(categories_config) is not list:
+        raise IncompleteConfiguration("'calendars.categories' must be a list")
+    return list(map(_read_category_config, categories_config))
+
+
+def _read_calendars_configuration(thing_config: dict) -> CalendarsConfig:
     if "calendars" not in thing_config:
-        return []
+        return CalendarsConfig([], [])
     calendars_config = thing_config["calendars"]
-    if type(calendars_config) is not list:
-        raise IncompleteConfiguration("'calendars' must be a list")
-    return list(map(lambda calendar_config: CalendarConfig(_read_url_conf(calendar_config, 'calendars', "calendar"),
-                                                           calendar_config[
-                                                               "color_hex"] if "color_hex" in calendar_config else None),
-                    calendars_config))
+    calendars = _read_caldav_configuration(calendars_config["caldav"]) if "caldav" in calendars_config else []
+    categories = _read_calendar_categories_configuration(
+        calendars_config["categories"]) if "categories" in calendars_config else []
+    return CalendarsConfig(categories, calendars)
 
 
 def _read_thing(thing_config, calendars) -> IotThingConfig:
@@ -303,10 +336,11 @@ def _read_time_series_config(time_series_config) -> TimeSeriesConfig:
 
 
 def _read_configuration(conf_dict) -> Configuration:
-    calendars = _read_calendars_configuration(conf_dict)
+    calendars_config = _read_calendars_configuration(conf_dict)
     return Configuration(_read_mqtt_configuration(conf_dict),
-                         _read_things(conf_dict, calendars),
-                         _read_time_series_config(conf_dict['time_series']) if 'time_series' in conf_dict else None)
+                         _read_things(conf_dict, calendars_config.calendars),
+                         _read_time_series_config(conf_dict['time_series']) if 'time_series' in conf_dict else None,
+                         calendars_config)
 
 
 def _verify_keys_set(yaml_dict, key_sets, prefix=None):

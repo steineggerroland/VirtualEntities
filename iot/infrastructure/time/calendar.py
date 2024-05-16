@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, date
 from typing import List
 
-import caldav
 import pytz
 
 from iot.infrastructure.thing import Thing
@@ -57,12 +56,3 @@ class Calendar(Thing):
                 "last_updated_at": self.last_updated_at.isoformat() if self.last_updated_at is not None else None,
                 "last_seen_at": self.last_seen_at.isoformat() if self.last_seen_at is not None else None}
 
-    @classmethod
-    def from_caldav_events(cls, name: str, url: str, color: str, caldav_events: List[caldav.CalendarObjectResource]):
-        appointments = []
-        for event in caldav_events:
-            summary = str(event.icalendar_component["SUMMARY"])
-            start_at = event.icalendar_component["DTSTART"].dt
-            end_at = event.icalendar_component["DTEND"].dt
-            appointments.append(Appointment(summary, start_at, end_at, color))
-        return Calendar(name, url, color, appointments)

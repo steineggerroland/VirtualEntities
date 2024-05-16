@@ -66,7 +66,7 @@ class ConfigurationTest(unittest.TestCase):
         self.assertEqual("calendar-user", config.things[3].sources.list[0].username)
         self.assertEqual("secret-calendar", config.things[3].sources.list[0].password)
         self.assertEqual("*/16 * * * *", config.things[3].sources.list[0].update_cron)
-        self.assertEqual("ffffff", config.things[3].sources.list[0].color_hex)
+        self.assertEqual("ffffff", config.things[3].sources.list[0].color)
         # referenced calendar
         self.assertEqual("calendar", config.things[3].sources.list[1].application)
         self.assertEqual("jane job", config.things[3].sources.list[1].name)
@@ -74,11 +74,16 @@ class ConfigurationTest(unittest.TestCase):
         self.assertEqual("jane", config.things[3].sources.list[1].username)
         self.assertEqual("secret", config.things[3].sources.list[1].password)
         self.assertEqual("0 0 * * * *", config.things[3].sources.list[1].update_cron)
-        self.assertEqual("f0f0f0", config.things[3].sources.list[1].color_hex)
+        self.assertEqual("f0f0f0", config.things[3].sources.list[1].color)
         # notifications
         self.assertEqual("persons/jane/appointments", config.things[3].destinations.planned_notifications[0].mqtt_topic)
         self.assertEqual("*/15 * * * * 0", config.things[3].destinations.planned_notifications[0].cron_expression)
         self.assertEqual("daily-appointments", config.things[3].destinations.planned_notifications[0].subject)
+        # calendar category colors
+        self.assertEqual("Special", config.calendars_config.categories[0].name)
+        self.assertEqual("ffff00", config.calendars_config.categories[0].color)
+        self.assertEqual("Important", config.calendars_config.categories[1].name)
+        self.assertEqual("ff0000", config.calendars_config.categories[1].color)
 
     def test_min_config(self):
         min_config = configuration.load_configuration(DIR / "min_test_config.yaml")
