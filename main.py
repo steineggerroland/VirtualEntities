@@ -5,10 +5,11 @@ from time import sleep
 
 from iot.core.configuration import load_configuration
 from iot.core.storage import Storage
+from iot.dav.calendar_reader import CalendarLoader
 from iot.infrastructure.machine.machine_service import MachineService, \
     supports_thing_type as machine_service_supports_thing_type
-from iot.infrastructure.room_service import RoomService, supports_thing_type as room_service_supports_thing_type
 from iot.infrastructure.person_service import PersonService, supports_thing_type as person_service_supports_thing_type
+from iot.infrastructure.room_service import RoomService, supports_thing_type as room_service_supports_thing_type
 from iot.mqtt.mqtt_client import MqttClient
 from iot.mqtt.mqtt_machine_mediator import MqttMachineMediator
 from iot.mqtt.mqtt_person_mediator import MqttPersonMediator
@@ -44,7 +45,8 @@ def run():
         elif person_service_supports_thing_type(thing_type=thing_config.type):
             person_service = PersonService(storage, thing_config)
             logger.debug("Person service for '%s' loaded" % thing_config.name)
-            mqtt_mediators.append(MqttPersonMediator(client, person_service, thing_config))
+            mqtt_mediators.append(
+                MqttPersonMediator(client, person_service, thing_config, CalendarLoader(config.calendars_config)))
             logger.debug("Mqtt person mediator for '%s' loaded" % thing_config.name)
         else:
             logger.error('Unsupported thing of type %s' % thing_config.type)
