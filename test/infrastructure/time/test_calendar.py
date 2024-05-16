@@ -50,11 +50,17 @@ class CalendarTest(unittest.TestCase):
 
 class AppointmentTest(unittest.TestCase):
     def test_constructor(self):
-        appointment = Appointment("Free time just for me", datetime.fromisoformat("2020-01-24T13:00:00"),
-                                  datetime.fromisoformat("2020-01-24T15:00:00"), "123123")
+        appointment = Appointment("Free time just for me",
+                                  datetime.fromisoformat("2020-01-24T13:00:00").astimezone(
+                                      pytz.timezone("Europe/Berlin")),
+                                  datetime.fromisoformat("2020-01-24T15:00:00").astimezone(
+                                      pytz.timezone("Europe/Berlin")),
+                                  "123123")
         self.assertEqual(appointment.summary, "Free time just for me")
-        self.assertEqual(appointment.start_at, datetime.fromisoformat("2020-01-24T13:00:00Z+01:00:00"))
-        self.assertEqual(appointment.end_at, datetime.fromisoformat("2020-01-24T15:00:00Z+01:00:00"))
+        self.assertEqual(appointment.start_at, datetime.fromisoformat("2020-01-24T13:00:00").astimezone(
+            pytz.timezone("Europe/Berlin")))
+        self.assertEqual(appointment.end_at, datetime.fromisoformat("2020-01-24T15:00:00").astimezone(
+            pytz.timezone("Europe/Berlin")))
         self.assertEqual(appointment.color, "123123")
 
     def test_covers_testcases(self):
@@ -88,8 +94,8 @@ class AppointmentTest(unittest.TestCase):
 
     def test_to_dict(self):
         summary = "Free time just for me"
-        start = datetime.fromisoformat("2020-01-24T13:00:00Z+01:00:00")
-        end = datetime.fromisoformat("2020-01-24T15:00:00Z+01:00:00")
+        start = datetime.fromisoformat("2020-01-24T13:00:00").astimezone(pytz.timezone("Europe/Berlin"))
+        end = datetime.fromisoformat("2020-01-24T15:00:00").astimezone(pytz.timezone("Europe/Berlin"))
         color = "ff0000"
         last_updated_at = datetime.fromisoformat("2020-01-24T15:00:00")
         appointment = Appointment(summary, start, end, color)
