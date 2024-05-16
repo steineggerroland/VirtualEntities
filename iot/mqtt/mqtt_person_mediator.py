@@ -7,8 +7,8 @@ import caldav
 from croniter import croniter
 
 from iot.core.configuration import IotThingConfig, CaldavConfig
+from iot.dav.calendar_reader import CalendarLoader
 from iot.infrastructure.person_service import PersonService
-from iot.infrastructure.time.calendar import Calendar
 from iot.mqtt.mqtt_client import MqttClient
 from iot.mqtt.mqtt_mediator import MqttMediator
 
@@ -16,10 +16,12 @@ DAILY_APPOINTMENTS = "daily-appointments"
 
 
 class MqttPersonMediator(MqttMediator):
-    def __init__(self, mqtt_client: MqttClient, person_service: PersonService, config: IotThingConfig):
+    def __init__(self, mqtt_client: MqttClient, person_service: PersonService, config: IotThingConfig,
+                 calendar_loader: CalendarLoader):
         super().__init__(mqtt_client)
         self.person_service = person_service
         self.scheduled_caldav_download_threads = []
+        self.calendar_loader = calendar_loader
 
         self.has_daily_appointment_notification = any(
             filter(lambda dest: dest.subject == DAILY_APPOINTMENTS, config.destinations.planned_notifications))
@@ -68,8 +70,8 @@ class MqttPersonMediator(MqttMediator):
                 relevant_events = caldav_calendar.search(start=start,
                                                          end=end,
                                                          event=True, expand=True)
-                updated_calendar = Calendar.from_caldav_events(calendar_source.name, caldav_calendar.name,
-                                                               calendar_source.color, relevant_events)
+                updated_calendar = self.calendar_loader.from_caldav_events(calendar_source.name, caldav_calendar.name,
+                                                                           calendar_source.color, relevant_events)
                 self.person_service.update_calendars([updated_calendar])
                 self.logger.debug(
                     "Updated calendar '%s' with %s appointments of person %s from %s", caldav_calendar.name,
