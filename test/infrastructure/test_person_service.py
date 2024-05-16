@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock
 
-from iot.core.configuration import IotThingConfig, UrlConf, Sources, CalendarConfig
+from iot.core.configuration import IotThingConfig, UrlConf, Sources, CaldavConfig
 from iot.infrastructure.person_service import PersonService
 
 
@@ -10,7 +10,7 @@ class PersonServiceCase(unittest.TestCase):
         name = "mika"
         service = PersonService(Mock(),
                                 IotThingConfig(name, sources=Sources(
-                                    [CalendarConfig(UrlConf("calendar", "my cal", "calendar.url"), "999999")])))
+                                    [CaldavConfig(UrlConf("calendar", "my cal", "calendar.url"), "999999")])))
         self.assertEqual(name, service.person.name)
         self.assertEqual(1, len(service.person.calendars))
         self.assertEqual("my cal", service.person.calendars[0].name)
