@@ -8,7 +8,7 @@ from typing import List
 from croniter import croniter
 from jsonpath import JSONPath
 
-from iot.core.configuration import Destinations, PlannedNotification
+from iot.core.configuration import PlannedNotification
 
 
 class MqttMediator:
