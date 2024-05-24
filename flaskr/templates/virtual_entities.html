@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{gettext('Virtual Entities')}}</title>
+</head>
+<body>
+<section class="things">
+    <h3>{{gettext('Things')}}</h3>
+    {% for thing in entities.things %}
+    {{ thing.name }}
+    {% endfor %}
+</section>
+<section class="rooms">
+    <h3>{{gettext('Rooms')}}</h3>
+    {% for room in entities.rooms %}
+    {{ room.name }}
+    {% endfor %}
+</section>
+<section class="persons">
+    <h3>{{gettext('Persons')}}</h3>
+    {% for person in entities.persons %}
+    {{ person.name }}
+    {% endfor %}
+</section>
+</body>
+</html>

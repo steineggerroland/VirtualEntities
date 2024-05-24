@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 from time import sleep
 
+from flaskr import create_app
 from iot.core.configuration import load_configuration
 from iot.core.storage import Storage
 from iot.dav.calendar_reader import CalendarLoader
@@ -15,6 +16,7 @@ from iot.mqtt.mqtt_machine_mediator import MqttMachineMediator
 from iot.mqtt.mqtt_person_mediator import MqttPersonMediator
 from iot.mqtt.mqtt_room_mediator import MqttRoomMediator
 
+DEFAULT_FLASK_CONFIG_FILE_NAME = "default_flask.yaml"
 DB_JSON_FILE = 'data/db.json'
 CONFIG_FILE_NAME = sys.argv[1] if len(sys.argv) > 1 else 'config.yaml'
 
@@ -56,6 +58,10 @@ def run():
         client.start()
         for mqtt_mediator in mqtt_mediators:
             mqtt_mediator.start()
+
+        frontend = create_app(Path(__file__).parent.absolute().joinpath(DEFAULT_FLASK_CONFIG_FILE_NAME).as_posix(),
+                              config.flaskr)
+        frontend.run()
         logger.info("Started.")
         while True:
             sleep(10)
