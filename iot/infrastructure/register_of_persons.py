@@ -8,3 +8,10 @@ class RegisterOfPersons:
             self._persons.remove(matching_persons[0])
         self._persons.append(person)
         return True
+
+    def dismiss(self, name: str):
+        matching_persons = list(filter(lambda p: p.name == name, self._persons))
+        if matching_persons:
+            self._persons.remove(matching_persons[0])
+            return True
+        return False
