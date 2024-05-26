@@ -5,7 +5,7 @@ from influxdb import InfluxDBClient
 from influxdb.exceptions import InfluxDBClientError
 
 from iot.core.configuration import TimeSeriesConfig
-from iot.core.time_series_storage import TimeSeriesStorage
+from iot.core.time_series_storage_strategy import TimeSeriesStorageStrategy
 from iot.core.timeseries_types import ConsumptionMeasurement
 from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.units import Temperature
@@ -19,7 +19,7 @@ HUMIDITY_FIELD = "humidity"
 INDOOR_CLIMATE_SERIES = "indoor_climate"
 
 
-class InfluxDbTimeSeriesStorage(TimeSeriesStorage):
+class InfluxDbTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
     def __init__(self, time_series_config: TimeSeriesConfig):
         self.influxdb = InfluxDBClient(host=time_series_config.url, username=time_series_config.username,
                                        password=time_series_config.password)

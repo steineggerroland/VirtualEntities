@@ -4,9 +4,6 @@ from pathlib import Path
 from threading import Thread
 from typing import List
 
-from iot.core.timeseries_storage_in_memory import InMemoryTimeSeriesStorage
-from iot.core.timeseries_storage_influxdb import InfluxDbTimeSeriesStorage
-from iot.core.timeseries_types import ConsumptionMeasurement
 from iot.infrastructure.exceptions import InvalidThingType
 from iot.infrastructure.machine.dishwasher import from_dict as dw_from_dict
 from iot.infrastructure.machine.dryer import from_dict as d_from_dict
@@ -14,11 +11,10 @@ from iot.infrastructure.machine.machine_that_can_be_loaded import MachineThatCan
 from iot.infrastructure.machine.washing_machine import from_dict as wm_from_dict
 from iot.infrastructure.room import from_dict as r_from_dict, Room
 from iot.infrastructure.thing import Thing
-from iot.infrastructure.units import Temperature
 
 
 class Storage:
-    def __init__(self, db_path: Path, thing_names: [str], time_series_config):
+    def __init__(self, db_path: Path, thing_names: [str]):
         self.db_name = db_path
         self.things = {}
         db_file = None
@@ -36,19 +32,13 @@ class Storage:
             if db_file:
                 db_file.close()
         self._scheduled_snapshots_thread: Thread = Thread(target=self._scheduled_snapshots, daemon=True)
-        if time_series_config:
-            self.time_series_storage = InfluxDbTimeSeriesStorage(time_series_config)
-        else:
-            self.time_series_storage = InMemoryTimeSeriesStorage()
 
     def start(self):
         self._scheduled_snapshots_thread.start()
-        self.time_series_storage.start()
 
     def shutdown(self, timeout=5):
         self._scheduled_snapshots_thread.join(timeout)
         self._save_snapshot_to_file()
-        self.time_series_storage.shutdown()
 
     def _scheduled_snapshots(self):
         while True:
@@ -95,12 +85,3 @@ class Storage:
 
     def load_all_rooms(self) -> List[Room]:
         return list(map(lambda r: r_from_dict(r), filter(lambda e: e.type == 'room', self.things.values())))
-
-    def append_power_consumption(self, watt: float, thing_name: str):
-        self.time_series_storage.append_power_consumption(watt, thing_name)
-
-    def get_power_consumptions_for_last_seconds(self, seconds: int, thing_name: str) -> [ConsumptionMeasurement]:
-        return self.time_series_storage.get_power_consumptions_for_last_seconds(seconds, thing_name)
-
-    def append_room_climate(self, temperature: Temperature, humidity: float, thing_name):
-        self.time_series_storage.append_room_climate(temperature, humidity, thing_name)

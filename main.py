@@ -6,6 +6,7 @@ from time import sleep
 from flaskr import create_app
 from iot.core.configuration import load_configuration
 from iot.core.storage import Storage
+from iot.core.time_series_storage import TimeSeriesStorage
 from iot.dav.calendar_reader import CalendarLoader
 from iot.infrastructure.machine.appliance_depot import ApplianceDepot
 from iot.infrastructure.machine.machine_service import MachineService, \
@@ -31,7 +32,8 @@ def run():
     logger.debug("Configuration loaded")
     client = MqttClient(config.mqtt)
     logger.debug("Mqtt client loaded")
-    storage = Storage(Path(DB_JSON_FILE), [thing.name for thing in config.things], config.time_series)
+    storage = Storage(Path(DB_JSON_FILE), [thing.name for thing in config.things])
+    time_series_storage = TimeSeriesStorage(config.time_series)
     appliance_depot = ApplianceDepot(storage)
     room_catalog = RoomCatalog(storage)
     register_of_persons = RegisterOfPersons()
@@ -39,13 +41,13 @@ def run():
     mqtt_mediators = []
     for thing_config in config.things:
         if machine_service_supports_thing_type(thing_type=thing_config.type):
-            machine_service = MachineService(appliance_depot, thing_config)
+            machine_service = MachineService(appliance_depot, time_series_storage, thing_config)
             logger.debug("Machine service for '%s' loaded" % thing_config.name)
             mqtt_mediators.append(
                 MqttMachineMediator(machine_service, thing_config.sources, thing_config.destinations, client))
             logger.debug("Mqtt machine mediator for '%s' loaded" % thing_config.name)
         elif room_service_supports_thing_type(thing_type=thing_config.type):
-            room_service = RoomService(room_catalog, storage, thing_config)
+            room_service = RoomService(room_catalog, time_series_storage, thing_config)
             logger.debug("Room service for '%s' loaded" % thing_config.name)
             mqtt_mediators.append(
                 MqttRoomMediator(client, room_service, thing_config))
