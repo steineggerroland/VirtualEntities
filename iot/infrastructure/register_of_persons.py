@@ -26,4 +26,4 @@ class RegisterOfPersons:
         return matching_persons[0] if matching_persons else None
 
     def catalog_all(self):
-        pass
+        return self._persons.copy()
