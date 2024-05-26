@@ -4,78 +4,75 @@ from threading import Thread
 
 from iot.core.configuration import IotThingConfig
 from iot.core.storage import Storage
-from iot.infrastructure.exceptions import DatabaseException, InvalidThingType
-from iot.infrastructure.machine.dishwasher import from_dict as dw_from_dict
-from iot.infrastructure.machine.dryer import from_dict as d_from_dict
+from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.machine.power_state_decorator import PowerState
 from iot.infrastructure.machine.run_complete_strategy import SimpleHistoryRunCompleteStrategy
-from iot.infrastructure.machine.washing_machine import from_dict as wm_from_dict
 
 
 class MachineService:
     def __init__(self, storage: Storage, thing_config: IotThingConfig):
         self.logger = logging.getLogger(self.__class__.__qualname__)
         self.storage = storage
-        db_entry = self.storage.load_thing(thing_config.name)
-        if thing_config.type == 'washing_machine':
-            self.thing = wm_from_dict(db_entry)
-        elif thing_config.type == 'dryer':
-            self.thing = d_from_dict(db_entry)
-        elif thing_config.type == 'dishwasher':
-            self.thing = dw_from_dict(db_entry)
-        else:
-            raise InvalidThingType(thing_config)
+        self.machine_name = thing_config.name
+        db_entry = self.storage.load_iot_machine(thing_config.name)
         self.run_complete_strategy = SimpleHistoryRunCompleteStrategy(storage)
-        if self.thing.started_run_at is not None:
+        if db_entry.started_run_at is not None:
             self.started_run()
 
     def update_power_consumption(self, new_power_consumption):
         try:
-            self.thing.update_power_consumption(new_power_consumption)
-            self.storage.update_thing(self.thing)
-            self.storage.append_power_consumption(new_power_consumption, self.thing.name)
-            if self.thing.started_run_at is None and self.thing.power_state is PowerState.RUNNING:
+            machine = self.storage.load_iot_machine(self.machine_name)
+            machine.update_power_consumption(new_power_consumption)
+            self.storage.update_thing(machine)
+            self.storage.append_power_consumption(new_power_consumption, machine.name)
+            if machine.started_run_at is None and machine.power_state is PowerState.RUNNING:
                 self.started_run()
         except ValueError as e:
             raise DatabaseException('Failed to save new power consumption because of database error.', e) from e
 
     def started_run(self):
         try:
-            if not self.thing.start_run:
+            machine = self.storage.load_iot_machine(self.machine_name)
+            if not machine.start_run:
                 return
-            self.thing.start_run()
-            self.storage.update_thing(self.thing)
+            machine.start_run()
+            self.storage.update_thing(machine)
             check_if_run_completed_thread = Thread(target=self._scheduled_check, daemon=True)
             check_if_run_completed_thread.start()
         except ValueError as e:
             raise DatabaseException('Failed to save started run because of database error.', e) from e
 
     def _scheduled_check(self):
-        while not self.run_complete_strategy.is_run_completed(self.thing):
+        machine = self.storage.load_iot_machine(self.machine_name)
+        while not self.run_complete_strategy.is_run_completed(machine):
             time.sleep(10)
+            machine = self.storage.load_iot_machine(self.machine_name)
         try:
             self.finished_run()
         except DatabaseException as e:
-            self.logger.error("Failed to finish run of '%s' because of database error.", self.thing.name, exc_info=e)
+            self.logger.error("Failed to finish run of '%s' because of database error.", machine.name, exc_info=e)
 
     def finished_run(self):
         try:
-            self.thing.finish_run()
-            self.storage.update_thing(self.thing)
+            machine = self.storage.load_iot_machine(self.machine_name)
+            machine.finish_run()
+            self.storage.update_thing(machine)
         except ValueError as e:
             raise DatabaseException('Failed to save finished run because of database error.', e) from e
 
     def unloaded(self):
         try:
-            self.thing.unload()
-            self.storage.update_thing(self.thing)
+            machine = self.storage.load_iot_machine(self.machine_name)
+            machine.unload()
+            self.storage.update_thing(machine)
         except ValueError as e:
             raise DatabaseException('Failed to save unloading machine because of database error.', e) from e
 
     def loaded(self, needs_unloading=False):
         try:
-            self.thing.load(needs_unloading)
-            self.storage.update_thing(self.thing)
+            machine = self.storage.load_iot_machine(self.machine_name)
+            machine.load(needs_unloading)
+            self.storage.update_thing(machine)
         except ValueError as e:
             raise DatabaseException('Failed to save setting machine to loaded.', e) from e
 

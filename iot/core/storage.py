@@ -6,6 +6,12 @@ from threading import Thread
 from iot.core.timeseries_storage_in_memory import InMemoryTimeSeriesStorage
 from iot.core.timeseries_storage_influxdb import InfluxDbTimeSeriesStorage
 from iot.core.timeseries_types import ConsumptionMeasurement
+from iot.infrastructure.exceptions import InvalidThingType
+from iot.infrastructure.machine.dishwasher import from_dict as dw_from_dict
+from iot.infrastructure.machine.dryer import from_dict as d_from_dict
+from iot.infrastructure.machine.iot_machine import IotMachine
+from iot.infrastructure.machine.washing_machine import from_dict as wm_from_dict
+from iot.infrastructure.room import from_dict as r_from_dict, Room
 from iot.infrastructure.thing import Thing
 from iot.infrastructure.units import Temperature
 
@@ -52,8 +58,20 @@ class Storage:
         with open(self.db_name, 'w') as db_file:
             json.dump(self.things, db_file)
 
-    def load_thing(self, thing_name: str):
-        return self.things[thing_name]
+    def load_iot_machine(self, thing_name: str) -> IotMachine:
+        db_entry = self.things[thing_name]
+        if db_entry.type == 'washing_machine':
+            return wm_from_dict(db_entry)
+        elif db_entry.type == 'dryer':
+            return d_from_dict(db_entry)
+        elif db_entry.type == 'dishwasher':
+            return dw_from_dict(db_entry)
+        else:
+            raise InvalidThingType(db_entry.type)
+
+    def load_room(self, name: str) -> Room:
+        db_entry = self.things[name]
+        return r_from_dict(db_entry)
 
     def update_thing(self, thing: Thing):
         self.things[thing.name] = thing.to_dict()
