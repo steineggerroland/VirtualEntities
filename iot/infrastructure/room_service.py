@@ -1,5 +1,5 @@
 from iot.core.configuration import IotThingConfig
-from iot.core.storage import Storage
+from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.room import Room
 from iot.infrastructure.room_catalog import RoomCatalog
@@ -7,9 +7,9 @@ from iot.infrastructure.units import TemperatureThresholds, Range, HumidityThres
 
 
 class RoomService:
-    def __init__(self, room_catalog: RoomCatalog, storage: Storage, room_config: IotThingConfig):
+    def __init__(self, room_catalog: RoomCatalog, time_series_storage: TimeSeriesStorage, room_config: IotThingConfig):
         self.room_catalog = room_catalog
-        self.storage = storage
+        self.time_series_storage = time_series_storage
         self.room_name = room_config.name
         room: Room = room_catalog.find_room(room_config.name)
         if room_config.temperature_thresholds:
@@ -45,7 +45,7 @@ class RoomService:
             room.update_temperature(temperature)
             room.update_humidity(humidity)
             self.room_catalog.catalog(room)
-            self.storage.append_room_climate(temperature, humidity, self.room_name)
+            self.time_series_storage.append_room_climate(temperature, humidity, self.room_name)
         except ValueError as e:
             raise DatabaseException('Failed to save room climate.', e) from e
 

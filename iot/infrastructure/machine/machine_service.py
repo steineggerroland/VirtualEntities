@@ -3,7 +3,7 @@ import time
 from threading import Thread
 
 from iot.core.configuration import IotThingConfig
-from iot.core.storage import Storage
+from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.machine.appliance_depot import ApplianceDepot
 from iot.infrastructure.machine.power_state_decorator import PowerState
@@ -11,13 +11,14 @@ from iot.infrastructure.machine.run_complete_strategy import SimpleHistoryRunCom
 
 
 class MachineService:
-    def __init__(self, appliance_depot: ApplianceDepot, storage: Storage, thing_config: IotThingConfig):
+    def __init__(self, appliance_depot: ApplianceDepot, time_series_storage: TimeSeriesStorage,
+                 thing_config: IotThingConfig):
         self.logger = logging.getLogger(self.__class__.__qualname__)
-        self.storage = storage
+        self.time_series_storage = time_series_storage
         self.appliance_depot = appliance_depot
         self.machine_name = thing_config.name
         db_entry = self.appliance_depot.retrieve(thing_config.name)
-        self.run_complete_strategy = SimpleHistoryRunCompleteStrategy(storage)
+        self.run_complete_strategy = SimpleHistoryRunCompleteStrategy(time_series_storage)
         if db_entry.started_run_at is not None:
             self.started_run()
 
@@ -26,7 +27,7 @@ class MachineService:
             machine = self.appliance_depot.retrieve(self.machine_name)
             machine.update_power_consumption(new_power_consumption)
             self.appliance_depot.stock(machine)
-            self.storage.append_power_consumption(new_power_consumption, machine.name)
+            self.time_series_storage.append_power_consumption(new_power_consumption, machine.name)
             if machine.started_run_at is None and machine.power_state is PowerState.RUNNING:
                 self.started_run()
         except ValueError as e:

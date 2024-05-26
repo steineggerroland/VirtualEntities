@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
 
-from iot.core.time_series_storage import TimeSeriesStorage
+from iot.core.time_series_storage_strategy import TimeSeriesStorageStrategy
 from iot.core.timeseries_types import ConsumptionMeasurement
 from iot.infrastructure.units import Temperature
 
 
-class InMemoryTimeSeriesStorage(TimeSeriesStorage):
+class InMemoryTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
     def __init__(self):
         self.power_consumption_values = {}
 
