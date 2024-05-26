@@ -73,7 +73,7 @@ class Storage:
         db_entry = self.things[name]
         return r_from_dict(db_entry)
 
-    def update_thing(self, thing: Thing):
+    def update(self, thing: Thing):
         self.things[thing.name] = thing.to_dict()
 
     def append_power_consumption(self, watt: float, thing_name: str):

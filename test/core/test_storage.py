@@ -15,7 +15,7 @@ class StorageTest(unittest.TestCase):
         room.humidity = 15.1
         room.last_updated_at = datetime.now()
         # when
-        db.update_thing(room)
+        db.update(room)
         # then
         db_obj = db.load_room("thing01")
         self.assertEqual(room.humidity, db_obj.humidity)

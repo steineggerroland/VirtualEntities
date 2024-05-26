@@ -43,14 +43,14 @@ class MachinePowerTest(unittest.TestCase):
     def test_update_power_consumption(self):
         # given
         watt = 1898
-        self.storage_mock.update_thing = Mock()
+        self.storage_mock.update = Mock()
         self.storage_mock.append_power_consumption = Mock()
         self.thing.update_power_consumption = Mock()
         # when
         self.machine_service.update_power_consumption(watt)
         # then
         self.thing.update_power_consumption.assert_called_once_with(watt)
-        self.storage_mock.update_thing.assert_called_once()
+        self.storage_mock.update.assert_called_once()
         self.storage_mock.append_power_consumption.assert_called_once_with(watt, self.thing_name)
 
     def test_started_run_called_on_change_to_running(self):
@@ -76,14 +76,14 @@ class MachinePowerTest(unittest.TestCase):
 
     def test_start_run(self):
         # given
-        self.storage_mock.update_thing = Mock()
+        self.storage_mock.update = Mock()
         self.thing.started_run_at = None
         self.machine_service._scheduled_check = Mock()  # avoid check causing errors
         # when
         self.machine_service.started_run()
         # then
         self.assertAlmostEqual(self.thing.started_run_at, datetime.now(), delta=timedelta(seconds=0.1))
-        self.storage_mock.update_thing.assert_called_once_with(self.thing)
+        self.storage_mock.update.assert_called_once_with(self.thing)
 
     def test_start_run_schedules_finish_check(self):
         # given
@@ -97,42 +97,42 @@ class MachinePowerTest(unittest.TestCase):
     def test_finished_run(self):
         # given
         self.thing.finish_run = Mock()
-        self.storage_mock.update_thing = Mock()
+        self.storage_mock.update = Mock()
         # when
         self.machine_service.finished_run()
         # then
         self.thing.finish_run.assert_called()
-        self.storage_mock.update_thing.assert_called()
+        self.storage_mock.update.assert_called()
 
     def test_unloaded(self):
         # given
         self.thing.unload = Mock()
-        self.storage_mock.update_thing = Mock()
+        self.storage_mock.update = Mock()
         # when
         self.machine_service.unloaded()
         # then
         self.thing.unload.assert_called()
-        self.storage_mock.update_thing.assert_called()
+        self.storage_mock.update.assert_called()
 
     def test_loaded(self):
         # given
         self.thing.load = Mock()
-        self.storage_mock.update_thing = Mock()
+        self.storage_mock.update = Mock()
         # when
         self.machine_service.loaded()
         # then
         self.thing.load.assert_called()
-        self.storage_mock.update_thing.assert_called()
+        self.storage_mock.update.assert_called()
 
     def test_loade_needing_unload(self):
         # given
         self.thing.load = Mock()
-        self.storage_mock.update_thing = Mock()
+        self.storage_mock.update = Mock()
         # when
         self.machine_service.loaded(needs_unloading=True)
         # then
         self.thing.load.assert_called_with(True)
-        self.storage_mock.update_thing.assert_called()
+        self.storage_mock.update.assert_called()
 
 
 class DatabaseExceptionTranslationTests(unittest.TestCase):
@@ -141,7 +141,7 @@ class DatabaseExceptionTranslationTests(unittest.TestCase):
         self.storage_mock: Mock | Storage = Mock()
         self.storage_mock.load_iot_machine = Mock(return_value=WashingMachine('washing_machine'))
         self.machine_service = MachineService(self.storage_mock, self.configuration_mock)
-        self.storage_mock.update_thing.side_effect = [ValueError()]
+        self.storage_mock.update.side_effect = [ValueError()]
 
     def test_update_power_consumption(self):
         self.assertRaises(DatabaseException, self.machine_service.update_power_consumption, 14)

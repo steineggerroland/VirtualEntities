@@ -19,13 +19,13 @@ class RoomService:
             room.humidity_thresholds = HumidityThresholds(
                 Range(room_config.humidity_thresholds.optimal.lower, room_config.humidity_thresholds.optimal.upper),
                 room_config.humidity_thresholds.critical_lower, room_config.humidity_thresholds.critical_upper)
-        self.storage.update_thing(room)
+        self.storage.update(room)
 
     def update_temperature(self, new_temperature: Temperature):
         try:
             room: Room = self.storage.load_room(self.room_name)
             room.update_temperature(new_temperature)
-            self.storage.update_thing(room)
+            self.storage.update(room)
         except ValueError as e:
             raise DatabaseException('Failed to save updated temperature.', e) from e
 
@@ -33,7 +33,7 @@ class RoomService:
         try:
             room: Room = self.storage.load_room(self.room_name)
             room.update_humidity(humidity)
-            self.storage.update_thing(room)
+            self.storage.update(room)
         except ValueError as e:
             raise DatabaseException('Failed to save updated humidity.', e) from e
 
@@ -42,7 +42,7 @@ class RoomService:
             room: Room = self.storage.load_room(self.room_name)
             room.update_temperature(temperature)
             room.update_humidity(humidity)
-            self.storage.update_thing(room)
+            self.storage.update(room)
             self.storage.append_room_climate(temperature, humidity, self.room_name)
         except ValueError as e:
             raise DatabaseException('Failed to save room climate.', e) from e
