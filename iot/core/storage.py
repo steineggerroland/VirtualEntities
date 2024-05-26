@@ -2,6 +2,7 @@ import json
 import time
 from pathlib import Path
 from threading import Thread
+from typing import List
 
 from iot.core.timeseries_storage_in_memory import InMemoryTimeSeriesStorage
 from iot.core.timeseries_storage_influxdb import InfluxDbTimeSeriesStorage
@@ -73,11 +74,22 @@ class Storage:
         db_entry = self.things[name]
         return r_from_dict(db_entry)
 
-    def update(self, thing: Thing):
+    def update(self, thing: Thing) -> bool:
+        is_update = thing.name in self.things.keys()
         self.things[thing.name] = thing.to_dict()
+        return is_update
+
+    def remove(self, name: str) -> bool:
+        if name in self.things.keys():
+            del self.things[name]
+            return True
+        return False
 
     def append_power_consumption(self, watt: float, thing_name: str):
         self.time_series_storage.append_power_consumption(watt, thing_name)
+
+    def load_all_rooms(self) -> List[Room]:
+        return list(map(lambda r: r_from_dict(r), filter(lambda e: e.type == 'room', self.things.values())))
 
     def get_power_consumptions_for_last_seconds(self, seconds: int, thing_name: str) -> [ConsumptionMeasurement]:
         return self.time_series_storage.get_power_consumptions_for_last_seconds(seconds, thing_name)
