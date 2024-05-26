@@ -85,11 +85,19 @@ class Storage:
             return True
         return False
 
-    def append_power_consumption(self, watt: float, thing_name: str):
-        self.time_series_storage.append_power_consumption(watt, thing_name)
+    def load_all_iot_machines(self):
+        iot_machines = list(
+            map(lambda r: wm_from_dict(r), filter(lambda e: e.type == 'washing_machine', self.things.values())))
+        iot_machines.extend(map(lambda r: d_from_dict(r), filter(lambda e: e.type == 'dryer', self.things.values())))
+        iot_machines.extend(
+            map(lambda r: dw_from_dict(r), filter(lambda e: e.type == 'dishwasher', self.things.values())))
+        return iot_machines
 
     def load_all_rooms(self) -> List[Room]:
         return list(map(lambda r: r_from_dict(r), filter(lambda e: e.type == 'room', self.things.values())))
+
+    def append_power_consumption(self, watt: float, thing_name: str):
+        self.time_series_storage.append_power_consumption(watt, thing_name)
 
     def get_power_consumptions_for_last_seconds(self, seconds: int, thing_name: str) -> [ConsumptionMeasurement]:
         return self.time_series_storage.get_power_consumptions_for_last_seconds(seconds, thing_name)
