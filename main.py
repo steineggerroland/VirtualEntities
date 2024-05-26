@@ -68,7 +68,7 @@ def run():
             mqtt_mediator.start()
 
         frontend = create_app(Path(__file__).parent.absolute().joinpath(DEFAULT_FLASK_CONFIG_FILE_NAME).as_posix(),
-                              config.flaskr)
+                              appliance_depot, room_catalog, register_of_persons, config.flaskr)
         frontend.run()
         logger.info("Started.")
         while True:

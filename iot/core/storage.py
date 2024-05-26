@@ -77,11 +77,11 @@ class Storage:
 
     def load_all_iot_machines(self) -> List[MachineThatCanBeLoaded]:
         iot_machines = list(
-            map(lambda r: wm_from_dict(r), filter(lambda e: e.type == 'washing_machine', self.things.values())))
-        iot_machines.extend(map(lambda r: d_from_dict(r), filter(lambda e: e.type == 'dryer', self.things.values())))
+            map(lambda r: wm_from_dict(r), filter(lambda e: e["type"] == 'washing_machine', self.things.values())))
+        iot_machines.extend(map(lambda r: d_from_dict(r), filter(lambda e: e["type"] == 'dryer', self.things.values())))
         iot_machines.extend(
-            map(lambda r: dw_from_dict(r), filter(lambda e: e.type == 'dishwasher', self.things.values())))
+            map(lambda r: dw_from_dict(r), filter(lambda e: e["type"] == 'dishwasher', self.things.values())))
         return iot_machines
 
     def load_all_rooms(self) -> List[Room]:
-        return list(map(lambda r: r_from_dict(r), filter(lambda e: e.type == 'room', self.things.values())))
+        return list(map(lambda r: r_from_dict(r), filter(lambda e: e["type"] == 'room', self.things.values())))
