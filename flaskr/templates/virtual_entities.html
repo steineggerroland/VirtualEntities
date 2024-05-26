@@ -20,7 +20,9 @@
 <section class="persons">
     <h3>{{gettext('Persons')}}</h3>
     {% for person in entities.persons %}
-    {{ person.name }}
+    <div class="person">
+        <p><b>{{ person.name }}</b></p>
+    </div>
     {% endfor %}
 </section>
 </body>
