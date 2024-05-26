@@ -10,7 +10,7 @@ from iot.core.timeseries_types import ConsumptionMeasurement
 from iot.infrastructure.exceptions import InvalidThingType
 from iot.infrastructure.machine.dishwasher import from_dict as dw_from_dict
 from iot.infrastructure.machine.dryer import from_dict as d_from_dict
-from iot.infrastructure.machine.iot_machine import IotMachine
+from iot.infrastructure.machine.machine_that_can_be_loaded import MachineThatCanBeLoaded
 from iot.infrastructure.machine.washing_machine import from_dict as wm_from_dict
 from iot.infrastructure.room import from_dict as r_from_dict, Room
 from iot.infrastructure.thing import Thing
@@ -59,7 +59,7 @@ class Storage:
         with open(self.db_name, 'w') as db_file:
             json.dump(self.things, db_file)
 
-    def load_iot_machine(self, thing_name: str) -> IotMachine:
+    def load_iot_machine(self, thing_name: str) -> MachineThatCanBeLoaded:
         db_entry = self.things[thing_name]
         if db_entry.type == 'washing_machine':
             return wm_from_dict(db_entry)
@@ -85,7 +85,7 @@ class Storage:
             return True
         return False
 
-    def load_all_iot_machines(self):
+    def load_all_iot_machines(self) -> List[MachineThatCanBeLoaded]:
         iot_machines = list(
             map(lambda r: wm_from_dict(r), filter(lambda e: e.type == 'washing_machine', self.things.values())))
         iot_machines.extend(map(lambda r: d_from_dict(r), filter(lambda e: e.type == 'dryer', self.things.values())))

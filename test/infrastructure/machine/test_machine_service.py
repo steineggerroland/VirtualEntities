@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from unittest.mock import Mock
 
 from iot.core.storage import Storage
+from iot.infrastructure.machine.appliance_depot import ApplianceDepot
 from iot.infrastructure.machine.machine_service import MachineService, DatabaseException
 from iot.infrastructure.machine.washing_machine import WashingMachine
 
@@ -13,9 +14,9 @@ class InitTest(unittest.TestCase):
         configuration_mock.name = 'washing machine'
         storage_mock = Mock()
         storage_mock.load_thing = Mock(return_value=WashingMachine('washing_machine'))
-        machine_service = MachineService(storage_mock, configuration_mock)
+        machine_service = MachineService(ApplianceDepot(storage_mock), storage_mock, configuration_mock)
         self.assertEqual(machine_service.machine_name, 'washing machine')
-        self.assertIsNotNone(machine_service.storage)
+        self.assertIsNotNone(machine_service.appliance_depot)
         self.assertIsNotNone(machine_service.logger)
 
     def test_start_run_initiated(self):
@@ -26,7 +27,7 @@ class InitTest(unittest.TestCase):
         storage_mock.load_iot_machine = Mock(return_value=dryer_mock)
         dryer_mock.started_run_at = datetime.now()
         # when
-        MachineService(storage_mock, configuration_mock)
+        MachineService(ApplianceDepot(storage_mock), storage_mock, configuration_mock)
         # then
         dryer_mock.start_run.assert_called()
 
@@ -38,7 +39,8 @@ class MachinePowerTest(unittest.TestCase):
         self.configuration_mock: Mock | Storage = Mock(name=self.thing_name, type='washing_machine')
         self.storage_mock: Mock | Storage = Mock()
         self.storage_mock.load_iot_machine = Mock(return_value=self.thing)
-        self.machine_service = MachineService(self.storage_mock, self.configuration_mock)
+        self.machine_service = MachineService(ApplianceDepot(self.storage_mock), self.storage_mock,
+                                              self.configuration_mock)
 
     def test_update_power_consumption(self):
         # given
@@ -140,7 +142,8 @@ class DatabaseExceptionTranslationTests(unittest.TestCase):
         self.configuration_mock: Mock | Storage = Mock(type='washing_machine')
         self.storage_mock: Mock | Storage = Mock()
         self.storage_mock.load_iot_machine = Mock(return_value=WashingMachine('washing_machine'))
-        self.machine_service = MachineService(self.storage_mock, self.configuration_mock)
+        self.machine_service = MachineService(ApplianceDepot(self.storage_mock), self.storage_mock,
+                                              self.configuration_mock)
         self.storage_mock.update.side_effect = [ValueError()]
 
     def test_update_power_consumption(self):
