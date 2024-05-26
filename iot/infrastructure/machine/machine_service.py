@@ -23,7 +23,7 @@ class MachineService:
         try:
             machine = self.storage.load_iot_machine(self.machine_name)
             machine.update_power_consumption(new_power_consumption)
-            self.storage.update_thing(machine)
+            self.storage.update(machine)
             self.storage.append_power_consumption(new_power_consumption, machine.name)
             if machine.started_run_at is None and machine.power_state is PowerState.RUNNING:
                 self.started_run()
@@ -36,7 +36,7 @@ class MachineService:
             if not machine.start_run:
                 return
             machine.start_run()
-            self.storage.update_thing(machine)
+            self.storage.update(machine)
             check_if_run_completed_thread = Thread(target=self._scheduled_check, daemon=True)
             check_if_run_completed_thread.start()
         except ValueError as e:
@@ -56,7 +56,7 @@ class MachineService:
         try:
             machine = self.storage.load_iot_machine(self.machine_name)
             machine.finish_run()
-            self.storage.update_thing(machine)
+            self.storage.update(machine)
         except ValueError as e:
             raise DatabaseException('Failed to save finished run because of database error.', e) from e
 
@@ -64,7 +64,7 @@ class MachineService:
         try:
             machine = self.storage.load_iot_machine(self.machine_name)
             machine.unload()
-            self.storage.update_thing(machine)
+            self.storage.update(machine)
         except ValueError as e:
             raise DatabaseException('Failed to save unloading machine because of database error.', e) from e
 
@@ -72,7 +72,7 @@ class MachineService:
         try:
             machine = self.storage.load_iot_machine(self.machine_name)
             machine.load(needs_unloading)
-            self.storage.update_thing(machine)
+            self.storage.update(machine)
         except ValueError as e:
             raise DatabaseException('Failed to save setting machine to loaded.', e) from e
 
