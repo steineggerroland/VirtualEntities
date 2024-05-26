@@ -7,6 +7,7 @@ from flaskr import create_app
 from iot.core.configuration import load_configuration
 from iot.core.storage import Storage
 from iot.dav.calendar_reader import CalendarLoader
+from iot.infrastructure.machine.appliance_depot import ApplianceDepot
 from iot.infrastructure.machine.machine_service import MachineService, \
     supports_thing_type as machine_service_supports_thing_type
 from iot.infrastructure.person_service import PersonService, supports_thing_type as person_service_supports_thing_type
@@ -26,14 +27,15 @@ def run():
     logger.debug("Starting")
     config = load_configuration(CONFIG_FILE_NAME)
     logger.debug("Configuration loaded")
-    storage = Storage(Path(DB_JSON_FILE), [thing.name for thing in config.things], config.time_series)
-    logger.debug("Storage loaded")
     client = MqttClient(config.mqtt)
     logger.debug("Mqtt client loaded")
+    storage = Storage(Path(DB_JSON_FILE), [thing.name for thing in config.things], config.time_series)
+    appliance_depot = ApplianceDepot(storage)
+    logger.debug("Storage loaded")
     mqtt_mediators = []
     for thing_config in config.things:
         if machine_service_supports_thing_type(thing_type=thing_config.type):
-            machine_service = MachineService(storage, thing_config)
+            machine_service = MachineService(appliance_depot, thing_config)
             logger.debug("Machine service for '%s' loaded" % thing_config.name)
             mqtt_mediators.append(
                 MqttMachineMediator(machine_service, thing_config.sources, thing_config.destinations, client))
