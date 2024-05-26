@@ -22,4 +22,5 @@ class RegisterOfPersons:
         return False
 
     def locate(self, name: str) -> Person | None:
-        pass
+        matching_persons = list(filter(lambda p: p.name == name, self._persons))
+        return matching_persons[0] if matching_persons else None
