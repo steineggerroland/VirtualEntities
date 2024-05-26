@@ -11,6 +11,7 @@ from iot.infrastructure.machine.appliance_depot import ApplianceDepot
 from iot.infrastructure.machine.machine_service import MachineService, \
     supports_thing_type as machine_service_supports_thing_type
 from iot.infrastructure.person_service import PersonService, supports_thing_type as person_service_supports_thing_type
+from iot.infrastructure.room_catalog import RoomCatalog
 from iot.infrastructure.room_service import RoomService, supports_thing_type as room_service_supports_thing_type
 from iot.mqtt.mqtt_client import MqttClient
 from iot.mqtt.mqtt_machine_mediator import MqttMachineMediator
@@ -31,6 +32,7 @@ def run():
     logger.debug("Mqtt client loaded")
     storage = Storage(Path(DB_JSON_FILE), [thing.name for thing in config.things], config.time_series)
     appliance_depot = ApplianceDepot(storage)
+    room_catalog = RoomCatalog(storage)
     logger.debug("Storage loaded")
     mqtt_mediators = []
     for thing_config in config.things:
@@ -41,7 +43,7 @@ def run():
                 MqttMachineMediator(machine_service, thing_config.sources, thing_config.destinations, client))
             logger.debug("Mqtt machine mediator for '%s' loaded" % thing_config.name)
         elif room_service_supports_thing_type(thing_type=thing_config.type):
-            room_service = RoomService(storage, thing_config)
+            room_service = RoomService(room_catalog, storage, thing_config)
             logger.debug("Room service for '%s' loaded" % thing_config.name)
             mqtt_mediators.append(
                 MqttRoomMediator(client, room_service, thing_config))

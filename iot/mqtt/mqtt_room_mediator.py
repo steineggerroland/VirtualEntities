@@ -14,7 +14,7 @@ class MqttRoomMediator(MqttMediator):
             mqtt_client.subscribe(source.topic, lambda msg: self._handle_message(msg, source.measures))
 
         self.handle_destinations(thing_config.destinations.planned_notifications if thing_config.destinations else [],
-                                 lambda: self.room_service.room.to_dict())
+                                 lambda: self.room_service.get_room().to_dict())
 
     def temperature_update(self, msg, json_path=None):
         try:
@@ -23,7 +23,7 @@ class MqttRoomMediator(MqttMediator):
                 self.room_service.update_temperature(Temperature(raw_temperature))
         except DatabaseException as e:
             self.logger.error("Failed to save room's '%s' temperature because of database error '%s'",
-                              self.room_service.room.name, e, exc_info=True)
+                              self.room_service.get_room().name, e, exc_info=True)
 
     def humidity_update(self, msg, json_path=None):
         try:
@@ -32,7 +32,7 @@ class MqttRoomMediator(MqttMediator):
                 self.room_service.update_humidity(raw_humidity)
         except DatabaseException as e:
             self.logger.error("Failed to save room's '%s' humidity because of database error '%s'",
-                              self.room_service.room.name, e, exc_info=True)
+                              self.room_service.get_room().name, e, exc_info=True)
 
     def update_room_climate(self, msg, temperature_json_path=None, humidity_json_path=None):
         try:
@@ -41,7 +41,7 @@ class MqttRoomMediator(MqttMediator):
                 self._read_value_from_message(msg, humidity_json_path, float))
         except DatabaseException as e:
             self.logger.error("Failed to save room's '%s' climate because of database error '%s'",
-                              self.room_service.room.name, e, exc_info=True)
+                              self.room_service.get_room().name, e, exc_info=True)
 
     def _handle_message(self, msg, measures: [Measure]):
         unhandled_measures = list(measures)
