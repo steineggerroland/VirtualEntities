@@ -3,6 +3,7 @@ import os
 import yamlenv
 from flask import Flask, request
 from flask_babel import Babel
+from flask_bootstrap import Bootstrap5
 
 from flaskr.views import VirtualEntities
 from iot.infrastructure.machine.appliance_depot import ApplianceDepot
@@ -26,8 +27,20 @@ def create_app(default_config_file_name: str, appliance_depot: ApplianceDepot, r
         view_func=VirtualEntities.ListView.as_view("ve_list")
     )
 
+    def locale_selector():
+        return request.accept_languages.best_match(app.config['LANGUAGES'].keys())
+
+    @app.context_processor
+    def utility_processor():
+        return dict(lang=locale_selector())
+
     babel = Babel(app, default_translation_directories="../translations",
-                  locale_selector=lambda: request.accept_languages.best_match(app.config['LANGUAGES'].keys()))
+                  locale_selector=locale_selector)
+
+    app.config['BOOTSTRAP_SERVE_LOCAL'] = True
+    app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = 'sketchy'
+    bootstrap = Bootstrap5(app)
+
 
     # ensure the instance folder exists
     try:
