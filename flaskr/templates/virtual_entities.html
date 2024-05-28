@@ -1,29 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{gettext('Virtual Entities')}}</title>
-</head>
-<body>
-<section class="things">
-    <h3>{{gettext('Things')}}</h3>
-    {% for thing in entities.things %}
-    {{ thing.name }}
-    {% endfor %}
-</section>
-<section class="rooms">
-    <h3>{{gettext('Rooms')}}</h3>
-    {% for room in entities.rooms %}
-    {{ room.name }}
-    {% endfor %}
-</section>
-<section class="persons">
-    <h3>{{gettext('Persons')}}</h3>
-    {% for person in entities.persons %}
-    <div class="person">
-        <p><b>{{ person.name }}</b></p>
-    </div>
-    {% endfor %}
-</section>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}<title>{{_('Virtual Entities')}}</title>{% endblock %}
+{% block content %}
+<main class="container">
+    <section class="appliance-depot">
+        <h3>{{_('Appliance depot')}}</h3>
+        {% if entities.things %}
+        {% for appliance in entities.things %}
+        <section class="appliance">
+            {{ appliance.name }}
+        </section>
+        {% endfor %}
+        {% else %}
+        <div class="alert alert-secondary" role="alert">
+            {{ _('The depot is empty') }}
+        </div>
+        {% endif %}
+    </section>
+    <section class="room-catalog">
+        <h3>{{_('Room catalog')}}</h3>
+        {% if entities.rooms %}
+        {% for room in entities.rooms %}
+        <section class="room">
+            {{ room.name }}
+        </section>
+        {% endfor %}
+        {% else %}
+        <div class="alert alert-secondary" role="alert">
+            {{ _('No rooms in catalog') }}
+        </div>
+        {% endif %}
+    </section>
+    <section class="register-of-persons">
+        <h3>{{_('Register of Persons')}}</h3>
+        {% if entities.persons %}
+        {% for person in entities.persons %}
+        <div class="person">
+            <p><b>{{ person.name }}</b></p>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="alert alert-secondary" role="alert">
+            {{ _('Register is empty') }}
+        </div>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}
