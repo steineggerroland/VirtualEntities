@@ -1,4 +1,4 @@
-{% if power_consumption %}
+{% if power_consumption != None %}
 <span class="badge power-consumption text-bg-light border border-secondary" data-bs-title="{{_('Power consumption')}}"
       data-bs-toggle="tooltip">{{power_consumption}}W</span>
 {% else %}
