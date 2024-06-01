@@ -2,13 +2,10 @@
     <div class="card-header">
         <h4 class="card-title mb-0">
             {{ room.name }}
-            {% with online_status=room.online_status() %}
+            {% with online_status=room.online_status(), time_delta=room.last_seen_time_delta() %}
             {% include "snippets/online_status_badge.html" %}
             {% endwith %}
         </h4>
-        {% with time_delta=room.last_seen_time_delta() %}
-        {% include "snippets/last_seen_at_subtitle.html" %}
-        {% endwith %}
     </div>
     <div class="card-body">
         {% with temperature=room.temperature,rating=room.rate_temperature() %}
