@@ -11,7 +11,7 @@ class RoomService:
         self.room_catalog = room_catalog
         self.time_series_storage = time_series_storage
         self.room_name = room_config.name
-        room: Room = room_catalog.find_room(room_config.name)
+        room: Room = self.get_room()
         if room_config.temperature_thresholds:
             room.temperature_thresholds = TemperatureThresholds(
                 Range(room_config.temperature_thresholds.optimal.lower,
@@ -49,8 +49,9 @@ class RoomService:
         except ValueError as e:
             raise DatabaseException('Failed to save room climate.', e) from e
 
-    def get_room(self):
-        self.room_catalog.find_room(self.room_name)
+    def get_room(self) -> Room:
+        db_entry = self.room_catalog.find_room(self.room_name)
+        return db_entry if db_entry is not None else Room(self.room_name)
 
 
 def supports_thing_type(thing_type) -> bool:

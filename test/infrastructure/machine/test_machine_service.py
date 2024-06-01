@@ -13,7 +13,7 @@ class InitTest(unittest.TestCase):
         configuration_mock = Mock(type='washing_machine')
         configuration_mock.name = 'washing machine'
         storage_mock = Mock()
-        storage_mock.load_thing = Mock(return_value=WashingMachine('washing_machine'))
+        storage_mock.load_thing = Mock(return_value=WashingMachine('washing_machine', 'washing_machine'))
         machine_service = MachineService(ApplianceDepot(storage_mock), storage_mock, configuration_mock)
         self.assertEqual(machine_service.machine_name, 'washing machine')
         self.assertIsNotNone(machine_service.appliance_depot)
@@ -35,7 +35,7 @@ class InitTest(unittest.TestCase):
 class MachinePowerTest(unittest.TestCase):
     def setUp(self) -> None:
         self.thing_name = "some thing"
-        self.thing: WashingMachine = WashingMachine(self.thing_name)
+        self.thing: WashingMachine = WashingMachine(self.thing_name, 'washing_machine')
         self.configuration_mock: Mock | Storage = Mock(name=self.thing_name, type='washing_machine')
         self.storage_mock: Mock | Storage = Mock()
         self.storage_mock.load_iot_machine = Mock(return_value=self.thing)
@@ -141,7 +141,7 @@ class DatabaseExceptionTranslationTests(unittest.TestCase):
     def setUp(self) -> None:
         self.configuration_mock: Mock | Storage = Mock(type='washing_machine')
         self.storage_mock: Mock | Storage = Mock()
-        self.storage_mock.load_iot_machine = Mock(return_value=WashingMachine('washing_machine'))
+        self.storage_mock.load_iot_machine = Mock(return_value=WashingMachine('washing_machine', 'washing_machine'))
         self.machine_service = MachineService(ApplianceDepot(self.storage_mock), self.storage_mock,
                                               self.configuration_mock)
         self.storage_mock.update.side_effect = [ValueError()]

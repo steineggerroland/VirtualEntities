@@ -11,7 +11,8 @@ class ListView(View):
         appliance_depot: ApplianceDepot = current_app.appliance_depot
         room_catalog: RoomCatalog = current_app.room_catalog
         register_of_persons: RegisterOfPersons = current_app.register_of_persons
-        things = appliance_depot.inventory()
+        appliances = appliance_depot.inventory()
         rooms = room_catalog.list_all_rooms()
         persons = register_of_persons.catalog_all()
-        return render_template("virtual_entities.html", entities={'things': things, 'rooms': rooms, 'persons': persons})
+        return render_template("virtual_entities.html", entities={'appliance_depot': appliances, 'room_catalog': rooms,
+                                                                  'register_of_persons': persons})

@@ -9,7 +9,7 @@ from iot.infrastructure.time.calendar import Calendar
 class Person(Thing):
     def __init__(self, name: str, calendars: List[Calendar] = (), last_updated_at: datetime = datetime.now(),
                  last_seen_at: None | datetime = None):
-        super().__init__(name, last_updated_at, last_seen_at, online_delta_in_seconds=60 * 10)
+        super().__init__(name, "person", last_updated_at, last_seen_at, online_delta_in_seconds=60 * 10)
         self.calendars = calendars
 
     def get_appointments_for(self, start: datetime, delta: timedelta):

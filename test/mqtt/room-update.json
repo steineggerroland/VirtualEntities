@@ -1,5 +1,6 @@
 {
   "name": "kitchen",
+  "type": "room",
   "temperature": {
     "value": 13.37,
     "unit": "degree_celsius"

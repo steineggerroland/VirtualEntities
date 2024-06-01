@@ -1,0 +1,21 @@
+<div class="card person">
+    <div class="card-header">
+        <h4 class="card-title mb-0">
+            {{ person.name }}
+            {% with online_status=person.online_status() %}
+            {% include "snippets/online_status_badge.html" %}
+            {% endwith %}
+        </h4>
+        {% with time_delta=person.last_seen_time_delta() %}
+        {% include "snippets/last_seen_at_subtitle.html" %}
+        {% endwith %}
+    </div>
+    {% for calendar in person.calendars %}
+    {% if person.calendars|length > 2 %}
+    {% include "snippets/calendar_card_body_sm.html" %}
+    {% else %}
+    {% include "snippets/calendar_card_body_lg.html" %}
+    {% endif %}
+    {% endfor %}
+    {% if debug %}{{person.to_dict()}}{% endif %}
+</div>

@@ -1,20 +1,20 @@
 import json
+import logging
 import time
 from pathlib import Path
 from threading import Thread
 from typing import List
 
 from iot.infrastructure.exceptions import InvalidThingType
-from iot.infrastructure.machine.dishwasher import from_dict as dw_from_dict
-from iot.infrastructure.machine.dryer import from_dict as d_from_dict
+from iot.infrastructure.machine.machine_builder import MachineBuilder
 from iot.infrastructure.machine.machine_that_can_be_loaded import MachineThatCanBeLoaded
-from iot.infrastructure.machine.washing_machine import from_dict as wm_from_dict
 from iot.infrastructure.room import from_dict as r_from_dict, Room
 from iot.infrastructure.thing import Thing
 
 
 class Storage:
     def __init__(self, db_path: Path, thing_names: [str]):
+        self.logger = logging.getLogger(self.__class__.__qualname__)
         self.db_name = db_path
         self.things = {}
         db_file = None
@@ -22,12 +22,10 @@ class Storage:
             db_file = open(db_path)
             things_in_db = json.loads(db_file.read())
             for thing_name in thing_names:
-                self.things[thing_name] = things_in_db[thing_name] \
-                    if thing_name in things_in_db \
-                    else {'type': 'thing', 'name': thing_name}
+                if thing_name in things_in_db:
+                    self.things[thing_name] = things_in_db[thing_name]
         except FileNotFoundError:
-            for thing_name in thing_names:
-                self.things[thing_name] = {'type': 'thing', 'name': thing_name}
+            self.logger.debug('Skipping to load files from db: Database file does not exist')
         finally:
             if db_file:
                 db_file.close()
@@ -49,18 +47,18 @@ class Storage:
         with open(self.db_name, 'w') as db_file:
             json.dump(self.things, db_file)
 
-    def load_iot_machine(self, thing_name: str) -> MachineThatCanBeLoaded:
-        db_entry = self.things[thing_name]
-        if db_entry.type == 'washing_machine':
-            return wm_from_dict(db_entry)
-        elif db_entry.type == 'dryer':
-            return d_from_dict(db_entry)
-        elif db_entry.type == 'dishwasher':
-            return dw_from_dict(db_entry)
-        else:
-            raise InvalidThingType(db_entry.type)
+    def load_iot_machine(self, thing_name: str) -> MachineThatCanBeLoaded | None:
+        if thing_name not in self.things:
+            return None
+        try:
+            return MachineBuilder.from_dict(self.things[thing_name])
+        except InvalidThingType:
+            return None
 
-    def load_room(self, name: str) -> Room:
+    def load_room(self, name: str) -> Room | None:
+        if name not in self.things:
+            return None
+
         db_entry = self.things[name]
         return r_from_dict(db_entry)
 
@@ -76,12 +74,8 @@ class Storage:
         return False
 
     def load_all_iot_machines(self) -> List[MachineThatCanBeLoaded]:
-        iot_machines = list(
-            map(lambda r: wm_from_dict(r), filter(lambda e: e["type"] == 'washing_machine', self.things.values())))
-        iot_machines.extend(map(lambda r: d_from_dict(r), filter(lambda e: e["type"] == 'dryer', self.things.values())))
-        iot_machines.extend(
-            map(lambda r: dw_from_dict(r), filter(lambda e: e["type"] == 'dishwasher', self.things.values())))
-        return iot_machines
+        return list(map(MachineBuilder.from_dict,
+                        filter(lambda t: MachineBuilder.can_build(t['type']), self.things.values())))
 
     def load_all_rooms(self) -> List[Room]:
-        return list(map(lambda r: r_from_dict(r), filter(lambda e: e["type"] == 'room', self.things.values())))
+        return list(map(lambda r: r_from_dict(r), filter(lambda e: e['type'] == 'room', self.things.values())))

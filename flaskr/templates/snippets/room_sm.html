@@ -1,0 +1,22 @@
+<div class="card room">
+    <div class="card-header">
+        <h4 class="card-title mb-0">
+            {{ room.name }}
+            {% with online_status=room.online_status() %}
+            {% include "snippets/online_status_badge.html" %}
+            {% endwith %}
+        </h4>
+        {% with time_delta=room.last_seen_time_delta() %}
+        {% include "snippets/last_seen_at_subtitle.html" %}
+        {% endwith %}
+    </div>
+    <div class="card-body">
+        {% with temperature=room.temperature,rating=room.rate_temperature() %}
+        {% include "snippets/temperature_badge.html" %}
+        {% endwith %}
+        {% with humidity=room.humidity,rating=room.rate_humidity() %}
+        {% include "snippets/humidity_badge.html" %}
+        {% endwith %}
+    </div>
+    {% if debug %}{{room.to_dict()}}{% endif %}
+</div>

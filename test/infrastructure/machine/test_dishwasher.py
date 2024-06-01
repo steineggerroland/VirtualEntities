@@ -32,7 +32,7 @@ class WashingMachineInitTest(unittest.TestCase):
         is_loaded = True
         needs_unloading = False
         washing_machine = from_dict(
-            {'name': name, 'watt': watt, 'last_updated_at': last_updated_at.isoformat(),
+            {'name': name, "type": "washing_machine", 'watt': watt, 'last_updated_at': last_updated_at.isoformat(),
              'started_run_at': started_run_at.isoformat(), 'running_state': running_state,
              'finished_last_run_at': finished_last_run_at.isoformat(), 'is_loaded': is_loaded,
              'needs_unloading': needs_unloading, "last_seen_at": last_seen_at.isoformat()})

@@ -16,10 +16,10 @@ class ApplianceDepot:
         """Removes an appliance from the depot."""
         return self.storage.remove(name)
 
-    def retrieve(self, name: str) -> MachineThatCanBeLoaded:
+    def retrieve(self, name: str) -> MachineThatCanBeLoaded | None:
         """Retrieves details of an appliance."""
         return self.storage.load_iot_machine(name)
 
     def inventory(self) -> List[MachineThatCanBeLoaded]:
         """Returns an inventory list of all appliances."""
-        return self.storage.load_all_iot_machines()  # Assuming this method loads all appliances
+        return self.storage.load_all_iot_machines()

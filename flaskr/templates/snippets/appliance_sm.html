@@ -1,0 +1,29 @@
+<div class="card appliance {{appliance.thing_type}}">
+    <div class="card-header">
+        <h4 class="card-title mb-0">
+            {% with type=appliance.thing_type %}
+            <span class="mr-2">
+            {% include "snippets/appliance_icon.html" %}
+            </span>
+            {% endwith %}
+            {{ appliance.name }}
+            {% with online_status=appliance.online_status() %}
+            <span class="ml-2">
+            {% include "snippets/online_status_badge.html" %}
+            </span>
+            {% endwith %}
+        </h4>
+        {% with time_delta=appliance.last_seen_time_delta() %}
+        {% include "snippets/last_seen_at_subtitle.html" %}
+        {% endwith %}
+
+    </div>
+    <div class="card-body">
+        <div class="card-text">
+            {% with power_consumption=appliance.watt %}
+            {% include "snippets/power_consumption_badge.html" %}
+            {% endwith %}
+        </div>
+    </div>
+    {% if debug %}{{appliance.to_dict()}}{% endif %}
+</div>
