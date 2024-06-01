@@ -7,16 +7,12 @@
             </span>
             {% endwith %}
             {{ appliance.name }}
-            {% with online_status=appliance.online_status() %}
+            {% with online_status=appliance.online_status(), time_delta=appliance.last_seen_time_delta() %}
             <span class="ml-2">
             {% include "snippets/online_status_badge.html" %}
             </span>
             {% endwith %}
         </h4>
-        {% with time_delta=appliance.last_seen_time_delta() %}
-        {% include "snippets/last_seen_at_subtitle.html" %}
-        {% endwith %}
-
     </div>
     <div class="card-body">
         <div class="card-text">
