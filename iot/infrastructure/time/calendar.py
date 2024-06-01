@@ -38,7 +38,7 @@ class Calendar(Thing):
     def __init__(self, name: str, url: str, color: str, appointments: List[Appointment] = [],
                  last_updated_at: datetime = datetime.now(),
                  last_seen_at: None | datetime = None):
-        super().__init__(name, last_updated_at, last_seen_at, online_delta_in_seconds=60 * 30)
+        super().__init__(name, "calendar", last_updated_at, last_seen_at, online_delta_in_seconds=60 * 30)
         self.url = url
         self.color = color.lower()
         self.appointments = appointments
@@ -55,4 +55,3 @@ class Calendar(Thing):
                 "online_status": self.online_status(),
                 "last_updated_at": self.last_updated_at.isoformat() if self.last_updated_at is not None else None,
                 "last_seen_at": self.last_seen_at.isoformat() if self.last_seen_at is not None else None}
-

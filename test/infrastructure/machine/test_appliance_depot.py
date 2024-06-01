@@ -10,7 +10,7 @@ class TestApplianceDepot(unittest.TestCase):
     def setUp(self):
         self.storage_mock: Storage | MagicMock = MagicMock()
         self.depot = ApplianceDepot(self.storage_mock)
-        self.sample_appliance = WashingMachine("washer1")
+        self.sample_appliance = WashingMachine("washer1", 'washing_machine')
 
     def test_stock_stores_new_appliance(self):
         """Test storing a new appliance."""

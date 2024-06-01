@@ -6,6 +6,8 @@ from iot.core.configuration import IotThingConfig
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.machine.appliance_depot import ApplianceDepot
+from iot.infrastructure.machine.machine_builder import MachineBuilder
+from iot.infrastructure.machine.machine_that_can_be_loaded import MachineThatCanBeLoaded
 from iot.infrastructure.machine.power_state_decorator import PowerState
 from iot.infrastructure.machine.run_complete_strategy import SimpleHistoryRunCompleteStrategy
 
@@ -17,9 +19,12 @@ class MachineService:
         self.time_series_storage = time_series_storage
         self.appliance_depot = appliance_depot
         self.machine_name = thing_config.name
-        db_entry = self.appliance_depot.retrieve(thing_config.name)
+        machine = self.appliance_depot.retrieve(thing_config.name)
+        if machine is None:
+            machine = MachineBuilder.from_dict(thing_config.__dict__)
+            self.appliance_depot.stock(machine)
         self.run_complete_strategy = SimpleHistoryRunCompleteStrategy(time_series_storage)
-        if db_entry.started_run_at is not None:
+        if machine.started_run_at is not None:
             self.started_run()
 
     def update_power_consumption(self, new_power_consumption):
@@ -79,9 +84,9 @@ class MachineService:
         except ValueError as e:
             raise DatabaseException('Failed to save setting machine to loaded.', e) from e
 
-    def get_machine(self):
-        self.appliance_depot.retrieve(self.machine_name)
+    def get_machine(self) -> MachineThatCanBeLoaded:
+        return self.appliance_depot.retrieve(self.machine_name)
 
 
 def supports_thing_type(thing_type) -> bool:
-    return thing_type in ['washing_machine', 'dryer', 'dishwasher']
+    return MachineBuilder.can_build(thing_type)

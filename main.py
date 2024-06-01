@@ -24,7 +24,6 @@ DEFAULT_FLASK_CONFIG_FILE_NAME = "default_flask.yaml"
 DB_JSON_FILE = 'data/db.json'
 CONFIG_FILE_NAME = sys.argv[1] if len(sys.argv) > 1 else 'config.yaml'
 
-
 def run():
     logger = logging.getLogger("main")
     logger.debug("Starting")

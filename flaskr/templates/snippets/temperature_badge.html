@@ -1,0 +1,16 @@
+{% if temperature and rating=='unknown' %}
+<span class="badge temperature text-bg-light border border-secondary" data-bs-title="{{_('Temperature')}}"
+      data-bs-toggle="tooltip">{{temperature}}</span>
+{% elif temperature and rating=='optimal' %}
+<span class="badge temperature text-bg-light border border-success" data-bs-title="{{_('Temperature optimal')}}"
+      data-bs-toggle="tooltip">{{temperature}}</span>
+{% elif temperature and (rating=='cold' or rating=='hot') %}
+<span class="badge temperature text-bg-light border border-warning" data-bs-title="{{_('Temperature slightly out of range')}}"
+      data-bs-toggle="tooltip">{{temperature}}</span>
+{% elif temperature %}
+<span class="badge temperature text-bg-light border border-danger" data-bs-title="{{_('Temperature out of range')}}"
+      data-bs-toggle="tooltip">{{temperature}}</span>
+{% else %}
+<span class="badge temperature text-bg-light border border-secondary" data-bs-title="{{_('Temperature unknown')}}"
+      data-bs-toggle="tooltip">{{_('?°C')}}</span>
+{% endif %}

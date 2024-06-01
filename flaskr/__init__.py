@@ -9,6 +9,7 @@ from flaskr.views import VirtualEntities
 from iot.infrastructure.machine.appliance_depot import ApplianceDepot
 from iot.infrastructure.register_of_persons import RegisterOfPersons
 from iot.infrastructure.room_catalog import RoomCatalog
+from project import project
 
 
 def create_app(default_config_file_name: str, appliance_depot: ApplianceDepot, room_catalog: RoomCatalog,
@@ -32,7 +33,7 @@ def create_app(default_config_file_name: str, appliance_depot: ApplianceDepot, r
 
     @app.context_processor
     def utility_processor():
-        return dict(lang=locale_selector())
+        return dict(lang=locale_selector(), debug=request.args.get('debug'), project_url=project['url'])
 
     babel = Babel(app, default_translation_directories="../translations",
                   locale_selector=locale_selector)

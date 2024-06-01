@@ -77,7 +77,7 @@ class MqttMediatorTest(unittest.TestCase):
 
     def _set_up_thing_matching_json_file(self):
         # matches the values of the json file
-        self.machine_service_mock.get_machine = lambda: Dryer("dryer", 2400.121,
+        self.machine_service_mock.get_machine = lambda: Dryer("dryer", "dryer", 2400.121,
                                                               datetime.fromisoformat("2024-01-02T03:04:05.678910"),
                                                               False, True,
                                                               datetime.fromisoformat("2024-01-02T01:01:01.111111"),

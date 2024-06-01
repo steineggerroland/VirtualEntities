@@ -1,0 +1,9 @@
+<div class="card-body">
+    <div class="card-text"><span style="color:#{{calendar.color}}">⬤</span> {{_('Calendar')}}: {{calendar.name}}</div>
+    {% if calendar.url %}
+    <div class="card-text text-truncate"><small class="text-body-secondary">{{_('URL:')}}
+        {{calendar.url|replace('http://','')|replace('https://','')|truncate(calendar.url|length - 28)}}</small></div>
+    {% endif %}
+    <div class="card-text">{{ngettext('%(num)d Appointment', '%(num)d Appointments', calendar.appointments|length)}}
+    </div>
+</div>

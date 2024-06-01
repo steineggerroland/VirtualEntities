@@ -12,11 +12,12 @@ class RunningState(str, Enum):
 
 
 class MachineThatCanBeLoaded(IotMachine):
-    def __init__(self, name, watt: float | None = None, last_updated_at: datetime | None = None, needs_unloading=False,
+    def __init__(self, name, thing_type: str, watt: float | None = None, last_updated_at: datetime | None = None,
+                 needs_unloading=False,
                  is_loaded=False, started_last_run_at=None, running_state=None,
                  finished_last_run_at=None,
                  last_seen_at: None | datetime = None):
-        super().__init__(name, watt, last_updated_at=last_updated_at, last_seen_at=last_seen_at,
+        super().__init__(name, thing_type, watt, last_updated_at=last_updated_at, last_seen_at=last_seen_at,
                          started_last_run_at=started_last_run_at, finished_last_run_at=finished_last_run_at)
         self.needs_unloading = needs_unloading
         self.is_loaded = is_loaded or needs_unloading

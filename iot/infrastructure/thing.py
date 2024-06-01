@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 
 
@@ -10,9 +10,11 @@ class OnlineStatus(str, Enum):
 
 
 class Thing(metaclass=ABCMeta):
-    def __init__(self, name: str, last_updated_at: datetime | None = None, last_seen_at: None | datetime = None,
+    def __init__(self, name: str, thing_type: str, last_updated_at: datetime | None = None,
+                 last_seen_at: None | datetime = None,
                  online_delta_in_seconds=300):
         self.name = name
+        self.thing_type = thing_type
         self.last_updated_at = last_updated_at
         self.last_seen_at = last_seen_at
         self._online_delta_in_seconds = online_delta_in_seconds
@@ -23,6 +25,9 @@ class Thing(metaclass=ABCMeta):
         if (datetime.now() - self.last_seen_at).total_seconds() <= self._online_delta_in_seconds:
             return OnlineStatus.ONLINE
         return OnlineStatus.OFFLINE
+
+    def last_seen_time_delta(self) -> timedelta | None:
+        return self.last_seen_at - datetime.now() if self.last_seen_at is not None else None
 
     @abstractmethod
     def to_dict(self):

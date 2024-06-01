@@ -1,0 +1,13 @@
+{% if online_status=='unknown' %}
+<span class="badge online-status px-2 py-1 text-bg-light border border-secondary"
+      data-bs-title="{{_('Online status not known')}}" data-bs-toggle="tooltip"
+      style="font-size: 0.9rem">{{_('Online?')}}</span>
+{% elif online_status=='online' %}
+<span class="badge online-status px-2 py-1 text-bg-light border border-success"
+      data-bs-title="{{_('Online')}}" data-bs-toggle="tooltip"
+      style="font-size: 0.9rem">{{_('Online')}}</span>
+{% else %}
+<span class="badge online-status px-2 py-1 text-bg-light border border-warning"
+      data-bs-title="{{_('Offline')}}" data-bs-toggle="tooltip"
+      style="font-size: 0.9rem">{{_('Offline')}}</span>
+{% endif %}
