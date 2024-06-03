@@ -1,8 +1,7 @@
 import unittest
+from _datetime import timedelta
 from datetime import datetime
 from random import Random
-
-from _datetime import timedelta
 
 from iot.infrastructure.room import Room, from_dict
 from iot.infrastructure.thing import OnlineStatus
@@ -111,7 +110,8 @@ class RoomTest(unittest.TestCase):
         room = Room(name, Temperature(temperature), humidity, temperature_thresholds, humidity_thresholds,
                     last_updated_at, last_seen_at)
         # then
-        self.assertEqual(room.to_dict(), {"name": name, "temperature": {"value": temperature, "unit": "degree_celsius"},
+        self.assertEqual(room.to_dict(),
+                         {"name": name, "type": "room", "temperature": {"value": temperature, "unit": "degree_celsius"},
                                           "humidity": humidity, 'temperature_thresholds': {'frostiness_threshold': 15,
                                                                                            'heat_threshold': 30,
                                                                                            'optimal_lower': 20,

@@ -35,9 +35,10 @@ class MqttPersonMediator(MqttMediator):
     def _get_appointments_for_today(self):
         start_of_today = datetime.combine(datetime.now(), datetime.min.time())
         return {"appointments": list(map(lambda appointment: appointment.to_dict(),
-                                         self.person_service.person.get_appointments_for(start_of_today,
-                                                                                         timedelta(hours=23, minutes=59,
-                                                                                                   seconds=59))))}
+                                         self.person_service.get_person().get_appointments_for(start_of_today,
+                                                                                               timedelta(hours=23,
+                                                                                                         minutes=59,
+                                                                                                         seconds=59))))}
 
     def _handle_calendar_sources(self, sources: List[CaldavConfig]):
         for calendar_source in sources:
@@ -70,12 +71,12 @@ class MqttPersonMediator(MqttMediator):
                 relevant_events = caldav_calendar.search(start=start,
                                                          end=end,
                                                          event=True, expand=True)
-                updated_calendar = self.calendar_loader.from_caldav_events(calendar_source.name, caldav_calendar.name,
+                updated_calendar = self.calendar_loader.from_caldav_events(calendar_source.name, calendar_source.url,
                                                                            calendar_source.color, relevant_events)
                 self.person_service.update_calendars([updated_calendar])
                 self.logger.debug(
                     "Updated calendar '%s' with %s appointments of person %s from %s", caldav_calendar.name,
-                    len(relevant_events), self.person_service.person.name, calendar_source.url)
+                    len(relevant_events), self.person_service.get_person().name, calendar_source.url)
         except Exception as e:
             self.logger.error("Failed to update calendars from source %s with error", calendar_source.url, exc_info=e)
 

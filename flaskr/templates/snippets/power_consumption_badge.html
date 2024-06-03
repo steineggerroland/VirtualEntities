@@ -1,0 +1,7 @@
+{% if power_consumption != None %}
+<span class="badge power-consumption text-bg-light border border-secondary" data-bs-title="{{_('Power consumption')}}"
+      data-bs-toggle="tooltip">{{power_consumption}}W</span>
+{% else %}
+<span class="badge power-consumption text-bg-light border border-secondary" data-bs-title="{{_('Power consumption unknown')}}"
+      data-bs-toggle="tooltip">{{_('?W')}}</span>
+{% endif %}

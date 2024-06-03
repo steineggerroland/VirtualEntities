@@ -151,17 +151,18 @@ class IotThingConfig:
 
 class Configuration:
     def __init__(self, mqtt: MqttConfiguration, things: [IotThingConfig], time_series: TimeSeriesConfig | None,
-                 calendars_config: CalendarsConfig):
+                 calendars_config: CalendarsConfig, flaskr: dict):
         self.mqtt = mqtt
         self.things = things
         self.time_series = time_series
         self.calendars_config = calendars_config
+        self.flaskr = flaskr
 
     def __str__(self):
         return f"{self.mqtt}, {self.things}, {self.time_series}, {self.calendars_config}"
 
 
-def load_configuration(config_path):
+def load_configuration(config_path) -> Configuration:
     conf_file = None
     try:
         conf_file = open(config_path)
@@ -340,7 +341,8 @@ def _read_configuration(conf_dict) -> Configuration:
     return Configuration(_read_mqtt_configuration(conf_dict),
                          _read_things(conf_dict, calendars_config.calendars),
                          _read_time_series_config(conf_dict['time_series']) if 'time_series' in conf_dict else None,
-                         calendars_config)
+                         calendars_config,
+                         conf_dict['flaskr'] if 'flaskr' in conf_dict else {})
 
 
 def _verify_keys_set(yaml_dict, key_sets, prefix=None):

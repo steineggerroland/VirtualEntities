@@ -77,11 +77,13 @@ class MqttMediatorTest(unittest.TestCase):
 
     def _set_up_thing_matching_json_file(self):
         # matches the values of the json file
-        self.machine_service_mock.thing = Dryer("dryer", 2400.121, datetime.fromisoformat("2024-01-02T03:04:05.678910"),
-                                                False, True, datetime.fromisoformat("2024-01-02T01:01:01.111111"),
-                                                RunningState.RUNNING,
-                                                datetime.fromisoformat("2023-12-31T23:59:02.133742"),
-                                                datetime.fromisoformat("2024-01-02T03:04:05.678910"))
+        self.machine_service_mock.get_machine = lambda: Dryer("dryer", "dryer", 2400.121,
+                                                              datetime.fromisoformat("2024-01-02T03:04:05.678910"),
+                                                              False, True,
+                                                              datetime.fromisoformat("2024-01-02T01:01:01.111111"),
+                                                              RunningState.RUNNING,
+                                                              datetime.fromisoformat("2023-12-31T23:59:02.133742"),
+                                                              datetime.fromisoformat("2024-01-02T03:04:05.678910"))
 
     def test_subscribes_for_consumption_on_start(self):
         # given
@@ -115,7 +117,8 @@ class MqttMediatorTest(unittest.TestCase):
         # when
         mqtt_mediator = MqttMachineMediator(self.machine_service_mock,
                                             Sources([MqttMeasureSource(loading_topic, [Measure(source_type='loading')]),
-                                                     MqttMeasureSource(unloading_topic, [Measure(source_type='unloading')])]),
+                                                     MqttMeasureSource(unloading_topic,
+                                                                       [Measure(source_type='unloading')])]),
                                             self.destinations_mock, self.mqtt_client_mock)
         # then
         self.mqtt_client_mock.subscribe.assert_any_call(loading_topic, mqtt_mediator.load_machine)

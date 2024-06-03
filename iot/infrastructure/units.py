@@ -25,8 +25,8 @@ class Temperature:
         return {"value": self.value, "unit": self.unit}
 
 
-def from_dict(dictionary: dict):
-    return Temperature(value=dictionary['value'], unit=dictionary['unit'])
+def from_dict(dictionary: dict | None):
+    return None if dictionary is None else Temperature(value=dictionary['value'], unit=dictionary['unit'])
 
 
 class Range:
@@ -62,7 +62,7 @@ class TemperatureThresholds:
         if not isinstance(other, TemperatureThresholds):
             return False
         return self.optimal == other.optimal and self.frostiness_threshold == other.frostiness_threshold and \
-               self.heat_threshold == other.heat_threshold
+            self.heat_threshold == other.heat_threshold
 
     def __str__(self):
         return f"Temperature threshold with optimum at {self.optimal}, frostiness below {self.frostiness_threshold} " \
