@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-06-01 15:49+0200\n"
+"POT-Creation-Date: 2024-06-05 08:20+0200\n"
 "PO-Revision-Date: 2024-05-24 21:54+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
@@ -18,17 +18,69 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.15.0\n"
 
-#: flaskr/templates/base.html:34
-msgid "Overview"
-msgstr "Überblick"
+#: flaskr/templates/appliance_details.html:2
+#, fuzzy
+msgid "Appliance"
+msgstr "Gerät"
 
+#: flaskr/templates/appliance_details.html:8
 #: flaskr/templates/virtual_entities.html:2
 msgid "Virtual Entities"
 msgstr "Virtuelle Sachen"
 
+#: flaskr/templates/appliance_details.html:9
 #: flaskr/templates/virtual_entities.html:6
 msgid "Appliance depot"
 msgstr "Gerätelager"
+
+#: flaskr/templates/appliance_details.html:31
+#: flaskr/templates/snippets/appliance_icon.html:2
+#: flaskr/templates/snippets/appliance_icon.html:3
+msgid "Dishwasher"
+msgstr "Geschirrspülmaschine"
+
+#: flaskr/templates/appliance_details.html:33
+#: flaskr/templates/snippets/appliance_icon.html:5
+#: flaskr/templates/snippets/appliance_icon.html:6
+msgid "Dryer"
+msgstr "Trockner"
+
+#: flaskr/templates/appliance_details.html:35
+#: flaskr/templates/snippets/appliance_icon.html:8
+#: flaskr/templates/snippets/appliance_icon.html:9
+msgid "Washing machine"
+msgstr "Waschmaschine"
+
+#: flaskr/templates/appliance_details.html:37
+#: flaskr/templates/snippets/appliance_icon.html:11
+#: flaskr/templates/snippets/appliance_icon.html:12
+msgid "Unknown thing"
+msgstr "Unbekanntes Ding"
+
+#: flaskr/templates/appliance_details.html:64
+msgid "Running for "
+msgstr "Läuft seit "
+
+#: flaskr/templates/appliance_details.html:66
+msgid "Needs to be unloaded"
+msgstr "Muss entladen werden"
+
+#: flaskr/templates/appliance_details.html:68
+msgid "Currently idling"
+msgstr "Derzeit im Ruhezustand"
+
+#: flaskr/templates/appliance_details.html:76
+msgid "Finished last run "
+msgstr "Letzter Lauf beendet "
+
+#: flaskr/templates/appliance_details.html:131
+#, fuzzy
+msgid "Power consumption (Watt)"
+msgstr "Stromverbrauch (Watt)"
+
+#: flaskr/templates/base.html:34
+msgid "Overview"
+msgstr "Überblick"
 
 #: flaskr/templates/virtual_entities.html:13
 msgid "The depot is empty"
@@ -50,22 +102,6 @@ msgstr "Personenverzeichnis"
 msgid "Register is empty"
 msgstr "Das Verzeichnis ist leer"
 
-#: flaskr/templates/snippets/appliance_icon.html:3
-msgid "Dishwasher"
-msgstr "Geschirrspülmaschine"
-
-#: flaskr/templates/snippets/appliance_icon.html:6
-msgid "Dryer"
-msgstr "Trockner"
-
-#: flaskr/templates/snippets/appliance_icon.html:9
-msgid "Washing machine"
-msgstr "Waschmaschine"
-
-#: flaskr/templates/snippets/appliance_icon.html:12
-msgid "Unknown thing"
-msgstr "Unbekanntes Ding"
-
 #: flaskr/templates/snippets/attribution_footer.html:3
 #: flaskr/templates/snippets/attribution_footer.html:7
 #: flaskr/templates/snippets/attribution_footer.html:12
@@ -84,7 +120,7 @@ msgid "URL:"
 msgstr "URL:"
 
 #: flaskr/templates/snippets/calendar_card_body_lg.html:7
-#: flaskr/templates/snippets/calendar_card_body_sm.html:3
+#: flaskr/templates/snippets/calendar_card_body_sm.html:4
 #, python-format
 msgid "%(num)d Appointment"
 msgid_plural "%(num)d Appointments"
@@ -95,28 +131,30 @@ msgstr[1] "%(num)d Termine"
 msgid "Humidity"
 msgstr "Luftfeuchte"
 
-#: flaskr/templates/snippets/humidity_badge.html:4
+#: flaskr/templates/snippets/humidity_badge.html:5
 msgid "Humidity optimal"
 msgstr "Luftfeuchte optimal"
 
-#: flaskr/templates/snippets/humidity_badge.html:6
+#: flaskr/templates/snippets/humidity_badge.html:8
 msgid "Humidity slightly out of range"
 msgstr "Luftfeuchte etwas außerhalb des optimalen Bereichs"
 
-#: flaskr/templates/snippets/humidity_badge.html:8
+#: flaskr/templates/snippets/humidity_badge.html:11
 msgid "Humidity out of range"
 msgstr "Luftfeuchte außerhalb des optimalen Bereichs"
 
-#: flaskr/templates/snippets/humidity_badge.html:10
+#: flaskr/templates/snippets/humidity_badge.html:14
 msgid "Humidity unknown"
 msgstr "Luftfeuchte unbekannt"
 
-#: flaskr/templates/snippets/humidity_badge.html:10
+#: flaskr/templates/snippets/humidity_badge.html:15
 #, python-format
 msgid "?%%"
 msgstr "?%%"
 
 #: flaskr/templates/snippets/last_seen_at_subtitle.html:2
+#: flaskr/templates/snippets/online_status_badge.html:3
+#: flaskr/templates/snippets/online_status_badge.html:7
 msgid "Last seen:"
 msgstr "Zuletzt gesehen:"
 
@@ -124,33 +162,35 @@ msgstr "Zuletzt gesehen:"
 msgid "Never seen"
 msgstr "Nie gesehen"
 
-#: flaskr/templates/snippets/online_status_badge.html:3
-msgid "Online status not known"
-msgstr "Onlinestatus unbekannt"
-
 #: flaskr/templates/snippets/online_status_badge.html:4
-msgid "Online?"
-msgstr "Online?"
-
-#: flaskr/templates/snippets/online_status_badge.html:7
-#: flaskr/templates/snippets/online_status_badge.html:8
-msgid "Online"
-msgstr "Online"
-
 #: flaskr/templates/snippets/online_status_badge.html:11
 #: flaskr/templates/snippets/online_status_badge.html:12
 msgid "Offline"
 msgstr "Offline"
 
+#: flaskr/templates/snippets/online_status_badge.html:8
+#: flaskr/templates/snippets/online_status_badge.html:15
+#: flaskr/templates/snippets/online_status_badge.html:16
+msgid "Online"
+msgstr "Online"
+
+#: flaskr/templates/snippets/online_status_badge.html:19
+msgid "Online status not known"
+msgstr "Online status unbekannt"
+
+#: flaskr/templates/snippets/online_status_badge.html:20
+msgid "Online?"
+msgstr "Online?"
+
 #: flaskr/templates/snippets/power_consumption_badge.html:2
 msgid "Power consumption"
 msgstr "Stromverbrauch"
 
-#: flaskr/templates/snippets/power_consumption_badge.html:4
+#: flaskr/templates/snippets/power_consumption_badge.html:5
 msgid "Power consumption unknown"
 msgstr "Stromverbrauch unbekannt"
 
-#: flaskr/templates/snippets/power_consumption_badge.html:4
+#: flaskr/templates/snippets/power_consumption_badge.html:6
 msgid "?W"
 msgstr "?W"
 
@@ -158,23 +198,23 @@ msgstr "?W"
 msgid "Temperature"
 msgstr "Temperatur"
 
-#: flaskr/templates/snippets/temperature_badge.html:4
+#: flaskr/templates/snippets/temperature_badge.html:5
 msgid "Temperature optimal"
 msgstr "Temperatur optimal"
 
-#: flaskr/templates/snippets/temperature_badge.html:6
+#: flaskr/templates/snippets/temperature_badge.html:8
 msgid "Temperature slightly out of range"
 msgstr "Temperatur leicht außerhalb des optimalen Bereichs"
 
-#: flaskr/templates/snippets/temperature_badge.html:8
+#: flaskr/templates/snippets/temperature_badge.html:11
 msgid "Temperature out of range"
 msgstr "Temperatur weit außerhalb des optimalen Bereichs"
 
-#: flaskr/templates/snippets/temperature_badge.html:10
+#: flaskr/templates/snippets/temperature_badge.html:14
 msgid "Temperature unknown"
 msgstr "Temperatur unbekannt"
 
-#: flaskr/templates/snippets/temperature_badge.html:10
+#: flaskr/templates/snippets/temperature_badge.html:15
 msgid "?°C"
 msgstr "?°C"
 

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from iot.infrastructure.machine.power_state_decorator import PowerState, SimplePowerStateDecorator
 from iot.infrastructure.thing import Thing
@@ -31,6 +31,18 @@ class IotMachine(Thing):
         now = datetime.now()
         self.finished_last_run_at = now
         self.last_updated_at = now
+
+    def running_for_time_period(self) -> timedelta:
+        if self.started_run_at is not None:
+            return self.started_run_at - datetime.now()
+        else:
+            return timedelta(0)
+
+    def finished_last_run_before_time_period(self) -> timedelta:
+        if self.finished_last_run_at is not None:
+            return self.finished_last_run_at - datetime.now()
+        else:
+            return timedelta(0)
 
     def to_dict(self):
         return {"name": self.name, "type": self.thing_type, "watt": self.watt, "power_state": self.power_state,
