@@ -6,14 +6,16 @@ from flask_babel import Babel
 from flask_bootstrap import Bootstrap5
 
 from flaskr.views import VirtualEntities
+from flaskr.views.ApplianceDetails import ApplianceDetails
+from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.machine.appliance_depot import ApplianceDepot
 from iot.infrastructure.register_of_persons import RegisterOfPersons
 from iot.infrastructure.room_catalog import RoomCatalog
 from project import project
 
 
-def create_app(default_config_file_name: str, appliance_depot: ApplianceDepot, room_catalog: RoomCatalog,
-               register_of_persons: RegisterOfPersons, config: dict = None):
+def create_app(default_config_file_name: str, appliance_depot: ApplianceDepot, time_series_storage: TimeSeriesStorage,
+               room_catalog: RoomCatalog, register_of_persons: RegisterOfPersons, config: dict = None):
     app = Flask(__name__)
 
     app.config.from_file(default_config_file_name, load=yamlenv.load)
@@ -26,6 +28,11 @@ def create_app(default_config_file_name: str, appliance_depot: ApplianceDepot, r
     app.add_url_rule(
         "/virtual-entities/",
         view_func=VirtualEntities.ListView.as_view("ve_list")
+    )
+
+    app.add_url_rule(
+        "/appliance/<name>/",
+        view_func=ApplianceDetails.as_view('appliance', appliance_depot, time_series_storage)
     )
 
     def locale_selector():
@@ -41,7 +48,6 @@ def create_app(default_config_file_name: str, appliance_depot: ApplianceDepot, r
     app.config['BOOTSTRAP_SERVE_LOCAL'] = True
     app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = 'sketchy'
     bootstrap = Bootstrap5(app)
-
 
     # ensure the instance folder exists
     try:
