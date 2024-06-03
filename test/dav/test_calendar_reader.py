@@ -16,14 +16,14 @@ class TestCalendarLoader(unittest.TestCase):
         calendar_loader = CalendarLoader(calendars_config)
         # then
         self.assertEqual("Private", calendar_loader.config.categories[0].name)
-        self.assertEqual("fff000", calendar_loader.config.categories[0].color)
+        self.assertEqual("fff000", calendar_loader.config.categories[0].color_hex)
         self.assertEqual("Work", calendar_loader.config.categories[1].name)
-        self.assertEqual("0f0f11", calendar_loader.config.categories[1].color)
+        self.assertEqual("0f0f11", calendar_loader.config.categories[1].color_hex)
 
         self.assertEqual("calendar", calendar_loader.config.calendars[0].application)
         self.assertEqual("private", calendar_loader.config.calendars[0].name)
         self.assertEqual("dav.private.url", calendar_loader.config.calendars[0].url)
-        self.assertEqual("f93e90", calendar_loader.config.calendars[0].color)
+        self.assertEqual("f93e90", calendar_loader.config.calendars[0].color_hex)
 
     def test_has_color_for(self):
         categories = [CategoryConfig("Private", "fff000"), CategoryConfig("Work", "0F0F11")]

@@ -1,5 +1,7 @@
+from abc import abstractmethod
 from typing import List
 
+import yaml
 import yamlenv
 
 
@@ -14,6 +16,9 @@ class TimeSeriesConfig:
         self.username = username
         self.password = password
         self.bucket_name = bucket_name
+
+    def to_dict(self):
+        return {**self.__dict__}
 
 
 class MqttConfiguration:
@@ -33,32 +38,51 @@ class MqttConfiguration:
             return f"mqtt ({self.url}:{self.port}, {self.username}:<pw len {len(self.password)}>)"
         return f"mqtt ({self.url}:{self.port})"
 
+    def to_dict(self):
+        to_dict = self.__dict__
+        del to_dict['has_credentials']
+        return to_dict
+
 
 class Measure:
     def __init__(self, source_type: str, path: None | str = None):
         self.type = source_type
         self.path = path
 
+    def to_dict(self):
+        return {**self.__dict__}
+
 
 class Source:
-    pass
+    @abstractmethod
+    def to_dict(self):
+        pass
 
 
 class MqttMeasureSource(Source):
-    def __init__(self, topic: str, measures: [Measure]):
-        self.topic = topic
+    def __init__(self, mqtt_topic: str, measures: list[Measure]):
+        self.mqtt_topic = mqtt_topic
         self.measures = measures
 
     def __eq__(self, other):
-        if not isinstance(other, MqttMeasureSource) or self.topic != other.topic:
+        if not isinstance(other, MqttMeasureSource) or self.mqtt_topic != other.mqtt_topic:
             return False
         for measure in self.measures:
             if not any(vars(measure) == vars(other_measure) for other_measure in other.measures):
                 return False
         return True
 
+    def to_dict(self):
+        to_dict = {'mqtt_topic': self.mqtt_topic}
+        if len(self.measures) == 1:
+            to_dict = to_dict | self.measures[0].to_dict()
+        else:
+            to_dict['measures'] = [m.to_dict() for m in self.measures]
+        return to_dict
+
 
 class UrlConf(Source):
+
     def __init__(self, application: str, name: str, url: str, username: str = None, password: str = None,
                  update_cron: str = None):
         self.application = application
@@ -77,29 +101,64 @@ class UrlConf(Source):
     def has_credentials(self):
         return self.username is not None
 
+    def to_dict(self) -> dict:
+        return {**self.__dict__}
+
+
+class ReferencedUrlConf(UrlConf):
+    def __init__(self, conf: UrlConf):
+        super().__init__(conf.application, conf.name, conf.url, conf.username, conf.password, conf.update_cron)
+
+    def to_dict(self) -> dict:
+        return {
+            'application': self.application,
+            'reference_name': self.name
+        }
+
 
 class CaldavConfig(UrlConf):
     def __init__(self, url_conf: UrlConf, color_hex: str = None):
         super().__init__("calendar", url_conf.name, url_conf.url, url_conf.username, url_conf.password,
                          url_conf.update_cron)
-        self.color = color_hex.lower() if color_hex is not None else "ffffff"
+        self.color_hex = color_hex.lower() if color_hex is not None else "ffffff"
+
+
+class ReferencedCaldavConfig(CaldavConfig):
+    def __init__(self, caldav_conf: CaldavConfig):
+        super().__init__(caldav_conf, caldav_conf.color_hex)
+
+    def to_dict(self) -> dict:
+        return {
+            'application': self.application,
+            'reference_name': self.name
+        }
 
 
 class CategoryConfig:
-    def __init__(self, name: str, color: str):
+    def __init__(self, name: str, color_hex: str):
         self.name = name
-        self.color = color.lower()
+        self.color_hex = color_hex.lower()
+
+    def to_dict(self):
+        return {**self.__dict__}
 
 
 class CalendarsConfig:
-    def __init__(self, categories: List[CategoryConfig], calendars: List[CaldavConfig]):
+    def __init__(self, categories: list[CategoryConfig], calendars: list[CaldavConfig]):
         self.categories = categories
         self.calendars = calendars
 
+    def to_dict(self):
+        return {'categories': [cat.to_dict() for cat in self.categories],
+                'caldav': [cal.to_dict() for cal in self.calendars]}
+
 
 class Sources:
-    def __init__(self, sources: [Source]):
+    def __init__(self, sources: List[Source]):
         self.list = sources
+
+    def to_dict(self):
+        return [source.to_dict() for source in self.list]
 
 
 class PlannedNotification:
@@ -113,10 +172,17 @@ class PlannedNotification:
             return False
         return self.mqtt_topic == other.mqtt_topic and self.cron_expression == other.cron_expression and self.subject == other.subject
 
+    def to_dict(self):
+        return {**self.__dict__}
+
 
 class Destinations:
-    def __init__(self, planned_notifications: list[PlannedNotification]):
+    def __init__(self, planned_notifications: List[PlannedNotification]):
         self.planned_notifications = planned_notifications
+
+    def to_dict(self):
+        return {'planned_notifications': [planned_notification.to_dict() for planned_notification in
+                                          self.planned_notifications]}
 
 
 class RangeConfig:
@@ -124,12 +190,20 @@ class RangeConfig:
         self.lower = lower
         self.upper = upper
 
+    def to_dict(self):
+        return {**self.__dict__}
+
 
 class ThresholdsConfig:
     def __init__(self, optimal: RangeConfig, critical_lower: float, critical_upper: float):
         self.optimal = optimal
         self.critical_lower = critical_lower
         self.critical_upper = critical_upper
+
+    def to_dict(self):
+        to_dict = self.__dict__
+        to_dict['optimal'] = self.optimal.to_dict()
+        return to_dict
 
 
 class IotThingConfig:
@@ -148,6 +222,18 @@ class IotThingConfig:
     def __str__(self):
         return f"{self.name} ({self.type}, {self.sources}, {self.destinations})"
 
+    def to_dict(self):
+        to_dict = {'name': self.name, 'type': self.type}
+        if self.sources and self.sources.list:
+            to_dict['sources'] = self.sources.to_dict()
+        if self.destinations and self.destinations.planned_notifications:
+            to_dict['destinations'] = self.destinations.to_dict()
+        if self.humidity_thresholds:
+            to_dict['humidity_thresholds'] = self.humidity_thresholds.to_dict()
+        if self.temperature_thresholds:
+            to_dict['temperature_thresholds'] = self.temperature_thresholds.to_dict()
+        return to_dict
+
 
 class Configuration:
     def __init__(self, mqtt: MqttConfiguration, things: [IotThingConfig], time_series: TimeSeriesConfig | None,
@@ -160,6 +246,20 @@ class Configuration:
 
     def __str__(self):
         return f"{self.mqtt}, {self.things}, {self.time_series}, {self.calendars_config}"
+
+    def to_dict(self) -> dict:
+        to_dict = {
+            'mqtt': self.mqtt.to_dict(),
+            'things': [thing.to_dict() for thing in self.things]
+        }
+        if self.time_series:
+            to_dict['time_series'] = self.time_series.to_dict()
+        if self.calendars_config:
+            to_dict['calendars'] = self.calendars_config.to_dict()
+        if self.flaskr:
+            to_dict['flaskr'] = self.flaskr
+
+        return to_dict
 
 
 def load_configuration(config_path) -> Configuration:
@@ -177,11 +277,34 @@ def load_configuration(config_path) -> Configuration:
             conf_file.close()
 
 
-def _read_mqtt_configuration(conf_dict):
+def save_configuration(conf: Configuration, config_path):
+    conf_dict = conf.to_dict()
+    _remove_none(conf_dict)
+    yaml_conf = yaml.dump(conf_dict)
+    with open(config_path, 'w') as new_conf:
+        new_conf.write(yaml_conf)
+
+
+def _remove_none(obj):
+    if type(obj) is dict:
+        none_keys = []
+        for key in obj.keys():
+            if obj[key] is None:
+                none_keys.append(key)
+            else:
+                _remove_none(obj[key])
+        for k in none_keys:
+            del obj[k]
+    elif type(obj) is list:
+        for o in obj:
+            _remove_none(o)
+
+
+def _read_mqtt_configuration(conf_dict) -> MqttConfiguration:
     mqtt_dict = conf_dict['mqtt']
     _verify_keys(mqtt_dict, ['url'], 'mqtt')
     return MqttConfiguration(mqtt_dict['url'],
-                             mqtt_dict['clientId'] if 'clientId' in mqtt_dict else f"iot-things-client",
+                             mqtt_dict['client_id'] if 'client_id' in mqtt_dict else f"iot-things-client",
                              mqtt_dict['port'] if 'port' in mqtt_dict else None,
                              credentials=_read_mqtt_credentials(mqtt_dict))
 
@@ -192,18 +315,20 @@ def _read_mqtt_credentials(mqtt_dict):
     return None
 
 
-def _read_destination_configuration(thing_dict):
-    if 'destinations' not in thing_dict or 'scheduled_updates' not in thing_dict['destinations']:
+def _read_destination_configuration(thing_dict) -> Destinations:
+    if 'destinations' not in thing_dict or 'planned_notifications' not in thing_dict['destinations']:
         return Destinations([])
     planned_notifications = []
-    for entry in thing_dict['destinations']['scheduled_updates']:
-        _verify_keys(entry, ['topic', 'cron'], 'things[].destinations.scheduled_updates[]')
+    for entry in thing_dict['destinations']['planned_notifications']:
+        _verify_keys(entry, ['mqtt_topic', 'cron_expression'],
+                     'things[%s].destinations.planned_notification[]' % thing_dict['name'])
         planned_notifications.append(
-            PlannedNotification(entry['topic'], entry['cron'], entry['subject'] if 'subject' in entry else None))
+            PlannedNotification(entry['mqtt_topic'], entry['cron_expression'],
+                                entry['subject'] if 'subject' in entry else None))
     return Destinations(planned_notifications)
 
 
-def _read_sources_configuration(thing_dict, calendars: List[CaldavConfig]):
+def _read_sources_configuration(thing_dict, calendars: List[CaldavConfig]) -> Sources:
     if 'sources' not in thing_dict:
         return Sources([])
 
@@ -215,31 +340,28 @@ def _read_sources_configuration(thing_dict, calendars: List[CaldavConfig]):
         if "mqtt_topic" in source:
             sources.append(_read_mqtt_source(source))
         elif "application" in source and source["application"] == "calendar":
-            conf = _read_url_conf(source, "things[%s].sources[%s]" % (thing_dict['name'], source["application"]),
-                                  "calendar", calendars)
-            sources.append(conf if type(conf) == CaldavConfig else CaldavConfig(conf, source[
-                "color_hex"] if "color_hex" in source else None))
+            _verify_keys_set(source, [['reference_name'], ['url', 'name']],
+                             "things[%s].sources[%s]" % (thing_dict['name'], source["application"]))
+
+            if 'reference_name' in source:
+                conf = _get_referenced_calendar_conf(source["reference_name"], calendars, "things[%s].sources[%s]" % (
+                    thing_dict['name'], source["application"]))
+            else:
+                conf = CaldavConfig(_read_new_url_conf(source, "calendar"),
+                                    source["color_hex"] if "color_hex" in source else None)
+            sources.append(conf)
         else:
             raise IncompleteConfiguration("Unknown source '%s' of thing '%s'" % (source, thing_dict['name']))
 
     return Sources(sources)
 
 
-def _read_url_conf(url_conf, path, application, url_confs=[]):
-    _verify_keys_set(url_conf, [['reference_name'], ['url', 'name']], path)
-    if 'reference_name' in url_conf:
-        return _get_referenced_url_config(url_conf, url_confs, path)
-    else:
-        return _read_new_url_conf(url_conf, application)
-
-
-def _get_referenced_url_config(url_conf, url_confs, path):
-    name_of_calendar = url_conf["reference_name"]
-    referenced_configs = list(filter(lambda c: c.name == name_of_calendar, url_confs))
+def _get_referenced_calendar_conf(reference_name: str, calendars: list[CaldavConfig], path) -> ReferencedCaldavConfig:
+    referenced_configs: list[CaldavConfig] = list(filter(lambda c: c.name == reference_name, calendars))
     if len(referenced_configs) < 1:
-        raise IncompleteConfiguration(f"No general calendar configuration '{name_of_calendar}' referenced in '{path}'")
+        raise IncompleteConfiguration(f"No general calendar configuration '{reference_name}' referenced in '{path}'")
     else:
-        return referenced_configs[0]
+        return ReferencedCaldavConfig(referenced_configs[0])
 
 
 def _read_new_url_conf(url_conf, application):
@@ -261,7 +383,7 @@ def _read_mqtt_source(source):
         _verify_keys(source, ['type'], "things[].sources[]")
         measures.append(
             Measure(source_type=source['type'], path=source['path'] if 'path' in source else None))
-    return MqttMeasureSource(topic=source['mqtt_topic'], measures=measures)
+    return MqttMeasureSource(mqtt_topic=source['mqtt_topic'], measures=measures)
 
 
 def _read_thresholds_config(thresholds_config: dict, prefix) -> ThresholdsConfig:
@@ -289,7 +411,7 @@ def _read_caldav_configuration(caldav_config: dict) -> List[CaldavConfig]:
     if type(caldav_config) is not list:
         raise IncompleteConfiguration("'calendars.dav' must be a list")
     return list(
-        map(lambda calendar_config: CaldavConfig(_read_url_conf(calendar_config, 'calendars', "calendar"),
+        map(lambda calendar_config: CaldavConfig(_read_new_url_conf(calendar_config, "calendar"),
                                                  calendar_config[
                                                      "color_hex"] if "color_hex" in calendar_config else None),
             caldav_config))

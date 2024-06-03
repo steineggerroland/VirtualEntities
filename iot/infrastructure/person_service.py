@@ -14,7 +14,7 @@ class PersonService:
         self.person_name = config.name
         person = Person(self.person_name,
                         list(map(lambda calendar_conf: Calendar(calendar_conf.name, calendar_conf.url,
-                                                                calendar_conf.color),
+                                                                calendar_conf.color_hex),
                                  calendar_sources)))
         self.register_of_persons.enlist(person)
 

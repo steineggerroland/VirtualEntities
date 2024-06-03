@@ -11,7 +11,7 @@ class MqttRoomMediator(MqttMediator):
         super().__init__(mqtt_client)
         self.room_service = room_service
         for source in thing_config.sources.list if thing_config.sources else []:
-            mqtt_client.subscribe(source.topic, lambda msg: self._handle_message(msg, source.measures))
+            mqtt_client.subscribe(source.mqtt_topic, lambda msg: self._handle_message(msg, source.measures))
 
         self.handle_destinations(thing_config.destinations.planned_notifications if thing_config.destinations else [],
                                  lambda: self.room_service.get_room().to_dict())
