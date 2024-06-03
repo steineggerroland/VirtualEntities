@@ -1,0 +1,198 @@
+# German translations for PROJECT.
+# Copyright (C) 2024 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2024-06-01 15:49+0200\n"
+"PO-Revision-Date: 2024-05-24 21:54+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: flaskr/templates/base.html:34
+msgid "Overview"
+msgstr "Überblick"
+
+#: flaskr/templates/virtual_entities.html:2
+msgid "Virtual Entities"
+msgstr "Virtuelle Sachen"
+
+#: flaskr/templates/virtual_entities.html:6
+msgid "Appliance depot"
+msgstr "Gerätelager"
+
+#: flaskr/templates/virtual_entities.html:13
+msgid "The depot is empty"
+msgstr "Das Lager ist leer"
+
+#: flaskr/templates/virtual_entities.html:18
+msgid "Room catalog"
+msgstr "Raumverzeichnis"
+
+#: flaskr/templates/virtual_entities.html:25
+msgid "No rooms in catalog"
+msgstr "Das Verzeichnis ist leer"
+
+#: flaskr/templates/virtual_entities.html:30
+msgid "Register of Persons"
+msgstr "Personenverzeichnis"
+
+#: flaskr/templates/virtual_entities.html:37
+msgid "Register is empty"
+msgstr "Das Verzeichnis ist leer"
+
+#: flaskr/templates/snippets/appliance_icon.html:3
+msgid "Dishwasher"
+msgstr "Geschirrspülmaschine"
+
+#: flaskr/templates/snippets/appliance_icon.html:6
+msgid "Dryer"
+msgstr "Trockner"
+
+#: flaskr/templates/snippets/appliance_icon.html:9
+msgid "Washing machine"
+msgstr "Waschmaschine"
+
+#: flaskr/templates/snippets/appliance_icon.html:12
+msgid "Unknown thing"
+msgstr "Unbekanntes Ding"
+
+#: flaskr/templates/snippets/attribution_footer.html:3
+#: flaskr/templates/snippets/attribution_footer.html:7
+#: flaskr/templates/snippets/attribution_footer.html:12
+#: flaskr/templates/snippets/attribution_footer.html:16
+#, fuzzy, python-format
+msgid "Icons made by %(author)s from %(url)s"
+msgstr "Icons erstellt von %(author)s von %(url)s"
+
+#: flaskr/templates/snippets/calendar_card_body_lg.html:2
+#: flaskr/templates/snippets/calendar_card_body_sm.html:2
+msgid "Calendar"
+msgstr "Kalender"
+
+#: flaskr/templates/snippets/calendar_card_body_lg.html:4
+msgid "URL:"
+msgstr "URL:"
+
+#: flaskr/templates/snippets/calendar_card_body_lg.html:7
+#: flaskr/templates/snippets/calendar_card_body_sm.html:3
+#, python-format
+msgid "%(num)d Appointment"
+msgid_plural "%(num)d Appointments"
+msgstr[0] "%(num)d Termin"
+msgstr[1] "%(num)d Termine"
+
+#: flaskr/templates/snippets/humidity_badge.html:2
+msgid "Humidity"
+msgstr "Luftfeuchte"
+
+#: flaskr/templates/snippets/humidity_badge.html:4
+msgid "Humidity optimal"
+msgstr "Luftfeuchte optimal"
+
+#: flaskr/templates/snippets/humidity_badge.html:6
+msgid "Humidity slightly out of range"
+msgstr "Luftfeuchte etwas außerhalb des optimalen Bereichs"
+
+#: flaskr/templates/snippets/humidity_badge.html:8
+msgid "Humidity out of range"
+msgstr "Luftfeuchte außerhalb des optimalen Bereichs"
+
+#: flaskr/templates/snippets/humidity_badge.html:10
+msgid "Humidity unknown"
+msgstr "Luftfeuchte unbekannt"
+
+#: flaskr/templates/snippets/humidity_badge.html:10
+#, python-format
+msgid "?%%"
+msgstr "?%%"
+
+#: flaskr/templates/snippets/last_seen_at_subtitle.html:2
+msgid "Last seen:"
+msgstr "Zuletzt gesehen:"
+
+#: flaskr/templates/snippets/last_seen_at_subtitle.html:4
+msgid "Never seen"
+msgstr "Nie gesehen"
+
+#: flaskr/templates/snippets/online_status_badge.html:3
+msgid "Online status not known"
+msgstr "Onlinestatus unbekannt"
+
+#: flaskr/templates/snippets/online_status_badge.html:4
+msgid "Online?"
+msgstr "Online?"
+
+#: flaskr/templates/snippets/online_status_badge.html:7
+#: flaskr/templates/snippets/online_status_badge.html:8
+msgid "Online"
+msgstr "Online"
+
+#: flaskr/templates/snippets/online_status_badge.html:11
+#: flaskr/templates/snippets/online_status_badge.html:12
+msgid "Offline"
+msgstr "Offline"
+
+#: flaskr/templates/snippets/power_consumption_badge.html:2
+msgid "Power consumption"
+msgstr "Stromverbrauch"
+
+#: flaskr/templates/snippets/power_consumption_badge.html:4
+msgid "Power consumption unknown"
+msgstr "Stromverbrauch unbekannt"
+
+#: flaskr/templates/snippets/power_consumption_badge.html:4
+msgid "?W"
+msgstr "?W"
+
+#: flaskr/templates/snippets/temperature_badge.html:2
+msgid "Temperature"
+msgstr "Temperatur"
+
+#: flaskr/templates/snippets/temperature_badge.html:4
+msgid "Temperature optimal"
+msgstr "Temperatur optimal"
+
+#: flaskr/templates/snippets/temperature_badge.html:6
+msgid "Temperature slightly out of range"
+msgstr "Temperatur leicht außerhalb des optimalen Bereichs"
+
+#: flaskr/templates/snippets/temperature_badge.html:8
+msgid "Temperature out of range"
+msgstr "Temperatur weit außerhalb des optimalen Bereichs"
+
+#: flaskr/templates/snippets/temperature_badge.html:10
+msgid "Temperature unknown"
+msgstr "Temperatur unbekannt"
+
+#: flaskr/templates/snippets/temperature_badge.html:10
+msgid "?°C"
+msgstr "?°C"
+
+#~ msgid "Things"
+#~ msgstr "Dinge"
+
+#~ msgid "Rooms"
+#~ msgstr "Räume"
+
+#~ msgid "Persons"
+#~ msgstr "Personen"
+
+#~ msgid ""
+#~ "Icons\n"
+#~ "    made\n"
+#~ "    by %(author)s from %(url)s"
+#~ msgstr ""
+#~ "Icons\n"
+#~ "erstellt\n"
+#~ "von %(author)s unter %(url)s"
+

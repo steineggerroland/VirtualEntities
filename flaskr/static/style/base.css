@@ -1,0 +1,11 @@
+.bg-dark .icon {
+    filter: invert(100%);
+}
+
+.icon {
+    height: 1em;
+}
+
+body {
+    min-height: 100vh;
+}

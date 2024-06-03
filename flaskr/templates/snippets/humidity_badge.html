@@ -1,0 +1,16 @@
+{% if humidity != None and rating=='unknown' %}
+<span class="badge humidity text-bg-light border border-secondary" data-bs-title="{{_('Humidity')}}"
+      data-bs-toggle="tooltip">{{humidity}}</span>
+{% elif humidity != None and rating=='optimal' %}
+<span class="badge humidity text-bg-light border border-success" data-bs-title="{{_('Humidity optimal')}}"
+      data-bs-toggle="tooltip">{{humidity}}</span>
+{% elif humidity != None and (rating=='dry' or rating=='wet') %}
+<span class="badge humidity text-bg-light border border-warning" data-bs-title="{{_('Humidity slightly out of range')}}"
+      data-bs-toggle="tooltip">{{humidity}}</span>
+{% elif humidity != None %}
+<span class="badge humidity text-bg-light border border-danger" data-bs-title="{{_('Humidity out of range')}}"
+      data-bs-toggle="tooltip">{{humidity}}</span>
+{% else %}
+<span class="badge humidity text-bg-light border border-secondary" data-bs-title="{{_('Humidity unknown')}}"
+      data-bs-toggle="tooltip">{{_('?%%')}}</span>
+{% endif %}

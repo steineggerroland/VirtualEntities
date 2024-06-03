@@ -6,7 +6,8 @@ from unittest.mock import Mock, ANY, patch, call
 
 from waiting import wait
 
-from iot.core.configuration import IotThingConfig, Sources, MqttMeasureSource, Destinations, PlannedNotification, Measure
+from iot.core.configuration import IotThingConfig, Sources, MqttMeasureSource, Destinations, PlannedNotification, \
+    Measure
 from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.room import Room
 from iot.infrastructure.room_service import RoomService
@@ -138,11 +139,11 @@ class TemperatureTest(unittest.TestCase):
             self.assertDictEqual(expected_json, self.mqtt_client_mock.publish.call_args_list[0].args[1])
 
     def _set_up_room_matching_json(self):
-        self.room_service_mock.room = Room("kitchen", Temperature(13.37), 42.42,
-                                           TemperatureThresholds(Range(18, 22), 16, 30),
-                                           HumidityThresholds(Range(50, 60), 40, 80),
-                                           datetime.fromisoformat("2024-01-02T03:04:05.678910"),
-                                           datetime.fromisoformat("2024-01-01T01:01:01.111111"))
+        self.room_service_mock.get_room = lambda: Room("kitchen", Temperature(13.37), 42.42,
+                                                       TemperatureThresholds(Range(18, 22), 16, 30),
+                                                       HumidityThresholds(Range(50, 60), 40, 80),
+                                                       datetime.fromisoformat("2024-01-02T03:04:05.678910"),
+                                                       datetime.fromisoformat("2024-01-01T01:01:01.111111"))
 
     def test_handles_database_exceptions_without_breaking(self):
         mqtt_mediator = MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, IotThingConfig())
