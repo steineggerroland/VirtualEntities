@@ -36,7 +36,7 @@ class TemperatureTest(unittest.TestCase):
     def test_subscribes_for_temp_when_init(self):
         thing_config = IotThingConfig("Kitchen", "room",
                                       sources=Sources(
-                                          [MqttMeasureSource(topic="some/topic",
+                                          [MqttMeasureSource(mqtt_topic="some/topic",
                                                              measures=[Measure(source_type='temperature', path="$")])]))
         # when
         MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
@@ -45,7 +45,7 @@ class TemperatureTest(unittest.TestCase):
 
     def test_forwards_to_mediator_when_updating_temperature_with_jsonpath(self):
         thing_config = IotThingConfig("Kitchen", "room",
-                                      sources=Sources([MqttMeasureSource(topic="some/topic", measures=[
+                                      sources=Sources([MqttMeasureSource(mqtt_topic="some/topic", measures=[
                                           Measure(source_type='temperature', path="$.temperature")])]))
         MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
         mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][1]
@@ -55,14 +55,14 @@ class TemperatureTest(unittest.TestCase):
             '{"battery":100,"humidity":71.65,"linkquality":216,"temperature":%s,"voltage":3000}' % temperature.value,
             "utf-8")
         # when
-        mqtt_callback(Mock(topic="some/topic", payload=msg))
+        mqtt_callback(Mock(mqtt_topic="some/topic", payload=msg))
         # then
         self.room_service_mock.update_temperature.assert_called_once()
         self.assertEqual(temperature, self.room_service_mock.update_temperature.call_args[0][0])
 
     def test_forwards_to_mediator_when_updating_temperature_without_jsonpath(self):
         thing_config = IotThingConfig("Kitchen", "room",
-                                      sources=Sources([MqttMeasureSource(topic="some/topic", measures=[
+                                      sources=Sources([MqttMeasureSource(mqtt_topic="some/topic", measures=[
                                           Measure(source_type='temperature')])]))
         MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
         mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][1]
@@ -70,7 +70,7 @@ class TemperatureTest(unittest.TestCase):
         temperature = Temperature(23.12)
         msg = b"23.12"
         # when
-        mqtt_callback(Mock(topic="some/topic", payload=msg))
+        mqtt_callback(Mock(mqtt_topic="some/topic", payload=msg))
         # then
         self.room_service_mock.update_temperature.assert_called_once()
         self.assertEqual(temperature, self.room_service_mock.update_temperature.call_args[0][0])
@@ -79,7 +79,7 @@ class TemperatureTest(unittest.TestCase):
         unsupported_json_path = "$.unknownPath"
         thing_config = IotThingConfig("Kitchen", "room",
                                       sources=Sources(
-                                          [MqttMeasureSource(topic="some/topic", measures=[
+                                          [MqttMeasureSource(mqtt_topic="some/topic", measures=[
                                               Measure(source_type='temperature',
                                                       path=unsupported_json_path)])]))
         MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
@@ -87,7 +87,7 @@ class TemperatureTest(unittest.TestCase):
         self.room_service_mock.update_temperature = Mock()
         msg = b'{"battery":100,"humidity":71.65,"linkquality":216,"temperature":23.12,"voltage":3000}'
         # when
-        mqtt_callback(Mock(topic="some/topic", payload=msg))
+        mqtt_callback(Mock(mqtt_topic="some/topic", payload=msg))
         # then
         self.room_service_mock.update_temperature.assert_not_called()
 
@@ -95,7 +95,7 @@ class TemperatureTest(unittest.TestCase):
         unsupported_json_path = "$.unknownPath"
         thing_config = IotThingConfig("Kitchen", "room",
                                       sources=Sources(
-                                          [MqttMeasureSource(topic="some/topic", measures=[
+                                          [MqttMeasureSource(mqtt_topic="some/topic", measures=[
                                               Measure(source_type='temperature',
                                                       path=unsupported_json_path)])]))
         MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
@@ -103,7 +103,7 @@ class TemperatureTest(unittest.TestCase):
         self.room_service_mock.update_temperature = Mock()
         msg = b"21.3"
         # when
-        mqtt_callback(Mock(topic="some/topic", payload=msg))
+        mqtt_callback(Mock(mqtt_topic="some/topic", payload=msg))
         # then
         self.room_service_mock.update_temperature.assert_not_called()
 
@@ -149,13 +149,14 @@ class TemperatureTest(unittest.TestCase):
         mqtt_mediator = MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, IotThingConfig())
 
         self.room_service_mock.update_temperature = Mock(side_effect=DatabaseException)
-        mqtt_mediator.temperature_update(Mock(topic="temperature/topic", payload='23.1'))
+        mqtt_mediator.temperature_update(Mock(mqtt_topic="temperature/topic", payload='23.1'))
 
         self.room_service_mock.update_humidity = Mock(side_effect=DatabaseException)
-        mqtt_mediator.humidity_update(Mock(topic="humidity/topic", payload='45'))
+        mqtt_mediator.humidity_update(Mock(mqtt_topic="humidity/topic", payload='45'))
 
         self.room_service_mock.update_room_climate = Mock(side_effect=DatabaseException)
-        mqtt_mediator.update_room_climate(Mock(topic="climat/topic", payload='{"temperature": 12.1, "humidity": 44}'),
+        mqtt_mediator.update_room_climate(
+            Mock(mqtt_topic="climat/topic", payload='{"temperature": 12.1, "humidity": 44}'),
                                           "$.temperature", "$.humidity")
 
 

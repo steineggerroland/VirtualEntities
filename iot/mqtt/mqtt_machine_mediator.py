@@ -14,13 +14,13 @@ class MqttMachineMediator(MqttMediator):
             if source.measures[0].type == 'consumption':
                 if source.measures[0].path:
                     json_path = str(source.measures[0].path)
-                    mqtt_client.subscribe(source.topic, lambda msg: self.power_consumption_update(msg, json_path))
+                    mqtt_client.subscribe(source.mqtt_topic, lambda msg: self.power_consumption_update(msg, json_path))
                 else:
-                    mqtt_client.subscribe(source.topic, lambda msg: self.power_consumption_update(msg))
+                    mqtt_client.subscribe(source.mqtt_topic, lambda msg: self.power_consumption_update(msg))
             if source.measures[0].type == 'loading':
-                mqtt_client.subscribe(source.topic, self.load_machine)
+                mqtt_client.subscribe(source.mqtt_topic, self.load_machine)
             if source.measures[0].type == 'unloading':
-                mqtt_client.subscribe(source.topic, lambda msg: self.unload_machine())
+                mqtt_client.subscribe(source.mqtt_topic, lambda msg: self.unload_machine())
 
         self.handle_destinations(destinations.planned_notifications if destinations else [],
                                  lambda: self.machine_service.get_machine().to_dict())

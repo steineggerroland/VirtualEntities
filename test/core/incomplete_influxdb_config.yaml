@@ -8,4 +8,4 @@ things:
     sources:
       consumption:
         # the Watt consumption is considered to be a floating point number
-        topic: washer/consumption/topic
+        mqtt_topic: washer/consumption/topic

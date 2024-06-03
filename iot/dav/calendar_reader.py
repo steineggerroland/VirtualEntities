@@ -18,7 +18,7 @@ class GlobalCalendarConfig:
     def get_color_for(self, category_name: str) -> str | None:
         for category in self.categories:
             if category.name.lower() == category_name.lower():
-                return category.color
+                return category.color_hex
         return None
 
 
