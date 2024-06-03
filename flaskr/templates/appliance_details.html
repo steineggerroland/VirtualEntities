@@ -141,7 +141,7 @@
             .y(function(d) { return y(d.value) })
             )
     }
-    addData([{% for measure in time_series %}{'date':new Date('{{measure.date}}'), 'value':{{measure.value}}},{% endfor %}])
+    addData([{% for measure in time_series %}{'date':new Date('{{measure.time}}'), 'value':{{measure.consumption}}},{% endfor %}])
 
 </script>
 {% endblock %}
