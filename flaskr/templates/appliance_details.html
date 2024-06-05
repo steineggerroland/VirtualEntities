@@ -1,6 +1,17 @@
 {% extends "base.html" %}
 {% block title %}<title>{{_('Appliance')}}</title>{% endblock %}
 {% block content %}
+<aside class="container">
+    <div class="row mt-4">
+        <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '〉';">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{url_for('ve_list')}}">{{_('Virtual Entities')}}</a></li>
+                <li class="breadcrumb-item">{{_('Appliance depot')}}</li>
+                <li aria-current="page" class="breadcrumb-item active">{{appliance.name}}</li>
+            </ol>
+        </nav>
+    </div>
+</aside>
 <main class="container appliance">
     <div class="row mt-4">
         <div class="col-2 col-sm-auto">
@@ -130,7 +141,7 @@
             .y(function(d) { return y(d.value) })
             )
     }
-            addData([{% for measure in time_series %}{'date':new Date('{{measure.date}}'), 'value':{{measure.value}}},{% endfor %}])
+    addData([{% for measure in time_series %}{'date':new Date('{{measure.date}}'), 'value':{{measure.value}}},{% endfor %}])
 
 </script>
 {% endblock %}
