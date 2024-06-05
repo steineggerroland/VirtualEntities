@@ -1,21 +1,21 @@
 {% if online_status=='offline' and time_delta %}
-<span class="badge online-status px-2 py-1 text-bg-light border border-warning"
+<span class="badge online-status text-bg-light border border-warning"
       data-bs-title="{{_('Last seen:')}} {{ time_delta|timedeltaformat(add_direction=True) }}" data-bs-toggle="tooltip"
-      style="font-size: 0.9rem">{{_('Offline')}}</span>
+      style="{{style}}">{{_('Offline')}}</span>
 {% elif online_status=='online' and time_delta %}
-<span class="badge online-status px-2 py-1 text-bg-light border border-success"
+<span class="badge online-status text-bg-light border border-success"
       data-bs-title="{{_('Last seen:')}} {{ time_delta|timedeltaformat(add_direction=True) }}" data-bs-toggle="tooltip"
-      style="font-size: 0.9rem">{{_('Online')}}</span>
+      style="{{style}}">{{_('Online')}}</span>
 {% elif online_status=='offline' %}
-<span class="badge online-status px-2 py-1 text-bg-light border border-warning"
+<span class="badge online-status text-bg-light border border-warning"
       data-bs-title="{{_('Offline')}}" data-bs-toggle="tooltip"
-      style="font-size: 0.9rem">{{_('Offline')}}</span>
+      style="{{style}}">{{_('Offline')}}</span>
 {% elif online_status=='online' %}
-<span class="badge online-status px-2 py-1 text-bg-light border border-success"
+<span class="badge online-status text-bg-light border border-success"
       data-bs-title="{{_('Online')}}" data-bs-toggle="tooltip"
-      style="font-size: 0.9rem">{{_('Online')}}</span>
+      style="{{style}}">{{_('Online')}}</span>
 {% else %}
-<span class="badge online-status px-2 py-1 text-bg-light border border-secondary"
+<span class="badge online-status text-bg-light border border-secondary"
       data-bs-title="{{_('Online status not known')}}" data-bs-toggle="tooltip"
-      style="font-size: 0.9rem">{{_('Online?')}}</span>
+      style="{{style}}">{{_('Online?')}}</span>
 {% endif %}
