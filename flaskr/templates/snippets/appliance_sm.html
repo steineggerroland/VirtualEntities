@@ -6,18 +6,17 @@
             {% include "snippets/appliance_icon.html" %}
             </span>
             {% endwith %}
-            {{ appliance.name }}
-            {% with online_status=appliance.online_status(), time_delta=appliance.last_seen_time_delta() %}
-            <span class="ml-2">
-            {% include "snippets/online_status_badge.html" %}
-            </span>
-            {% endwith %}
+            <a href="{{url_for('appliance', name=appliance.name)}}">{{ appliance.name }}</a>
         </h4>
     </div>
     <div class="card-body">
         <div class="card-text">
             {% with power_consumption=appliance.watt %}
             {% include "snippets/power_consumption_badge.html" %}
+            {% endwith %}
+
+            {% with online_status=appliance.online_status(),time_delta=appliance.last_seen_time_delta() %}
+            {% include "snippets/online_status_badge.html" %}
             {% endwith %}
         </div>
     </div>

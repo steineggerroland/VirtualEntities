@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}<title>{{_('Appliance')}}</title>{% endblock %}
+{% block content %}
+<aside class="container">
+    <div class="row mt-4">
+        <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '〉';">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{url_for('ve_list')}}">{{_('Virtual Entities')}}</a></li>
+                <li class="breadcrumb-item">{{_('Appliance depot')}}</li>
+                <li aria-current="page" class="breadcrumb-item active">{{appliance.name}}</li>
+            </ol>
+        </nav>
+    </div>
+</aside>
+<main class="container appliance">
+    <div class="row mt-4">
+        <div class="col-2 col-sm-auto">
+            <div class="row">
+                <div class="col d-flex justify-content-center">
+                    <div style="width: 4rem; max-width: 30vw">
+                        {% with type=appliance.thing_type %}
+                        {% include "snippets/appliance_icon.html" %}
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col text-center">
+                    <strong>
+                        {% if appliance.thing_type=='dishwasher' %}
+                        {{_('Dishwasher')}}
+                        {% elif appliance.thing_type=='dryer' %}
+                        {{_('Dryer')}}
+                        {% elif appliance.thing_type=='washing_machine' %}
+                        {{_('Washing machine')}}
+                        {% else %}
+                        {{_('Unknown thing')}}
+                        {% endif %}
+                    </strong>
+                </div>
+            </div>
+        </div>
+        <div class="col-10 col-sm-auto">
+            <div class="row">
+                <h2 class="col mb-0">
+                    {{appliance.name}}
+                </h2>
+            </div>
+            <div class="row">
+                <div class="col">
+                    {% with time_delta=appliance.last_seen_time_delta() %}
+                    {% include "snippets/last_seen_at_subtitle.html" %}
+                    {% endwith %}
+                    {% with online_status=appliance.online_status(),style='font-size: 0.9em' %}
+                    <span class="ml-2">
+                        {% include "snippets/online_status_badge.html" %}
+                        </span>
+                    {% endwith %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    {% if appliance.running_state=='running' %}
+                    <span data-bs-title="{{appliance.started_run_at|datetimeformat('short')}}" data-bs-toggle="tooltip">{{_('Running for ')}}{{appliance.running_for_time_period()|timedeltaformat(add_direction=True)}}</span>
+                    {% elif appliance.needs_unloading %}
+                    {{_('Needs to be unloaded')}}
+                    {% else %}
+                    {{_('Currently idling')}}
+                    {% endif %}
+                </div>
+            </div>
+            {% if appliance.finished_last_run_at %}
+            <div class="row">
+                <div class="col">
+                    <span data-bs-title="{{appliance.finished_last_run_at|datetimeformat('short')}}"
+                          data-bs-toggle="tooltip">{{_('Finished last run ')}}{{appliance.finished_last_run_before_time_period()|timedeltaformat(add_direction=True)}}</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div id="power-consumption"></div>
+        </div>
+    </div>
+    {% if debug %}{{appliance.to_dict()}}{% endif %}
+</main>
+<style>
+    .appliance .icon {
+        height: auto;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+{% block additional_scripts %}
+<script language="JavaScript" src="{{url_for('static', filename='javascript/d3.v7.min.js')}}"
+        type="text/javascript"></script>
+<script language="JavaScript">
+    var margin = {top: 10, right: 30, bottom: 30, left: 60},
+        width = 800 - margin.left - margin.right,
+        height = 600 - margin.top - margin.bottom;
+
+    var svg = d3.select("#power-consumption")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+      function addData(data) {
+        var x = d3.scaleTime()
+          .domain(d3.extent(data, function(d) { return d.date; }))
+          .range([ 0, width ]);
+        svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x));
+
+        var y = d3.scaleLinear()
+          .domain([0, d3.max(data, function(d) { return +d.value; })])
+          .range([ height, 15 ]);
+        svg.append("g")
+          .call(d3.axisLeft(y))
+          .call(g => g.append("text")
+              .attr("x", -margin.left)
+              .attr("y", 10)
+              .attr("fill", "currentColor")
+              .attr("class", "text-primary")
+              .attr("text-anchor", "start")
+              .text("{{_('Power consumption (Watt)')}}"));
+
+        svg.append("path")
+          .datum(data)
+          .attr("fill", "none")
+          .attr("stroke", "steelblue")
+          .attr("class", "stroke-primary")
+          .attr("stroke-width", 1.5)
+          .attr("d", d3.line()
+            .x(function(d) { return x(d.date) })
+            .y(function(d) { return y(d.value) })
+            )
+    }
+    addData([{% for measure in time_series %}{'date':new Date('{{measure.date}}'), 'value':{{measure.value}}},{% endfor %}])
+
+</script>
+{% endblock %}
