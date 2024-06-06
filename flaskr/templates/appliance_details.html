@@ -24,27 +24,25 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col text-center">
-                    <strong>
-                        {% if appliance.thing_type=='dishwasher' %}
-                        {{_('Dishwasher')}}
-                        {% elif appliance.thing_type=='dryer' %}
-                        {{_('Dryer')}}
-                        {% elif appliance.thing_type=='washing_machine' %}
-                        {{_('Washing machine')}}
-                        {% else %}
-                        {{_('Unknown thing')}}
-                        {% endif %}
-                    </strong>
-                </div>
-            </div>
         </div>
         <div class="col-10 col-sm-auto">
             <div class="row">
                 <h2 class="col mb-0">
                     {{appliance.name}}
                 </h2>
+            </div>
+            <div class="row">
+                <div class="col">
+                    {% if appliance.thing_type=='dishwasher' %}
+                    {{_('Dishwasher')}}
+                    {% elif appliance.thing_type=='dryer' %}
+                    {{_('Dryer')}}
+                    {% elif appliance.thing_type=='washing_machine' %}
+                    {{_('Washing machine')}}
+                    {% else %}
+                    {{_('Unknown thing')}}
+                    {% endif %}
+                </div>
             </div>
             <div class="row">
                 <div class="col">
