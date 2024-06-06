@@ -14,11 +14,11 @@ things:
   - name: super_thing
     type: dryer
     sources:
-      - topic: consumption/topic
+      - mqtt_topic: consumption/topic
         type: consumption
-      - topic: loading/topic
+      - mqtt_topic: loading/topic
         type: loading
-      - topic: unloading/topic
+      - mqtt_topic: unloading/topic
         type: unloading
     destinations:
       scheduled_updates:
@@ -29,7 +29,7 @@ things:
   - name: Kitchen
     type: room
     sources:
-      - topic: kitchen/sensor/temperature
+      - mqtt_topic: kitchen/sensor/temperature
         type: temperature
         path: $.update.temperature
   - name: Bathroom
@@ -47,7 +47,7 @@ things:
       critical_lower: 50
       critical_upper: 90
     sources:
-      - topic: bath/sensor/temperature
+      - mqtt_topic: bath/sensor/temperature
         measures:
           - type: temperature
             path: $.temperature
