@@ -5,6 +5,7 @@ from flask import Flask, request
 from flask_babel import Babel
 from flask_bootstrap import Bootstrap5
 
+from flaskr.api.ApplianceDepot import appliance_depot_api
 from flaskr.views import VirtualEntities
 from flaskr.views.ApplianceDetails import ApplianceDetails
 from iot.core.time_series_storage import TimeSeriesStorage
@@ -32,7 +33,7 @@ def create_app(default_config_file_name: str, appliance_depot: ApplianceDepot, t
 
     app.add_url_rule(
         "/appliance/<name>/",
-        view_func=ApplianceDetails.as_view('appliance', appliance_depot, time_series_storage)
+        view_func=ApplianceDetails.as_view('appliance', appliance_depot)
     )
 
     def locale_selector():
@@ -48,6 +49,8 @@ def create_app(default_config_file_name: str, appliance_depot: ApplianceDepot, t
     app.config['BOOTSTRAP_SERVE_LOCAL'] = True
     app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = 'sketchy'
     bootstrap = Bootstrap5(app)
+
+    app.register_blueprint(appliance_depot_api(appliance_depot, time_series_storage), url_prefix='/api/')
 
     # ensure the instance folder exists
     try:
