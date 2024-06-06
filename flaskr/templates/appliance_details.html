@@ -59,7 +59,7 @@
             <div class="row">
                 <div class="col">
                     {% if appliance.running_state=='running' %}
-                    <span data-bs-title="{{appliance.started_run_at|datetimeformat('short')}}" data-bs-toggle="tooltip">{{_('Running for ')}}{{appliance.running_for_time_period()|timedeltaformat(add_direction=True)}}</span>
+                    <span data-bs-title="{{appliance.started_run_at|datetimeformat('short')}}" data-bs-toggle="tooltip">{{_('Running since ')}}{{appliance.running_for_time_period()|timedeltaformat()}}</span>
                     {% elif appliance.needs_unloading %}
                     {{_('Needs to be unloaded')}}
                     {% else %}
