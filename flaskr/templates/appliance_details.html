@@ -81,6 +81,7 @@
     </div>
     <div class="row">
         <div class="col">
+            <h3>{{_('Power consumption (Watt)')}}</h3>
             <div id="power-consumption"></div>
         </div>
     </div>
@@ -97,11 +98,28 @@
 <script language="JavaScript" src="{{url_for('static', filename='javascript/d3.v7.min.js')}}"
         type="text/javascript"></script>
 <script language="JavaScript">
-    var margin = {top: 10, right: 30, bottom: 30, left: 60},
-        width = 800 - margin.left - margin.right,
-        height = 600 - margin.top - margin.bottom;
+    var margin = {top: 10, right: 30, bottom: 30, left: 60}
 
-    var svg = d3.select("#power-consumption")
+    let powerConsumptionMeasures = [{% for measure in time_series %}{'date':new Date('{{measure.time}}'), 'value':{{measure.consumption}}},{% endfor %}]
+    let svg
+    function drawChart() {
+      const maxWidth = parseInt(window.innerWidth * 0.7)
+      const maxHeight = parseInt(window.innerHeight * 0.7)
+      const useHeight = maxHeight / maxWidth < 1
+      let width, height = 0
+      if (useHeight) {
+        height = maxHeight
+        width = maxHeight
+      } else {
+        height = maxWidth
+        width = maxWidth
+      }
+      container = document.getElementById("power-consumption")
+      container.childNodes.forEach(function(child) {
+      container.removeChild(child)
+      })
+    var margin = {top: 10, right: 30, bottom: 30, left: 60}
+    svg = d3.select("#power-consumption")
       .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -128,7 +146,7 @@
               .attr("fill", "currentColor")
               .attr("class", "text-primary")
               .attr("text-anchor", "start")
-              .text("{{_('Power consumption (Watt)')}}"));
+              .text("Watt"));
 
         svg.append("path")
           .datum(data)
@@ -141,7 +159,12 @@
             .y(function(d) { return y(d.value) })
             )
     }
-    addData([{% for measure in time_series %}{'date':new Date('{{measure.time}}'), 'value':{{measure.consumption}}},{% endfor %}])
+  addData(powerConsumptionMeasures)
 
+    }
+
+    drawChart()
+
+    window.addEventListener('resize', drawChart );
 </script>
 {% endblock %}
