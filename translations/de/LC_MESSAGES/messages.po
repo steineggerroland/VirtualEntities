@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-06-05 08:20+0200\n"
+"POT-Creation-Date: 2024-06-06 13:20+0200\n"
 "PO-Revision-Date: 2024-05-24 21:54+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
@@ -33,47 +33,48 @@ msgstr "Virtuelle Sachen"
 msgid "Appliance depot"
 msgstr "Gerätelager"
 
-#: flaskr/templates/appliance_details.html:31
+#: flaskr/templates/appliance_details.html:37
 #: flaskr/templates/snippets/appliance_icon.html:2
 #: flaskr/templates/snippets/appliance_icon.html:3
 msgid "Dishwasher"
 msgstr "Geschirrspülmaschine"
 
-#: flaskr/templates/appliance_details.html:33
+#: flaskr/templates/appliance_details.html:39
 #: flaskr/templates/snippets/appliance_icon.html:5
 #: flaskr/templates/snippets/appliance_icon.html:6
 msgid "Dryer"
 msgstr "Trockner"
 
-#: flaskr/templates/appliance_details.html:35
+#: flaskr/templates/appliance_details.html:41
 #: flaskr/templates/snippets/appliance_icon.html:8
 #: flaskr/templates/snippets/appliance_icon.html:9
 msgid "Washing machine"
 msgstr "Waschmaschine"
 
-#: flaskr/templates/appliance_details.html:37
+#: flaskr/templates/appliance_details.html:43
 #: flaskr/templates/snippets/appliance_icon.html:11
 #: flaskr/templates/snippets/appliance_icon.html:12
 msgid "Unknown thing"
 msgstr "Unbekanntes Ding"
 
-#: flaskr/templates/appliance_details.html:64
-msgid "Running for "
+#: flaskr/templates/appliance_details.html:62
+#, fuzzy
+msgid "Running since "
 msgstr "Läuft seit "
 
-#: flaskr/templates/appliance_details.html:66
+#: flaskr/templates/appliance_details.html:64
 msgid "Needs to be unloaded"
 msgstr "Muss entladen werden"
 
-#: flaskr/templates/appliance_details.html:68
+#: flaskr/templates/appliance_details.html:66
 msgid "Currently idling"
 msgstr "Derzeit im Ruhezustand"
 
-#: flaskr/templates/appliance_details.html:76
+#: flaskr/templates/appliance_details.html:74
 msgid "Finished last run "
 msgstr "Letzter Lauf beendet "
 
-#: flaskr/templates/appliance_details.html:131
+#: flaskr/templates/appliance_details.html:82
 #, fuzzy
 msgid "Power consumption (Watt)"
 msgstr "Stromverbrauch (Watt)"
