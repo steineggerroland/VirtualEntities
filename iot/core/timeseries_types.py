@@ -9,6 +9,9 @@ class ConsumptionMeasurement:
     def __repr__(self):
         return f"<ConsumptionMeasurement time={self.time}, consumption={self.consumption}>"
 
+    def to_dict(self):
+        return {'time': self.time.isoformat(), 'consumption': self.consumption}
+
 
 class TemperatureHumidityMeasurement:
     def __init__(self, time: datetime, temperature: float, humidity: float):

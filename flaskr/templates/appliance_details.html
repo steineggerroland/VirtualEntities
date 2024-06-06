@@ -28,7 +28,7 @@
         <div class="col-10 col-sm-auto">
             <div class="row">
                 <h2 class="col mb-0">
-                    {{appliance.name}}
+                    <span class="name">{{appliance.name}}</span>
                 </h2>
             </div>
             <div class="row">
@@ -80,7 +80,7 @@
     <div class="row">
         <div class="col">
             <h3>{{_('Power consumption (Watt)')}}</h3>
-            <div id="power-consumption"></div>
+            <div id="power-consumption" itemid="{{appliance.name}}"></div>
         </div>
     </div>
     {% if debug %}{{appliance.to_dict()}}{% endif %}
@@ -95,74 +95,6 @@
 {% block additional_scripts %}
 <script language="JavaScript" src="{{url_for('static', filename='javascript/d3.v7.min.js')}}"
         type="text/javascript"></script>
-<script language="JavaScript">
-    var margin = {top: 10, right: 30, bottom: 30, left: 60}
-
-    let powerConsumptionMeasures = [{% for measure in time_series %}{'date':new Date('{{measure.time}}'), 'value':{{measure.consumption}}},{% endfor %}]
-    let svg
-    function drawChart() {
-      const maxWidth = parseInt(window.innerWidth * 0.7)
-      const maxHeight = parseInt(window.innerHeight * 0.7)
-      const useHeight = maxHeight / maxWidth < 1
-      let width, height = 0
-      if (useHeight) {
-        height = maxHeight
-        width = maxHeight
-      } else {
-        height = maxWidth
-        width = maxWidth
-      }
-      container = document.getElementById("power-consumption")
-      container.childNodes.forEach(function(child) {
-      container.removeChild(child)
-      })
-    var margin = {top: 10, right: 30, bottom: 30, left: 60}
-    svg = d3.select("#power-consumption")
-      .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-        .attr("transform",
-              "translate(" + margin.left + "," + margin.top + ")");
-
-      function addData(data) {
-        var x = d3.scaleTime()
-          .domain(d3.extent(data, function(d) { return d.date; }))
-          .range([ 0, width ]);
-        svg.append("g")
-          .attr("transform", "translate(0," + height + ")")
-          .call(d3.axisBottom(x));
-
-        var y = d3.scaleLinear()
-          .domain([0, d3.max(data, function(d) { return +d.value; })])
-          .range([ height, 15 ]);
-        svg.append("g")
-          .call(d3.axisLeft(y))
-          .call(g => g.append("text")
-              .attr("x", -margin.left)
-              .attr("y", 10)
-              .attr("fill", "currentColor")
-              .attr("class", "text-primary")
-              .attr("text-anchor", "start")
-              .text("Watt"));
-
-        svg.append("path")
-          .datum(data)
-          .attr("fill", "none")
-          .attr("stroke", "steelblue")
-          .attr("class", "stroke-primary")
-          .attr("stroke-width", 1.5)
-          .attr("d", d3.line()
-            .x(function(d) { return x(d.date) })
-            .y(function(d) { return y(d.value) })
-            )
-    }
-  addData(powerConsumptionMeasures)
-
-    }
-
-    drawChart()
-
-    window.addEventListener('resize', drawChart );
-</script>
+<script language="JavaScript" src="{{url_for('static', filename='javascript/power-consumption-diagram.js')}}"
+        type="text/javascript"></script>
 {% endblock %}
