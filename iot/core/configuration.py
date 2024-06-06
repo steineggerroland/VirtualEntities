@@ -212,7 +212,7 @@ def _read_sources_configuration(thing_dict, calendars: List[CaldavConfig]):
 
     sources = []
     for source in thing_dict['sources']:
-        if "topic" in source:
+        if "mqtt_topic" in source:
             sources.append(_read_mqtt_source(source))
         elif "application" in source and source["application"] == "calendar":
             conf = _read_url_conf(source, "things[%s].sources[%s]" % (thing_dict['name'], source["application"]),
@@ -261,7 +261,7 @@ def _read_mqtt_source(source):
         _verify_keys(source, ['type'], "things[].sources[]")
         measures.append(
             Measure(source_type=source['type'], path=source['path'] if 'path' in source else None))
-    return MqttMeasureSource(topic=source['topic'], measures=measures)
+    return MqttMeasureSource(topic=source['mqtt_topic'], measures=measures)
 
 
 def _read_thresholds_config(thresholds_config: dict, prefix) -> ThresholdsConfig:
