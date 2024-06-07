@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List
+from typing import List, Any
 
 import yaml
 import yamlenv
@@ -22,7 +22,7 @@ class TimeSeriesConfig:
 
 
 class MqttConfiguration:
-    def __init__(self, url: str, client_id: str, port: int = 1883, credentials: str | None = None):
+    def __init__(self, url: str, client_id: str, port: int = 1883, credentials: dict | None = None):
         self.url = url
         self.port = port if port is not None else 1883
         if credentials is not None:
@@ -170,7 +170,8 @@ class PlannedNotification:
     def __eq__(self, other):
         if not isinstance(other, PlannedNotification):
             return False
-        return self.mqtt_topic == other.mqtt_topic and self.cron_expression == other.cron_expression and self.subject == other.subject
+        return (self.mqtt_topic == other.mqtt_topic and self.cron_expression == other.cron_expression
+                and self.subject == other.subject)
 
     def to_dict(self):
         return {**self.__dict__}
@@ -262,29 +263,6 @@ class Configuration:
         return to_dict
 
 
-def load_configuration(config_path) -> Configuration:
-    conf_file = None
-    try:
-        conf_file = open(config_path)
-        conf_dict = yamlenv.load(conf_file)
-
-        config = _read_configuration(conf_dict)
-        return config
-    except FileNotFoundError as e:
-        raise Exception(f'Configuration file is missing. File "{config_path}" is needed.') from e
-    finally:
-        if conf_file:
-            conf_file.close()
-
-
-def save_configuration(conf: Configuration, config_path):
-    conf_dict = conf.to_dict()
-    _remove_none(conf_dict)
-    yaml_conf = yaml.dump(conf_dict)
-    with open(config_path, 'w') as new_conf:
-        new_conf.write(yaml_conf)
-
-
 def _remove_none(obj):
     if type(obj) is dict:
         none_keys = []
@@ -309,7 +287,7 @@ def _read_mqtt_configuration(conf_dict) -> MqttConfiguration:
                              credentials=_read_mqtt_credentials(mqtt_dict))
 
 
-def _read_mqtt_credentials(mqtt_dict):
+def _read_mqtt_credentials(mqtt_dict) -> dict | None:
     if 'username' in mqtt_dict and 'password' in mqtt_dict:
         return {'username': mqtt_dict['username'], 'password': mqtt_dict['password']}
     return None
@@ -477,3 +455,38 @@ def _verify_keys(yaml_dict, keys, prefix=None):
     if any(key not in yaml_dict for key in keys):
         raise IncompleteConfiguration(
             f"Config is missing key(s) in '{prefix + '.' if prefix else ''}'. Mandatory are {keys}")
+
+
+def _save_configuration(conf, config_path):
+    conf_dict = conf.to_dict()
+    _remove_none(conf_dict)
+    yaml_conf = yaml.dump(conf_dict)
+    with open(config_path, 'w') as new_conf:
+        new_conf.write(yaml_conf)
+
+
+class ConfigurationManager:
+    def __init__(self):
+        self.configuration: Configuration | None = None
+        self.config_path: Any | None = None
+
+    def load(self, config_path) -> Configuration:
+        self.config_path = config_path
+        conf_file = None
+        try:
+            conf_file = open(config_path)
+            conf_dict = yamlenv.load(conf_file)
+            self.configuration = _read_configuration(conf_dict)
+        except FileNotFoundError as e:
+            raise Exception(f'Configuration file is missing. File "{config_path}" is needed.') from e
+        finally:
+            if conf_file:
+                conf_file.close()
+        return self.configuration
+
+    def change_thing_name(self, thing_name, new_name):
+        self.configuration.things[thing_name].name = new_name
+        self.save()
+
+    def save(self):
+        _save_configuration(self.configuration, self.config_path)
