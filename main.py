@@ -4,7 +4,7 @@ from pathlib import Path
 from time import sleep
 
 from flaskr import create_app
-from iot.core.configuration import load_configuration
+from iot.core.configuration import ConfigurationManager
 from iot.core.storage import Storage
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.dav.calendar_reader import CalendarLoader
@@ -24,10 +24,12 @@ DEFAULT_FLASK_CONFIG_FILE_NAME = "default_flask.yaml"
 DB_JSON_FILE = 'data/db.json'
 CONFIG_FILE_NAME = sys.argv[1] if len(sys.argv) > 1 else 'config.yaml'
 
+
 def run():
     logger = logging.getLogger("main")
     logger.debug("Starting")
-    config = load_configuration(CONFIG_FILE_NAME)
+    config_manager = ConfigurationManager()
+    config = config_manager.load(CONFIG_FILE_NAME)
     logger.debug("Configuration loaded")
     client = MqttClient(config.mqtt)
     logger.debug("Mqtt client loaded")
@@ -67,7 +69,8 @@ def run():
             mqtt_mediator.start()
 
         frontend = create_app(Path(__file__).parent.absolute().joinpath(DEFAULT_FLASK_CONFIG_FILE_NAME).as_posix(),
-                              appliance_depot, time_series_storage, room_catalog, register_of_persons, config.flaskr)
+                              config_manager, appliance_depot, time_series_storage, room_catalog, register_of_persons,
+                              config.flaskr)
         frontend.run(host=config.flaskr['HOST'] if 'HOST' in config.flaskr else None,
                      port=config.flaskr['PORT'] if 'PORT' in config.flaskr else None)
         logger.info("Started.")

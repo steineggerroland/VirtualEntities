@@ -9,6 +9,7 @@ from flaskr.api.ApplianceDepot import appliance_depot_api
 from flaskr.views import VirtualEntities
 from flaskr.views.ApplianceDetails import ApplianceDetails
 from flaskr.views.Homepage import Homepage
+from iot.core.configuration import ConfigurationManager
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.machine.appliance_depot import ApplianceDepot
 from iot.infrastructure.register_of_persons import RegisterOfPersons
@@ -16,8 +17,9 @@ from iot.infrastructure.room_catalog import RoomCatalog
 from project import project
 
 
-def create_app(default_config_file_name: str, appliance_depot: ApplianceDepot, time_series_storage: TimeSeriesStorage,
-               room_catalog: RoomCatalog, register_of_persons: RegisterOfPersons, config: dict = None):
+def create_app(default_config_file_name: str, config_manager: ConfigurationManager, appliance_depot: ApplianceDepot,
+               time_series_storage: TimeSeriesStorage, room_catalog: RoomCatalog,
+               register_of_persons: RegisterOfPersons, config: dict = None):
     app = Flask(__name__)
 
     app.config.from_file(default_config_file_name, load=yamlenv.load)
@@ -46,6 +48,9 @@ def create_app(default_config_file_name: str, appliance_depot: ApplianceDepot, t
         view_func=UpdateAppliance.as_view('appliance_update', appliance_depot)
     )
 
+    app.register_blueprint(appliance_depot_api(appliance_depot, time_series_storage, config_manager),
+                           url_prefix='/api/')
+
     def locale_selector():
         return request.accept_languages.best_match(app.config['LANGUAGES'].keys())
 
@@ -59,8 +64,6 @@ def create_app(default_config_file_name: str, appliance_depot: ApplianceDepot, t
     app.config['BOOTSTRAP_SERVE_LOCAL'] = True
     app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = 'sketchy'
     bootstrap = Bootstrap5(app)
-
-    app.register_blueprint(appliance_depot_api(appliance_depot, time_series_storage), url_prefix='/api/')
 
     # ensure the instance folder exists
     try:
