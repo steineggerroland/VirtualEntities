@@ -80,16 +80,16 @@
     <div class="row">
         <div class="col">
             <h3>{{_('Power consumption (Watt)')}}</h3>
-            <div id="power-consumption" itemid="{{appliance.name}}"></div>
+            <div class="power-consumption diagram" data-thing-name="{{appliance.name}}"></div>
         </div>
     </div>
     {% if debug %}{{appliance.to_dict()}}{% endif %}
 </main>
 <style>
-    .appliance .icon {
-        height: auto;
-        width: 100%;
-    }
+.appliance .icon {
+    height: auto;
+    width: 100%;
+}
 </style>
 {% endblock %}
 {% block additional_scripts %}
