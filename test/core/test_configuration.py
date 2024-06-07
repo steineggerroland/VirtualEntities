@@ -4,16 +4,15 @@ from pathlib import Path
 
 import yamlenv
 
-from iot.core import configuration
 from iot.core.configuration import PlannedNotification, IncompleteConfiguration, MqttMeasureSource, Measure, \
-    save_configuration
+    ConfigurationManager
 
 DIR = Path(__file__).parent
 
 
 class ConfigurationTest(unittest.TestCase):
     def test_complete_config(self):
-        config = configuration.load_configuration(DIR / "complete_test_config.yaml")
+        config = ConfigurationManager().load(DIR / "complete_test_config.yaml")
         self.assertEqual("my.machine.local", config.mqtt.url)
         self.assertEqual(1337, config.mqtt.port)
         self.assertEqual("user", config.mqtt.username)
@@ -90,7 +89,7 @@ class ConfigurationTest(unittest.TestCase):
         self.assertEqual("ff0000", config.calendars_config.categories[1].color_hex)
 
     def test_min_config(self):
-        min_config = configuration.load_configuration(DIR / "min_test_config.yaml")
+        min_config = ConfigurationManager().load(DIR / "min_test_config.yaml")
         self.assertEqual("mqtt.local", min_config.mqtt.url)
         self.assertIsNotNone(min_config.mqtt.port)
         self.assertFalse(min_config.mqtt.has_credentials)
@@ -109,27 +108,31 @@ class ConfigurationTest(unittest.TestCase):
     def test_incomplete_sources_produce_errors(self):
         with self.subTest("incomplete loading source"):
             self.assertRaises(IncompleteConfiguration,
-                              configuration.load_configuration, (DIR / "incomplete_loading_source_config.yaml"))
+                              ConfigurationManager().load,
+                              (DIR / "incomplete_loading_source_config.yaml"))
         with self.subTest("incomplete unloading source"):
             self.assertRaises(IncompleteConfiguration,
-                              configuration.load_configuration, (DIR / "incomplete_unloading_source_config.yaml"))
+                              ConfigurationManager().load,
+                              (DIR / "incomplete_unloading_source_config.yaml"))
         with self.subTest("incomplete mqtt conf"):
             self.assertRaises(IncompleteConfiguration,
-                              configuration.load_configuration, (DIR / "incomplete_mqtt_config.yaml"))
+                              ConfigurationManager().load, (DIR / "incomplete_mqtt_config.yaml"))
         with self.subTest("incomplete thing conf"):
             self.assertRaises(IncompleteConfiguration,
-                              configuration.load_configuration, (DIR / "incomplete_thing_config.yaml"))
+                              ConfigurationManager().load, (DIR / "incomplete_thing_config.yaml"))
         with self.subTest("incomplete influxdb conf"):
             self.assertRaises(IncompleteConfiguration,
-                              configuration.load_configuration, (DIR / "incomplete_influxdb_config.yaml"))
+                              ConfigurationManager().load, (DIR / "incomplete_influxdb_config.yaml"))
         with self.subTest("incomplete person conf"):
             self.assertRaises(IncompleteConfiguration,
-                              configuration.load_configuration, (DIR / "incomplete_person_calendar_config.yaml"))
+                              ConfigurationManager().load,
+                              (DIR / "incomplete_person_calendar_config.yaml"))
 
     def test_saving_config(self):
         try:
             # given
-            config = configuration.load_configuration(DIR / "complete_test_config.yaml")
+            manager = ConfigurationManager()
+            config = manager.load(DIR / "complete_test_config.yaml")
             dict_of_loaded_config = yamlenv.load(open(DIR / "complete_test_config.yaml"))
             # fix colors that are lower-cased internally and, therefore, saved lower too
             caldav_calendar_with_upper_case_color = dict_of_loaded_config['calendars']['caldav'][0]
@@ -142,7 +145,9 @@ class ConfigurationTest(unittest.TestCase):
                                                      'sources']))[0]
             calendar_without_color['color_hex'] = 'ffffff'
             # when
-            save_configuration(config, DIR / "test_result_complete_test_config.yaml")
+            manager.config_path = DIR / "test_result_complete_test_config.yaml"
+            manager.configuration = config
+            manager.save()
             # then
             self.assertEqual(dict_of_loaded_config,
                              yamlenv.load(open(DIR / "test_result_complete_test_config.yaml")))
