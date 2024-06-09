@@ -8,6 +8,7 @@ from flask_bootstrap import Bootstrap5
 from flaskr.api.ApplianceDepot import appliance_depot_api
 from flaskr.views import VirtualEntities
 from flaskr.views.ApplianceDetails import ApplianceDetails
+from flaskr.views.Homepage import Homepage
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.machine.appliance_depot import ApplianceDepot
 from iot.infrastructure.register_of_persons import RegisterOfPersons
@@ -25,6 +26,11 @@ def create_app(default_config_file_name: str, appliance_depot: ApplianceDepot, t
     app.appliance_depot = appliance_depot
     app.room_catalog = room_catalog
     app.register_of_persons = register_of_persons
+
+    app.add_url_rule(
+        "/",
+        view_func=Homepage.as_view("home")
+    )
 
     app.add_url_rule(
         "/virtual-entities/",
