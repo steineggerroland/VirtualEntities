@@ -41,14 +41,14 @@ class TemperatureTest(unittest.TestCase):
         # when
         MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
         # then
-        self.mqtt_client_mock.subscribe.assert_called_with("some/topic", ANY)
+        self.mqtt_client_mock.subscribe.assert_called_with(ANY, "some/topic", ANY)
 
     def test_forwards_to_mediator_when_updating_temperature_with_jsonpath(self):
         thing_config = IotThingConfig("Kitchen", "room",
                                       sources=Sources([MqttMeasureSource(mqtt_topic="some/topic", measures=[
                                           Measure(source_type='temperature', path="$.temperature")])]))
-        MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
-        mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][1]
+        mediator = MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
+        mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][2]
         self.room_service_mock.update_temperature = Mock()
         temperature = Temperature(23.12)
         msg = bytes(
@@ -65,7 +65,7 @@ class TemperatureTest(unittest.TestCase):
                                       sources=Sources([MqttMeasureSource(mqtt_topic="some/topic", measures=[
                                           Measure(source_type='temperature')])]))
         MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
-        mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][1]
+        mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][2]
         self.room_service_mock.update_temperature = Mock()
         temperature = Temperature(23.12)
         msg = b"23.12"
@@ -83,7 +83,7 @@ class TemperatureTest(unittest.TestCase):
                                               Measure(source_type='temperature',
                                                       path=unsupported_json_path)])]))
         MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
-        mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][1]
+        mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][2]
         self.room_service_mock.update_temperature = Mock()
         msg = b'{"battery":100,"humidity":71.65,"linkquality":216,"temperature":23.12,"voltage":3000}'
         # when
@@ -99,7 +99,7 @@ class TemperatureTest(unittest.TestCase):
                                               Measure(source_type='temperature',
                                                       path=unsupported_json_path)])]))
         MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
-        mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][1]
+        mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][2]
         self.room_service_mock.update_temperature = Mock()
         msg = b"21.3"
         # when

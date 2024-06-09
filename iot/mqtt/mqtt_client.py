@@ -1,11 +1,40 @@
 import json
 import logging
 from threading import Thread
+from typing import Callable, List
 
 import paho.mqtt.client as paho_mqtt
 
 from iot.core.configuration import MqttConfiguration
 from iot.infrastructure.machine.machine_service import DatabaseException
+
+
+class Subscription:
+    def __init__(self, name: str, topic: str, callback: Callable):
+        self.name = name
+        self.topic = topic
+        self.callback = callback
+
+
+class Subscriptions:
+    def __init__(self):
+        self.subscriptions = []
+
+    def add(self, subscription: Subscription):
+        self.subscriptions.append(subscription)
+
+    def get_and_remove_all_of(self, name: str):
+        removed_subscriptions = list(filter(lambda s: s.name == name, self.subscriptions))
+        for subscription in removed_subscriptions:
+            self.subscriptions.remove(subscription)
+        return removed_subscriptions
+
+    def get_topics(self):
+        return set(map(lambda subscription: subscription.topic, self.subscriptions))
+
+    def get_callbacks_for(self, topic: str):
+        return list(map(lambda subscription: subscription.callback,
+                        filter(lambda subscription: subscription.topic == topic, self.subscriptions)))
 
 
 class MqttClient:
@@ -19,9 +48,7 @@ class MqttClient:
         self.mqtt_client.on_message = self.on_message
         self.mqtt_client.connect(self.mqtt_config.url, self.mqtt_config.port)
         self.loop_thread: Thread = Thread(target=self._loop_forever, daemon=True)
-
-        self.subscriptions = {}
-
+        self.subscriptions = Subscriptions()
         self.logger = logging.getLogger(self.__class__.__qualname__)
 
     def start(self):
@@ -36,12 +63,12 @@ class MqttClient:
 
     def on_connect(self, client, userdata, flags, rc):
         self.logger.debug("Connected with result code %s", str(rc))
-        for subscribed_topic in self.subscriptions.keys():
+        for subscribed_topic in self.subscriptions.get_topics():
             client.subscribe(subscribed_topic)
 
     def on_message(self, client, userdata, msg):
         self.logger.debug("Received message topic '%s' payload '%s'", msg.topic, msg.payload)
-        callbacks = self.subscriptions[msg.topic]
+        callbacks = self.subscriptions.get_callbacks_for(msg.topic)
         for callback in callbacks:
             try:
                 callback(msg)
@@ -52,10 +79,15 @@ class MqttClient:
                 self.logger.error("Failed to handle message '%s' by one subscriber with error: %s",
                                   msg.topic, e, exc_info=True)
 
-    def subscribe(self, topic: str, callback):
-        self.subscriptions.setdefault(topic, [])
-        self.subscriptions.get(topic).append(callback)
+    def subscribe(self, name: str, topic: str, callback):
+        self.subscriptions.add(Subscription(name, topic, callback))
         self.mqtt_client.subscribe(topic)
+
+    def unsubscribe(self, name: str):
+        removed_subscriptions = self.subscriptions.get_and_remove_all_of(name)
+        all_topics = self.subscriptions.get_topics()
+        for sub in set(filter(lambda s: s.topic not in all_topics, removed_subscriptions)):
+            self.mqtt_client.unsubscribe(sub.topic)
 
     def publish(self, topic: str, payload: str | dict = None):
         msg = json.dumps(payload) if isinstance(payload, dict) else payload

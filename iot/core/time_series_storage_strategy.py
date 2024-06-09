@@ -24,3 +24,7 @@ class TimeSeriesStorageStrategy(metaclass=ABCMeta):
     @abstractmethod
     def append_room_climate(self, temperature: Temperature, humidity: float, thing_name: str):
         pass
+
+    @abstractmethod
+    def rename(self, old_name: str, new_name: str):
+        pass

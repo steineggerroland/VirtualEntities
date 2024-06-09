@@ -63,3 +63,14 @@ class InfluxDbTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
                               temperature, humidity, thing_name, e, exc_info=True)
             raise DatabaseException("Failed to write room climate (%s, %d%%) for thing '%s' to influx db: %s" %
                                     (temperature, humidity, thing_name, e), e) from e
+
+    def _change_thing_name_of_point(self, point: dict, new_name: str)-> dict:
+        point['tags'][THING_NAME_TAG] = new_name
+        return point
+
+    def rename(self, old_name: str, new_name: str):
+        rs = self.influxdb.query(f"SELECT * FROM {POWER_CONSUMPTION_SERIES}")
+        points = rs.get_points(measurement=POWER_CONSUMPTION_SERIES, tags={THING_NAME_TAG: old_name})
+        reassigned_points = map(lambda p: self._change_thing_name_of_point(p, new_name), points)
+        self.influxdb.write_points(points)
+        self.influxdb.delete_series(measurement=POWER_CONSUMPTION_SERIES, tags={THING_NAME_TAG: old_name})
