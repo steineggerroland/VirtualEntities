@@ -1,13 +1,14 @@
 import os
+import secrets
 
 import yamlenv
 from flask import Flask, request
 from flask_babel import Babel
 from flask_bootstrap import Bootstrap5
+from flaskr.views.ApplianceDetails import ApplianceDetails
 
 from flaskr.api.ApplianceDepot import appliance_depot_api
 from flaskr.views import VirtualEntities
-from flaskr.views.ApplianceDetails import ApplianceDetails
 from flaskr.views.Homepage import Homepage
 from iot.core.configuration import ConfigurationManager
 from iot.core.time_series_storage import TimeSeriesStorage
@@ -22,6 +23,7 @@ def create_app(default_config_file_name: str, config_manager: ConfigurationManag
                register_of_persons: RegisterOfPersons, config: dict = None):
     app = Flask(__name__)
 
+    app.secret_key = secrets.token_urlsafe(16)
     app.config.from_file(default_config_file_name, load=yamlenv.load)
     app.config.from_mapping(config)
 
@@ -33,7 +35,6 @@ def create_app(default_config_file_name: str, config_manager: ConfigurationManag
         "/",
         view_func=Homepage.as_view("home")
     )
-
     app.add_url_rule(
         "/virtual-entities/",
         view_func=VirtualEntities.ListView.as_view("ve_list")

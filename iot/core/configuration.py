@@ -485,7 +485,8 @@ class ConfigurationManager:
         return self.configuration
 
     def change_thing_name(self, thing_name, new_name):
-        self.configuration.things[thing_name].name = new_name
+        thing = list(filter(lambda t: t.name == thing_name, self.configuration.things)).pop()
+        thing.name = new_name
         self.save()
 
     def save(self):
