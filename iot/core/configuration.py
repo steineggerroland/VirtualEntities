@@ -3,6 +3,7 @@ from typing import List, Any
 
 import yaml
 import yamlenv
+from python_event_bus import EventBus
 
 
 class IncompleteConfiguration(Exception):
@@ -18,7 +19,7 @@ class TimeSeriesConfig:
         self.bucket_name = bucket_name
 
     def to_dict(self):
-        return {**self.__dict__}
+        return dict(self.__dict__)
 
 
 class MqttConfiguration:
@@ -39,7 +40,7 @@ class MqttConfiguration:
         return f"mqtt ({self.url}:{self.port})"
 
     def to_dict(self):
-        to_dict = self.__dict__
+        to_dict = dict(self.__dict__)
         del to_dict['has_credentials']
         return to_dict
 
@@ -50,7 +51,7 @@ class Measure:
         self.path = path
 
     def to_dict(self):
-        return {**self.__dict__}
+        return dict(self.__dict__)
 
 
 class Source:
@@ -102,7 +103,7 @@ class UrlConf(Source):
         return self.username is not None
 
     def to_dict(self) -> dict:
-        return {**self.__dict__}
+        return dict(self.__dict__)
 
 
 class ReferencedUrlConf(UrlConf):
@@ -140,7 +141,7 @@ class CategoryConfig:
         self.color_hex = color_hex.lower()
 
     def to_dict(self):
-        return {**self.__dict__}
+        return dict(self.__dict__)
 
 
 class CalendarsConfig:
@@ -174,7 +175,7 @@ class PlannedNotification:
                 and self.subject == other.subject)
 
     def to_dict(self):
-        return {**self.__dict__}
+        return dict(self.__dict__)
 
 
 class Destinations:
@@ -192,7 +193,7 @@ class RangeConfig:
         self.upper = upper
 
     def to_dict(self):
-        return {**self.__dict__}
+        return dict(self.__dict__)
 
 
 class ThresholdsConfig:
@@ -202,7 +203,7 @@ class ThresholdsConfig:
         self.critical_upper = critical_upper
 
     def to_dict(self):
-        to_dict = self.__dict__
+        to_dict = dict(self.__dict__)
         to_dict['optimal'] = self.optimal.to_dict()
         return to_dict
 
@@ -484,9 +485,12 @@ class ConfigurationManager:
                 conf_file.close()
         return self.configuration
 
-    def change_thing_name(self, thing_name, new_name):
-        self.configuration.things[thing_name].name = new_name
-        self.save()
+    def rename_appliance(self, old_name: str, new_name: str):
+        if new_name != old_name:
+            thing = list(filter(lambda t: t.name == old_name, self.configuration.things)).pop()
+            thing.name = new_name
+            self.save()
+            EventBus.call("thing_configs/changed_name", name=new_name, old_name=old_name)
 
     def save(self):
         _save_configuration(self.configuration, self.config_path)

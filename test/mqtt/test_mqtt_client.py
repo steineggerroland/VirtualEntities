@@ -33,7 +33,7 @@ class MqttClientTest(unittest.TestCase):
         paho_mqtt_client_mock.subscribe = Mock()
         topic = "my/important/topic"
         # when
-        mqtt_client.subscribe(topic, lambda: "callback")
+        mqtt_client.subscribe("some thing", topic, lambda: "callback")
         # then
         paho_mqtt_client_mock.subscribe.assert_called()
 
@@ -41,7 +41,7 @@ class MqttClientTest(unittest.TestCase):
         # given
         mqtt_client = MqttClient(self.mqtt_config_mock)
         topic = "my/important/topic"
-        mqtt_client.subscribe(topic, lambda: "callback")
+        mqtt_client.subscribe("some thing", topic, lambda: "callback")
         paho_mqtt_client_mock.subscribe = Mock()
         # when
         mqtt_client.on_connect(paho_mqtt_client_mock, None, None, rc=0)
@@ -55,7 +55,7 @@ class MqttClientTest(unittest.TestCase):
         msg_mock = Mock(topic=topic, payload="important message")
         callback_mock = Mock()
         # when
-        mqtt_client.subscribe(topic, callback_mock)
+        mqtt_client.subscribe("some thing", topic, callback_mock)
         mqtt_client.on_message(paho_mqtt_client_mock, None, msg=msg_mock)
         # then
         callback_mock.assert_called_once_with(msg_mock)

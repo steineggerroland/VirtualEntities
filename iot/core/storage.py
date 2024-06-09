@@ -5,6 +5,8 @@ from pathlib import Path
 from threading import Thread
 from typing import List
 
+from python_event_bus import EventBus
+
 from iot.infrastructure.exceptions import InvalidThingType
 from iot.infrastructure.machine.machine_builder import MachineBuilder
 from iot.infrastructure.machine.machine_that_can_be_loaded import MachineThatCanBeLoaded
@@ -30,6 +32,7 @@ class Storage:
             if db_file:
                 db_file.close()
         self._scheduled_snapshots_thread: Thread = Thread(target=self._scheduled_snapshots, daemon=True)
+        EventBus.subscribe("thing_configs/changed_name", self.rename)
 
     def start(self):
         self._scheduled_snapshots_thread.start()
@@ -79,3 +82,8 @@ class Storage:
 
     def load_all_rooms(self) -> List[Room]:
         return list(map(lambda r: r_from_dict(r), filter(lambda e: e['type'] == 'room', self.things.values())))
+
+    def rename(self, name: str, old_name: str):
+        self.things[name] = self.things[old_name]
+        self.things[name]["name"] = name
+        del self.things[old_name]

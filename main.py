@@ -35,19 +35,22 @@ def run():
     logger.debug("Mqtt client loaded")
     storage = Storage(Path(DB_JSON_FILE), [thing.name for thing in config.things])
     time_series_storage = TimeSeriesStorage(config.time_series)
-    appliance_depot = ApplianceDepot(storage)
+    appliance_depot = ApplianceDepot(storage, time_series_storage)
     room_catalog = RoomCatalog(storage)
     register_of_persons = RegisterOfPersons()
     logger.debug("Storage loaded")
+    machine_configs = list(filter(lambda t: machine_service_supports_thing_type(thing_type=t.type), config.things))
+    machine_service = MachineService(appliance_depot, storage, time_series_storage, config_manager)
+    machine_service.add_machines_by_config(machine_configs)
     mqtt_mediators = []
+    logger.debug("Machine service for loaded")
+    mqtt_machine_mediator = MqttMachineMediator(machine_service, client)
+    mqtt_mediators.append(mqtt_machine_mediator)
+    for thing_config in machine_configs:
+        mqtt_machine_mediator.add_thing_by_config(thing_config.name, thing_config.sources, thing_config.destinations)
+    logger.debug("Mqtt machine mediator for loaded")
     for thing_config in config.things:
-        if machine_service_supports_thing_type(thing_type=thing_config.type):
-            machine_service = MachineService(appliance_depot, time_series_storage, thing_config)
-            logger.debug("Machine service for '%s' loaded" % thing_config.name)
-            mqtt_mediators.append(
-                MqttMachineMediator(machine_service, thing_config.sources, thing_config.destinations, client))
-            logger.debug("Mqtt machine mediator for '%s' loaded" % thing_config.name)
-        elif room_service_supports_thing_type(thing_type=thing_config.type):
+        if room_service_supports_thing_type(thing_type=thing_config.type):
             room_service = RoomService(room_catalog, time_series_storage, thing_config)
             logger.debug("Room service for '%s' loaded" % thing_config.name)
             mqtt_mediators.append(
@@ -59,7 +62,7 @@ def run():
             mqtt_mediators.append(
                 MqttPersonMediator(client, person_service, thing_config, CalendarLoader(config.calendars_config)))
             logger.debug("Mqtt person mediator for '%s' loaded" % thing_config.name)
-        else:
+        elif not machine_service_supports_thing_type(thing_type=thing_config.type):
             logger.error('Unsupported thing of type %s' % thing_config.type)
 
     try:
@@ -69,8 +72,8 @@ def run():
             mqtt_mediator.start()
 
         frontend = create_app(Path(__file__).parent.absolute().joinpath(DEFAULT_FLASK_CONFIG_FILE_NAME).as_posix(),
-                              config_manager, appliance_depot, time_series_storage, room_catalog, register_of_persons,
-                              config.flaskr)
+                              machine_service, appliance_depot, time_series_storage, room_catalog, register_of_persons,
+                              config_manager, config.flaskr)
         frontend.run(host=config.flaskr['HOST'] if 'HOST' in config.flaskr else None,
                      port=config.flaskr['PORT'] if 'PORT' in config.flaskr else None)
         logger.info("Started.")
@@ -87,6 +90,6 @@ def run():
 
 if __name__ == '__main__':
     logging.basicConfig(filename='data/default.log', encoding='utf-8',
-                        level=logging.DEBUG if sys.flags.debug else logging.INFO,
+                        level=logging.DEBUG if sys.flags.debug else logging.DEBUG,
                         format='%(asctime)s - %(name)s(%(lineno)s) - %(levelname)s - %(message)s')
     run()

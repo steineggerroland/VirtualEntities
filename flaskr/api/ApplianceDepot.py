@@ -7,20 +7,12 @@ from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.machine.appliance_depot import ApplianceDepot
 
 
-def appliance_depot_api(appliance_depot: ApplianceDepot, time_series_storage: TimeSeriesStorage,
-                        config_manager: ConfigurationManager):
+def appliance_depot_api(appliance_depot: ApplianceDepot, time_series_storage: TimeSeriesStorage):
     api = Blueprint('appliance-depot_api', __name__)
 
     @api.get('/appliances')
     def all():
         return list(map(lambda a: a.to_dict(), appliance_depot.inventory()))
-
-    @api.patch('/appliances/<name>')
-    def patch(name: str, updates: dict):
-        if 'name' in updates:
-            config_manager.change_thing_name(name, updates['name'])
-            return Response(status=HTTPStatus.ACCEPTED)
-        return Response(status=HTTPStatus.BAD_REQUEST)
 
     @api.get('/appliances/<name>')
     def single(name: str):

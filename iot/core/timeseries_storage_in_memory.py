@@ -29,6 +29,11 @@ class InMemoryTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
         # saving in memory not necessary because they are never read
         pass
 
+    def rename(self, old_name, new_name):
+        if old_name in self.power_consumption_values:
+            self.power_consumption_values[new_name] = self.power_consumption_values[old_name]
+            del self.power_consumption_values[old_name]
+
     def start(self):
         pass
 
