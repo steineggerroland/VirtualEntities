@@ -28,3 +28,7 @@ class TimeSeriesStorage(metaclass=ABCMeta):
 
     def append_room_climate(self, temperature: Temperature, humidity: float, thing_name):
         self.time_series_storage_strategy.append_room_climate(temperature, humidity, thing_name)
+
+    def rename(self, old_name: str, new_name: str):
+        if new_name != old_name:
+            self.time_series_storage_strategy.rename(old_name, new_name)

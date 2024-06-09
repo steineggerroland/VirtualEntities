@@ -79,3 +79,8 @@ class Storage:
 
     def load_all_rooms(self) -> List[Room]:
         return list(map(lambda r: r_from_dict(r), filter(lambda e: e['type'] == 'room', self.things.values())))
+
+    def rename(self, old_name: str, new_name: str):
+        if new_name != old_name:
+            self.things[new_name] = self.things[old_name]
+            del self.things[old_name]
