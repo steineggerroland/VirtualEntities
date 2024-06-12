@@ -1,9 +1,10 @@
-from abc import abstractmethod
 from typing import List, Any
 
 import yaml
 import yamlenv
 from python_event_bus import EventBus
+
+from iot.core.configuration_to_yaml_dumper import ConfigDumpers
 
 
 class IncompleteConfiguration(Exception):
@@ -17,9 +18,6 @@ class TimeSeriesConfig:
         self.username = username
         self.password = password
         self.bucket_name = bucket_name
-
-    def to_dict(self):
-        return dict(self.__dict__)
 
 
 class MqttConfiguration:
@@ -39,25 +37,15 @@ class MqttConfiguration:
             return f"mqtt ({self.url}:{self.port}, {self.username}:<pw len {len(self.password)}>)"
         return f"mqtt ({self.url}:{self.port})"
 
-    def to_dict(self):
-        to_dict = dict(self.__dict__)
-        del to_dict['has_credentials']
-        return to_dict
-
 
 class Measure:
     def __init__(self, source_type: str, path: None | str = None):
         self.type = source_type
         self.path = path
 
-    def to_dict(self):
-        return dict(self.__dict__)
-
 
 class Source:
-    @abstractmethod
-    def to_dict(self):
-        pass
+    pass
 
 
 class MqttMeasureSource(Source):
@@ -72,14 +60,6 @@ class MqttMeasureSource(Source):
             if not any(vars(measure) == vars(other_measure) for other_measure in other.measures):
                 return False
         return True
-
-    def to_dict(self):
-        to_dict = {'mqtt_topic': self.mqtt_topic}
-        if len(self.measures) == 1:
-            to_dict = to_dict | self.measures[0].to_dict()
-        else:
-            to_dict['measures'] = [m.to_dict() for m in self.measures]
-        return to_dict
 
 
 class UrlConf(Source):
@@ -102,19 +82,10 @@ class UrlConf(Source):
     def has_credentials(self):
         return self.username is not None
 
-    def to_dict(self) -> dict:
-        return dict(self.__dict__)
-
 
 class ReferencedUrlConf(UrlConf):
     def __init__(self, conf: UrlConf):
         super().__init__(conf.application, conf.name, conf.url, conf.username, conf.password, conf.update_cron)
-
-    def to_dict(self) -> dict:
-        return {
-            'application': self.application,
-            'reference_name': self.name
-        }
 
 
 class CaldavConfig(UrlConf):
@@ -128,20 +99,11 @@ class ReferencedCaldavConfig(CaldavConfig):
     def __init__(self, caldav_conf: CaldavConfig):
         super().__init__(caldav_conf, caldav_conf.color_hex)
 
-    def to_dict(self) -> dict:
-        return {
-            'application': self.application,
-            'reference_name': self.name
-        }
-
 
 class CategoryConfig:
     def __init__(self, name: str, color_hex: str):
         self.name = name
         self.color_hex = color_hex.lower()
-
-    def to_dict(self):
-        return dict(self.__dict__)
 
 
 class CalendarsConfig:
@@ -149,17 +111,10 @@ class CalendarsConfig:
         self.categories = categories
         self.calendars = calendars
 
-    def to_dict(self):
-        return {'categories': [cat.to_dict() for cat in self.categories],
-                'caldav': [cal.to_dict() for cal in self.calendars]}
-
 
 class Sources:
     def __init__(self, sources: List[Source]):
         self.list = sources
-
-    def to_dict(self):
-        return [source.to_dict() for source in self.list]
 
 
 class PlannedNotification:
@@ -174,17 +129,10 @@ class PlannedNotification:
         return (self.mqtt_topic == other.mqtt_topic and self.cron_expression == other.cron_expression
                 and self.subject == other.subject)
 
-    def to_dict(self):
-        return dict(self.__dict__)
-
 
 class Destinations:
     def __init__(self, planned_notifications: List[PlannedNotification]):
         self.planned_notifications = planned_notifications
-
-    def to_dict(self):
-        return {'planned_notifications': [planned_notification.to_dict() for planned_notification in
-                                          self.planned_notifications]}
 
 
 class RangeConfig:
@@ -192,20 +140,12 @@ class RangeConfig:
         self.lower = lower
         self.upper = upper
 
-    def to_dict(self):
-        return dict(self.__dict__)
-
 
 class ThresholdsConfig:
     def __init__(self, optimal: RangeConfig, critical_lower: float, critical_upper: float):
         self.optimal = optimal
         self.critical_lower = critical_lower
         self.critical_upper = critical_upper
-
-    def to_dict(self):
-        to_dict = dict(self.__dict__)
-        to_dict['optimal'] = self.optimal.to_dict()
-        return to_dict
 
 
 class IotThingConfig:
@@ -224,18 +164,6 @@ class IotThingConfig:
     def __str__(self):
         return f"{self.name} ({self.type}, {self.sources}, {self.destinations})"
 
-    def to_dict(self):
-        to_dict = {'name': self.name, 'type': self.type}
-        if self.sources and self.sources.list:
-            to_dict['sources'] = self.sources.to_dict()
-        if self.destinations and self.destinations.planned_notifications:
-            to_dict['destinations'] = self.destinations.to_dict()
-        if self.humidity_thresholds:
-            to_dict['humidity_thresholds'] = self.humidity_thresholds.to_dict()
-        if self.temperature_thresholds:
-            to_dict['temperature_thresholds'] = self.temperature_thresholds.to_dict()
-        return to_dict
-
 
 class Configuration:
     def __init__(self, mqtt: MqttConfiguration, things: [IotThingConfig], time_series: TimeSeriesConfig | None,
@@ -248,35 +176,6 @@ class Configuration:
 
     def __str__(self):
         return f"{self.mqtt}, {self.things}, {self.time_series}, {self.calendars_config}"
-
-    def to_dict(self) -> dict:
-        to_dict = {
-            'mqtt': self.mqtt.to_dict(),
-            'things': [thing.to_dict() for thing in self.things]
-        }
-        if self.time_series:
-            to_dict['time_series'] = self.time_series.to_dict()
-        if self.calendars_config:
-            to_dict['calendars'] = self.calendars_config.to_dict()
-        if self.flaskr:
-            to_dict['flaskr'] = self.flaskr
-
-        return to_dict
-
-
-def _remove_none(obj):
-    if type(obj) is dict:
-        none_keys = []
-        for key in obj.keys():
-            if obj[key] is None:
-                none_keys.append(key)
-            else:
-                _remove_none(obj[key])
-        for k in none_keys:
-            del obj[k]
-    elif type(obj) is list:
-        for o in obj:
-            _remove_none(o)
 
 
 def _read_mqtt_configuration(conf_dict) -> MqttConfiguration:
@@ -458,12 +357,22 @@ def _verify_keys(yaml_dict, keys, prefix=None):
             f"Config is missing key(s) in '{prefix + '.' if prefix else ''}'. Mandatory are {keys}")
 
 
-def _save_configuration(conf, config_path):
-    conf_dict = conf.to_dict()
-    _remove_none(conf_dict)
-    yaml_conf = yaml.dump(conf_dict)
+sd = safe_dumper = yaml.SafeDumper
+for item in [(Configuration, ConfigDumpers.configuration_dumper), (TimeSeriesConfig, ConfigDumpers.time_series_dumper),
+             (MqttConfiguration, ConfigDumpers.mqtt_dumper), (Measure, ConfigDumpers.measure_dumper),
+             (MqttMeasureSource, ConfigDumpers.mqtt_measure_source_dumper), (UrlConf, ConfigDumpers.url_conf_dumper),
+             (ReferencedUrlConf, ConfigDumpers.referenced_url_dumper), (CaldavConfig, ConfigDumpers.caldav_dumper),
+             (ReferencedCaldavConfig, ConfigDumpers.referenced_caldav_dumper),
+             (CategoryConfig, ConfigDumpers.category_dumper), (CalendarsConfig, ConfigDumpers.calendars_dumper),
+             (Sources, ConfigDumpers.sources_dumper), (PlannedNotification, ConfigDumpers.planned_notification_dumper),
+             (Destinations, ConfigDumpers.destinations_dumper), (RangeConfig, ConfigDumpers.range_dumper),
+             (ThresholdsConfig, ConfigDumpers.thresholds_dumper), (IotThingConfig, ConfigDumpers.iot_thing_dumper)]:
+    sd.add_representer(item[0], item[1])
+
+
+def _save_configuration(conf: Configuration, config_path):
     with open(config_path, 'w') as new_conf:
-        new_conf.write(yaml_conf)
+        new_conf.write(yaml.dump(conf, Dumper=sd))
 
 
 class ConfigurationManager:

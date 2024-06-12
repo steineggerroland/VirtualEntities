@@ -66,8 +66,8 @@ things:
     destinations:
       planned_notifications:
         - mqtt_topic: persons/jane/appointments
-          cron_expression: "*/15 * * * * 0"
           subject: daily-appointments
+          cron_expression: "*/15 * * * * 0"
 calendars:
   categories:
     - name: Special
