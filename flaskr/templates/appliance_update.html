@@ -33,15 +33,19 @@
                 </div>
             </div>
         </div>
-        <form class="row g-3" method="POST" action="{{ url_for('appliance_update', name=appliance.name ) }}">
+        <form class="row g-4 mt-0" method="POST" action="{{ url_for('appliance_update', name=appliance.name ) }}">
             {{ form.csrf_token }}
-            {{ form.name.label(class='col-sm-2 col-form-label') }}
-            <div class="col-sm-10 mt-0 mt-sm-auto">
+            <div class="col-12">
+                {{ form.name.label(class='form-label') }}
                 {{ form.name(class='form-control',style='width: fit-content') }}
+                {% if form.name.errors %}
+                    <div class="invalid-feedback">{% for error in form.name.errors %}{{ error }}{% endfor %}</div>
+                {% endif %}
             </div>
             <div class="col-12">
                 <a href="{{ url_for('appliance', name=appliance.name) }}">
-                    <button type="button" class="btn btn-outline-secondary" value="{{ _('Cancel') }}">{{ _('Cancel') }}</button>
+                    <button type="button" class="btn btn-outline-secondary"
+                            value="{{ _('Cancel') }}">{{ _('Cancel') }}</button>
                 </a>
                 <button type="submit" class="btn btn-primary ms-2" value="{{ _('Save') }}">{{ _('Save') }}</button>
             </div>
@@ -60,4 +64,12 @@
             type="text/javascript"></script>
     <script language="JavaScript" src="{{ url_for('static', filename='javascript/power-consumption-diagram.js') }}"
             type="text/javascript"></script>
+    <script>
+        (function () {
+            let nameInput = document.getElementById('{{ form.name.id }}');
+            if (nameInput.parentElement.querySelectorAll('.invalid-feedback').length > 0) {
+                nameInput.className += ' is-invalid'
+            }
+        })()
+    </script>
 {% endblock %}
