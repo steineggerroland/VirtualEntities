@@ -1,6 +1,6 @@
 (function () {
 
-    function drawChart(powerConsumptionMeasures, containerId) {
+    function drawChart(measures, containerId, xAxisLabel) {
         let diagramContainer = document.getElementById(containerId);
         diagramContainer.childNodes.forEach(function (child) {
             diagramContainer.removeChild(child)
@@ -26,19 +26,20 @@
         diagram = svg.append("g")
             .attr("transform",
                 "translate(" + margin.left + "," + margin.top + ")");
+        // adds date now and date before two hours to set default range
         const x = d3.scaleTime()
-            // adds date now and date before two hours to set default range
-            .domain(d3.extent([...powerConsumptionMeasures, {'date': date_now}, {'date': date_before_two_hours}],
-                function (d) {
-                    return d.date;
-                }))
+            .domain(d3.extent([...measures, {'date': date_now}, {'date': date_before_two_hours}], function (d) {
+                return d.date;
+            }))
             .range([0, width - margin.left - margin.right]);
         diagram.append("g")
             .attr("transform", "translate(0," + (height - margin.top - margin.bottom) + ")")
             .call(d3.axisBottom(x));
 
         const y = d3.scaleLinear()
-            .domain([0, d3.max(powerConsumptionMeasures, function (d) {
+            .domain([-5 + d3.min(measures, function (d) {
+                return +d.value;
+            }), 5 + d3.max(measures, function (d) {
                 return +d.value;
             })])
             .range([height - margin.top - margin.bottom, 15]);
@@ -50,10 +51,10 @@
                 .attr("fill", "currentColor")
                 .attr("class", "text-primary")
                 .attr("text-anchor", "start")
-                .text("Watt"));
+                .text(xAxisLabel));
 
         diagram.append("path")
-            .datum(powerConsumptionMeasures)
+            .datum(measures)
             .attr("fill", "none")
             .attr("stroke", "steelblue")
             .attr("class", "stroke-primary")
@@ -68,19 +69,21 @@
             )
     }
 
-    document.querySelectorAll('.power-consumption.diagram').forEach(container => {
+    document.querySelectorAll('.room-climate.diagram').forEach(container => {
         const thingName = container.dataset.thingName
-        if (!container.id) container.id = "power-consumption-diagram-container-" + thingName
+        const attribute = container.dataset.attribute
+        const xAxisLabel = container.dataset.xAxisLabel
+        if (!container.id) container.id = attribute + "-diagram-container-" + thingName
         const measurements = []
-        const fetchAndDrawDiagram = () => fetch(`/api/appliances/${thingName}/power-consumptions`)
+        const fetchAndDrawDiagram = () => fetch(`/api/rooms/${thingName}/${attribute}`)
             .then(data => data.json())
             .then(data => {
                 measurements.splice(0, measurements.length)
                 measurements.push(...data.map(d => {
-                    return {"date": new Date(d.time), "value": d.consumption}
+                    return {"date": new Date(d.time), "value": d[attribute]}
                 }))
-                drawChart(measurements, container.id)
+                drawChart(measurements, container.id, xAxisLabel)
             }).then(() => window.setTimeout(fetchAndDrawDiagram, 30 * 1000))
-        fetchAndDrawDiagram().then(() => window.addEventListener('resize', () => drawChart(measurements, container.id)))
+        fetchAndDrawDiagram().then(() => window.addEventListener('resize', () => drawChart(measurements, container.id, xAxisLabel)))
     })
 })()

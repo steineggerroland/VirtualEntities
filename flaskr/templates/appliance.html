@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}<title>{{ _('Appliance') }}</title>{% endblock %}
+{% block title %}<title>{{ _('Appliance %(name)s', name=appliance.name) }}</title>{% endblock %}
 {% block content %}
     <aside class="container">
         <div class="row mt-4">
@@ -71,7 +71,7 @@
                     <div class="col">
                         {% if appliance.running_state=='running' %}
                             <span data-bs-title="{{ appliance.started_run_at|datetimeformat('short') }}"
-                                  data-bs-toggle="tooltip">{{ _('Running since ') }}{{ appliance.running_for_time_period()|timedeltaformat() }}</span>
+                                  data-bs-toggle="tooltip">{{ _('Running since %(xMinutes)s', xMinutes=appliance.running_for_time_period()|timedeltaformat()) }}</span>
                         {% elif appliance.needs_unloading %}
                             {{ _('Needs to be unloaded') }}
                         {% else %}
@@ -82,8 +82,8 @@
                 {% if appliance.finished_last_run_at %}
                     <div class="row">
                         <div class="col">
-                    <span data-bs-title="{{ appliance.finished_last_run_at|datetimeformat('short') }}"
-                          data-bs-toggle="tooltip">{{ _('Finished last run ') }}{{ appliance.finished_last_run_before_time_period()|timedeltaformat(add_direction=True) }}</span>
+                            <span data-bs-title="{{ appliance.finished_last_run_at|datetimeformat('short') }}"
+                                  data-bs-toggle="tooltip">{{ _('Finished last run %(xMinutesAgo)s', xMinutesAgo=appliance.finished_last_run_before_time_period()|timedeltaformat(add_direction=True)) }}</span>
                         </div>
                     </div>
                 {% endif %}

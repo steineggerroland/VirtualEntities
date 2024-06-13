@@ -1,12 +1,13 @@
 import logging
 from datetime import datetime
+from typing import List
 
 from influxdb import InfluxDBClient
 from influxdb.exceptions import InfluxDBClientError
 
 from iot.core.configuration import TimeSeriesConfig
 from iot.core.time_series_storage_strategy import TimeSeriesStorageStrategy
-from iot.core.timeseries_types import ConsumptionMeasurement
+from iot.core.timeseries_types import ConsumptionMeasurement, TemperatureHumidityMeasurement
 from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.units import Temperature
 
@@ -44,13 +45,13 @@ class InfluxDbTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
             raise DatabaseException("Failed to write power consumption (%sW) for thing (%s) to influx db: %s" %
                                     (watt, thing_name, e), e) from e
 
-    def get_power_consumptions_for_last_seconds(self, seconds: int, thing_name) -> [ConsumptionMeasurement]:
+    def get_power_consumptions_for_last_seconds(self, seconds: int, thing_name) -> List[ConsumptionMeasurement]:
         rs = self.influxdb.query(f"SELECT * FROM {POWER_CONSUMPTION_SERIES} WHERE time >= now() - {seconds}s")
         points = rs.get_points(measurement=POWER_CONSUMPTION_SERIES, tags={THING_NAME_TAG: thing_name})
         measurements = []
         self.logger.debug(points)
         for point in points:
-            measurements.append(ConsumptionMeasurement(datetime.fromisoformat(point['time']), point['consumption']))
+            measurements.append(ConsumptionMeasurement(datetime.fromisoformat(point['time']), point[CONSUMPTION_FIELD]))
         return measurements
 
     def append_room_climate(self, temperature: Temperature, humidity: float, thing_name):
@@ -64,13 +65,29 @@ class InfluxDbTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
             raise DatabaseException("Failed to write room climate (%s, %d%%) for thing '%s' to influx db: %s" %
                                     (temperature, humidity, thing_name, e), e) from e
 
-    def _change_thing_name_of_point(self, point: dict, new_name: str)-> dict:
-        point['tags'][THING_NAME_TAG] = new_name
-        return point
+    def get_room_climate_for_last_seconds(self, seconds: int, room_name: str) -> List[TemperatureHumidityMeasurement]:
+        rs = self.influxdb.query(f"SELECT * FROM {INDOOR_CLIMATE_SERIES} WHERE time >= now() - {seconds}s")
+        points = rs.get_points(measurement=INDOOR_CLIMATE_SERIES, tags={THING_NAME_TAG: room_name})
+        measurements = []
+        for point in points:
+            measurements.append(
+                TemperatureHumidityMeasurement(datetime.fromisoformat(point['time']), point[TEMPERATURE_FIELD],
+                                               point[HUMIDITY_FIELD]))
+        return measurements
 
     def rename(self, old_name: str, new_name: str):
-        rs = self.influxdb.query(f"SELECT * FROM {POWER_CONSUMPTION_SERIES}")
-        points = rs.get_points(measurement=POWER_CONSUMPTION_SERIES, tags={THING_NAME_TAG: old_name})
-        reassigned_points = map(lambda p: self._change_thing_name_of_point(p, new_name), points)
-        self.influxdb.write_points(points)
-        self.influxdb.delete_series(measurement=POWER_CONSUMPTION_SERIES, tags={THING_NAME_TAG: old_name})
+        self._rename_thing_in_time_series(INDOOR_CLIMATE_SERIES, old_name, new_name)
+        self._rename_thing_in_time_series(POWER_CONSUMPTION_SERIES, old_name, new_name)
+
+    def _rename_thing_in_time_series(self, time_series_name: str, old_name: str, new_name: str):
+        rs = self.influxdb.query(f"SELECT * FROM {time_series_name}")
+        old_points = rs.get_points(measurement=time_series_name, tags={THING_NAME_TAG: old_name})
+        if old_points:
+            reassigned_points = list(map(lambda p: self._change_thing_name_of_point(p, new_name), old_points))
+            self.influxdb.write_points(reassigned_points)
+            self.influxdb.delete_series(measurement=time_series_name, tags={THING_NAME_TAG: old_name})
+
+    @staticmethod
+    def _change_thing_name_of_point(point: dict, new_name: str) -> dict:
+        point['tags'][THING_NAME_TAG] = new_name
+        return point

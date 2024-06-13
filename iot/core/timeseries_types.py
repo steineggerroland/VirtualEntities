@@ -21,3 +21,6 @@ class TemperatureHumidityMeasurement:
 
     def __repr__(self):
         return f"<TemperatureHumidityMeasurement time={self.time}, temperature={self.temperature}, humidity={self.humidity}>"
+
+    def to_dict(self):
+        return {'time': self.time.isoformat(), 'temperature': self.temperature, 'humidity': self.humidity}

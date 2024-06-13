@@ -50,6 +50,10 @@ class Room(Thing):
             return HumidityRating.WET
         return HumidityRating.CRITICAL_WET
 
+    def last_seen_time_delta(self):
+        if self.last_seen_at:
+            return self.last_seen_at - datetime.now()
+
     def to_dict(self):
         return {"name": self.name,
                 "type": self.thing_type,
