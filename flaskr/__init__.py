@@ -7,7 +7,8 @@ from flask_babel import Babel
 from flask_bootstrap import Bootstrap5
 
 from flaskr.api.ApplianceDepot import appliance_depot_api
-from flaskr.views import VirtualEntities
+from flaskr.api.RoomCatalog import room_catalog_api
+from flaskr.views import VirtualEntities, Room
 from flaskr.views.Appliance import ApplianceDetails, UpdateAppliance
 from flaskr.views.Homepage import Homepage
 from iot.core.configuration import ConfigurationManager
@@ -46,9 +47,13 @@ def create_app(default_config_file_name: str, machine_service: MachineService, a
         "/appliance/<name>/update",
         view_func=UpdateAppliance.as_view('appliance_update', machine_service, configuration_manager)
     )
+    app.register_blueprint(appliance_depot_api(appliance_depot, time_series_storage), url_prefix='/api/')
 
-    app.register_blueprint(appliance_depot_api(appliance_depot, time_series_storage),
-                           url_prefix='/api/')
+    app.add_url_rule(
+        "/room/<name>/",
+        view_func=Room.Details.as_view('room', room_catalog)
+    )
+    app.register_blueprint(room_catalog_api(room_catalog, time_series_storage), url_prefix='/api/')
 
     def locale_selector():
         return request.accept_languages.best_match(app.config['LANGUAGES'].keys())
