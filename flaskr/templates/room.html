@@ -19,6 +19,17 @@
                     <h2 class="col-10 col-sm-auto mb-0">
                         <span class="name">{{ room.name }}</span>
                     </h2>
+                    <div class="col-2 col-sm-auto p-0" style="max-width: 50px">
+                        <a href="{{ url_for('room_configuration', name=room.name) }}"
+                           data-bs-title="{{ _('Edit %(room_name)s', room_name=room.name) }}"
+                           data-bs-toggle="tooltip">
+                            <button type="button" class="btn btn-light p-1">
+                                <img alt="{{ _('Configure %(room_name)s', room_name=room.name) }}"
+                                     class="icon configure-room icon-primary"
+                                     src="{{ url_for('static', filename='img/flaticon/controls_control.png') }}"/>
+                            </button>
+                        </a>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col">
@@ -34,21 +45,21 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col">
+        <div class="row mt-4">
+            <div class="col-auto align-items-center d-flex gap-1">
                 {{ _('Temperature') }}
                 {% with temperature=room.temperature,rating=room.rate_temperature() %}
                     {% include "snippets/temperature_badge.html" %}
                 {% endwith %}
             </div>
-            <div class="col">
+            <div class="col-auto align-items-center d-flex gap-1">
                 {{ _('Humidity') }}
                 {% with humidity=room.humidity,rating=room.rate_humidity() %}
                     {% include "snippets/humidity_badge.html" %}
                 {% endwith %}
             </div>
         </div>
-        <div class="row">
+        <div class="row mt-2">
             <div class="col-12 col-md-6">
                 <h3>{{ _('Temperature') }}</h3>
                 <div class="room-climate diagram" data-x-axis-label="{{ _('Temperature [°C]') }}"
@@ -62,6 +73,12 @@
         </div>
         {% if debug %}{{ room.to_dict() }}{% endif %}
     </main>
+    <style>
+        .room .icon {
+            height: auto;
+            width: 100%;
+        }
+    </style>
 {% endblock %}
 {% block additional_scripts %}
     <script language="JavaScript" src="{{ url_for('static', filename='javascript/d3.v7.min.js') }}"
