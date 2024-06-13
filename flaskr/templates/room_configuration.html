@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}<title>{{ _('Room %(name)s', name=room.name) }}</title>{% endblock %}
+{% block content %}
+    <aside class="container">
+        <div class="row mt-4">
+            <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '〉';">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('ve_list') }}">{{ _('Virtual Entities') }}</a></li>
+                    <li class="breadcrumb-item">{{ _('Room catalog') }}</li>
+                    <li aria-current="page" class="breadcrumb-item active">{{ room.name }}</li>
+                </ol>
+            </nav>
+        </div>
+    </aside>
+    <main class="container room g-2">
+        <div class="row mt-4">
+            <div class="col-10 col-sm-11">
+                <div class="row">
+                    <h2 class="col-10 col-sm-auto mb-0">
+                        <span class="name">{{ room.name }}</span>
+                    </h2>
+                    <div class="col-2 col-sm-auto p-0" style="max-width: 50px">
+                        <a href="{{ url_for('room', name=room.name) }}"
+                           data-bs-title="{{ _('Back to details') }}"
+                           data-bs-toggle="tooltip">
+                            <button type="button" class="btn btn-light p-1">
+                                <img alt="{{ _('Back to details') }}"
+                                     class="icon back-to-room icon-primary"
+                                     src="{{ url_for('static', filename='img/flaticon/controls_back.png') }}"/>
+                            </button>
+                        </a>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <h3 class="col-12">{{ _('Temperature thresholds') }}</h3>
+                    <div class="col-12">
+                        {{ _('Optimum from %(lower_bound_degree)s°C to %(upper_bound_degree)s°C', lower_bound_degree=room.temperature_thresholds.optimal.lower_value, upper_bound_degree=room.temperature_thresholds.optimal.upper_value) }}
+                    </div>
+                    <div class="col-12">
+                        {{ _('Critical below %(critical_lower_degree)s°C and above %(critical_upper_degree)s°C', critical_lower_degree=room.temperature_thresholds.frostiness_threshold, critical_upper_degree=room.temperature_thresholds.heat_threshold) }}
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <h3 class="col-12">{{ _('Humidity thresholds') }}</h3>
+                    <div class="col-12">
+                        {{ _('Optimum from %(lower_bound_percentage)s%% to %(upper_bound_percentage)s%%', lower_bound_percentage=room.humidity_thresholds.optimal.lower_value, upper_bound_percentage=room.humidity_thresholds.optimal.upper_value) }}
+                    </div>
+                    <div class="col-12">
+                        {{ _('Critical below %(critical_lower_percentage)s%% and above %(critical_upper_percentage)s%%', critical_lower_percentage=room.humidity_thresholds.drought_threshold, critical_upper_percentage=room.humidity_thresholds.wetness_threshold) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if debug %}{{ room.to_dict() }}{% endif %}
+    </main>
+    <style>
+        .room .icon {
+            height: auto;
+            width: 100%;
+        }
+    </style>
+{% endblock %}
+{% block additional_scripts %}
+    <script language="JavaScript" src="{{ url_for('static', filename='javascript/d3.v7.min.js') }}"
+            type="text/javascript"></script>
+    <script language="JavaScript" src="{{ url_for('static', filename='javascript/room-climate-diagrams.js') }}"
+            type="text/javascript"></script>
+{% endblock %}
