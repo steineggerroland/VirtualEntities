@@ -15,3 +15,5 @@ bootstrap-flask==2.4.0
 
 PyYAML~=6.0.1
 WTForms~=3.1.2
+python_event_bus~=1.2.0
+flask-wtf~=1.2.1
