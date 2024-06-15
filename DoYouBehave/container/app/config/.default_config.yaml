@@ -1,0 +1,206 @@
+mqtt:
+  url: $MQTT_HOST$
+  port: 8883
+  username: mqtt
+  password: mqtt
+  client_id: client
+time_series:
+  url: $INFLUXDB_HOST$
+  port: 8884
+  username: influx
+  password: influx
+  bucket_name: time_series
+things:
+  - name: washing-machine
+    type: washing_machine
+    sources:
+      - mqtt_topic: measurements/home/indoor/washing_machine/power
+        type: consumption
+      - mqtt_topic: home/things/washing_machine/load
+        type: loading
+      - mqtt_topic: home/things/washing_machine/unload
+        type: unloading
+    destinations:
+      planned_notifications:
+        - mqtt_topic: home/things/washing_machine
+          cron_expression: '* * * * *'
+  - name: dishwasher
+    type: dishwasher
+    sources:
+      - mqtt_topic: measurements/home/indoor/dishwasher/power
+        type: consumption
+      - mqtt_topic: home/things/dishwasher/load
+        type: loading
+      - mqtt_topic: home/things/dishwasher/unload
+        type: unloading
+    destinations:
+      planned_notifications:
+        - mqtt_topic: things/dishwasher
+          cron_expression: '* * * * *'
+  - name: dryer
+    type: dryer
+    sources:
+      - mqtt_topic: zigbee/home/living-room/robot-cleaner-station
+        type: consumption
+        path: $.power
+      - mqtt_topic: home/things/robot-cleaner-01/load
+        type: loading
+      - mqtt_topic: home/things/robot-cleaner-01/unload
+        type: unloading
+    destinations:
+      planned_notifications:
+        - mqtt_topic: home/things/robot-cleaner
+          cron_expression: '* * * * * */30'
+  - name: parents-bedroom
+    type: room
+    temperature_thresholds:
+      optimal:
+        lower: 19
+        upper: 22
+      critical_lower: 16
+      critical_upper: 28
+    humidity_thresholds:
+      optimal:
+        lower: 40
+        upper: 60
+      critical_lower: 30
+      critical_upper: 75
+    sources:
+      - mqtt_topic: zigbee/home/parents-bedroom/sensor01
+        measures:
+          - type: temperature
+            path: $.temperature
+          - type: humidity
+            path: $.humidity
+    destinations:
+      planned_notifications:
+        - mqtt_topic: home/rooms/parents-bedroom
+          cron_expression: '* * * * *'
+  - name: hallway
+    type: room
+    temperature_thresholds:
+      optimal:
+        lower: 20
+        upper: 23
+      critical_lower: 15
+      critical_upper: 30
+    humidity_thresholds:
+      optimal:
+        lower: 50
+        upper: 75
+      critical_lower: 40
+      critical_upper: 85
+    sources:
+      - mqtt_topic: zigbee/home/hallway/sensor01
+        measures:
+          - type: temperature
+            path: $.temperature
+          - type: humidity
+            path: $.humidity
+    destinations:
+      planned_notifications:
+        - mqtt_topic: home/rooms/hallway
+          cron_expression: '* * * * *'
+  - name: bathroom
+    type: room
+    temperature_thresholds:
+      optimal:
+        lower: 21
+        upper: 24
+      critical_lower: 19
+      critical_upper: 30
+    humidity_thresholds:
+      optimal:
+        lower: 50
+        upper: 70
+      critical_lower: 40
+      critical_upper: 85
+    sources:
+      - mqtt_topic: zigbee/home/bathroom/sensor01
+        measures:
+          - type: temperature
+            path: $.temperature
+          - type: humidity
+            path: $.humidity
+    destinations:
+      planned_notifications:
+        - mqtt_topic: home/rooms/bathroom
+          cron_expression: '* * * * *'
+  - name: kitchen
+    type: room
+    temperature_thresholds:
+      optimal:
+        lower: 18
+        upper: 22
+      critical_lower: 16
+      critical_upper: 30
+    humidity_thresholds:
+      optimal:
+        lower: 50
+        upper: 60
+      critical_lower: 40
+      critical_upper: 80
+    sources:
+      - mqtt_topic: zigbee/home/kitchen/sensor01
+        measures:
+          - type: temperature
+            path: $.temperature
+          - type: humidity
+            path: $.humidity
+    destinations:
+      planned_notifications:
+        - mqtt_topic: home/rooms/kitchen
+          cron_expression: '* * * * *'
+  - name: living-room
+    type: room
+    temperature_thresholds:
+      optimal:
+        lower: 20
+        upper: 22
+      critical_lower: 18
+      critical_upper: 30
+    humidity_thresholds:
+      optimal:
+        lower: 40
+        upper: 60
+      critical_lower: 30
+      critical_upper: 70
+    sources:
+      - mqtt_topic: zigbee/home/living-room/sensor01
+        measures:
+          - type: temperature
+            path: $.temperature
+          - type: humidity
+            path: $.humidity
+    destinations:
+      planned_notifications:
+        - mqtt_topic: home/rooms/living-room
+          cron_expression: '* * * * *'
+  - name: terrace
+    type: room
+    temperature_thresholds:
+      optimal:
+        lower: 15
+        upper: 23
+      critical_lower: 6
+      critical_upper: 30
+    humidity_thresholds:
+      optimal:
+        lower: 40
+        upper: 70
+      critical_lower: 30
+      critical_upper: 80
+    sources:
+      - mqtt_topic: zigbee/home/terrace/sensor01
+        measures:
+          - type: temperature
+            path: $.temperature
+          - type: humidity
+            path: $.humidity
+    destinations:
+      planned_notifications:
+        - mqtt_topic: home/rooms/terrace
+          cron_expression: '* * * * *'
+flaskr:
+  HOST: 0.0.0.0
+  PORT: 8080

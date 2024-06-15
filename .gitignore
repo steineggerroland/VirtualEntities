@@ -9,9 +9,10 @@ venv
 
 #IDE settings
 .idea
-DoYouBehave/.idea
-DoYouBehave/*.iml
+/DoYouBehave/.idea
+/DoYouBehave/*.iml
 
 #build
 htmlcov
 .coverage
+/DoYouBehave/.idea/misc.xml
