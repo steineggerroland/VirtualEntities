@@ -2,6 +2,7 @@ import logging
 import os.path
 import sys
 
+import paho.mqtt.client as paho_mqtt
 from behave import fixture, use_fixture
 from selenium import webdriver
 from testcontainers.core.docker_client import DockerClient
@@ -16,6 +17,7 @@ from features.pages.virtual_entity_page import VirtualEntityPage
 def influxdb_container_setup(context, timeout=20, **kwargs):
     influxdb_container = InfluxDb2Container(host_port=8884, username="influx", password="influx",
                                             bucket="time_series")
+    context.influxdb_container = influxdb_container
     try:
         influxdb_container.start()
         yield influxdb_container
@@ -26,11 +28,46 @@ def influxdb_container_setup(context, timeout=20, **kwargs):
 @fixture
 def mqtt_container_setup(context, timeout=20, **kwargs):
     mqtt_container = MosquittoContainer(8883)
+    context.mqtt_container = mqtt_container
     try:
         mqtt_container.start()
         yield mqtt_container
     finally:
         mqtt_container.stop()
+
+
+class Appliance:
+    def __init__(self, mqtt_client: paho_mqtt.Client, name: str, pc_topic=None, load_topic=None, unload_topic=None):
+        self.mqtt_client = mqtt_client
+        self.name = name
+        self.power_consumption_topic = pc_topic
+        self.load_topic = load_topic
+        self.unload_topic = unload_topic
+
+    def send_power_consumption_update(self, new_watt: float):
+        self.mqtt_client.publish(self.power_consumption_topic, new_watt)
+
+
+@fixture
+def appliances_setup(context, timeout=10, **kwargs):
+    client = DockerClient()
+    mqtt_client = paho_mqtt.Client(client_id='selenium-test-client')
+    mqtt_client.username_pw_set('mqtt', 'mqtt')
+    mqtt_client.connect(client.gateway_ip(context.mqtt_container.get_wrapped_container().id), 8883)
+    context.appliances = {
+        'Washing machine': Appliance(mqtt_client, 'Washing machine',
+                                     'measurements/home/indoor/washing_machine/power/power',
+                                     'home/things/washing_machine/load',
+                                     'home/things/washing_machine/unload'),
+        'Dishwasher': Appliance(mqtt_client, 'Dishwasher',
+                                'measurements/home/indoor/dishwasher/power',
+                                'home/things/dishwasher/load',
+                                'home/things/dishwasher/unload'),
+        'Dryer': Appliance(mqtt_client, 'Dryer',
+                           'zigbee/home/indoor/dryer',
+                           'home/things/dryer/load',
+                           'home/things/dryer/unload')
+    }
 
 
 @fixture
@@ -74,6 +111,7 @@ def browser_setup_and_teardown(context, timeout=30, **kwargs):
 def before_all(context):
     app_container = use_fixture(app_container_setup, context)
     context.base_url = app_container.get_behave_url()
+    use_fixture(appliances_setup, context)
 
 
 def before_scenario(context, scenario):

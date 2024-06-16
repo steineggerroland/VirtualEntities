@@ -40,12 +40,11 @@ things:
   - name: Dryer
     type: dryer
     sources:
-      - mqtt_topic: zigbee/home/living-room/robot-cleaner-station
+      - mqtt_topic: zigbee/home/indoor/dryer
         type: consumption
-        path: $.power
-      - mqtt_topic: home/things/robot-cleaner-01/load
+      - mqtt_topic: home/things/dryer/load
         type: loading
-      - mqtt_topic: home/things/robot-cleaner-01/unload
+      - mqtt_topic: home/things/dryer/unload
         type: unloading
     destinations:
       planned_notifications:
