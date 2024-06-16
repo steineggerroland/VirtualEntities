@@ -5,6 +5,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from threading import Thread
+from time import sleep
 
 from testcontainers.core.container import DockerContainer
 from testcontainers.core.container import wait_container_is_ready
@@ -41,6 +42,7 @@ class BehaveAppContainer(DockerContainer):
             if self.get_wrapped_container() is not None:
                 for line in self.get_wrapped_container().logs(stream=True):
                     logging.getLogger('BehaveAppContainer').debug(line)
+            sleep(3)
 
     @wait_container_is_ready(urllib.error.URLError)
     def _connect(self, host: str, port: int) -> None:

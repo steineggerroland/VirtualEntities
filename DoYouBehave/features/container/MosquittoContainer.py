@@ -1,6 +1,7 @@
 import logging
 import os
 from threading import Thread
+from time import sleep
 
 from testcontainers.core.container import DockerContainer
 from testcontainers.core.waiting_utils import wait_for_logs
@@ -32,3 +33,4 @@ class MosquittoContainer(DockerContainer):
             if self.get_wrapped_container() is not None:
                 for line in self.get_wrapped_container().logs(stream=True):
                     logging.getLogger('MosquittoContainer').debug(line)
+            sleep(3)
