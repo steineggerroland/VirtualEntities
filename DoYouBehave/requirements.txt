@@ -4,3 +4,4 @@ testcontainers==3.7.1
 testcontainers-core==0.0.1rc1
 testcontainers-python-influxdb==0.2.2
 influxdb-client~=1.43.0
+paho-mqtt~=1.6.1
