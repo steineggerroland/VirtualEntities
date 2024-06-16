@@ -11,7 +11,7 @@ time_series:
   password: influx
   bucket_name: time_series
 things:
-  - name: washing-machine
+  - name: Washing machine
     type: washing_machine
     sources:
       - mqtt_topic: measurements/home/indoor/washing_machine/power
@@ -24,7 +24,7 @@ things:
       planned_notifications:
         - mqtt_topic: home/things/washing_machine
           cron_expression: '* * * * *'
-  - name: dishwasher
+  - name: Dishwasher
     type: dishwasher
     sources:
       - mqtt_topic: measurements/home/indoor/dishwasher/power
@@ -37,7 +37,7 @@ things:
       planned_notifications:
         - mqtt_topic: things/dishwasher
           cron_expression: '* * * * *'
-  - name: dryer
+  - name: Dryer
     type: dryer
     sources:
       - mqtt_topic: zigbee/home/living-room/robot-cleaner-station

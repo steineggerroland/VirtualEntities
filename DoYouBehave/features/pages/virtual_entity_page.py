@@ -1,6 +1,6 @@
 from typing import List
 
-from test.pages.base import BasePage
+from features.pages.base import BasePage
 from selenium.webdriver.common.by import By
 
 
