@@ -9,6 +9,12 @@ def load_page(context, page_name: str):
     context.webdriver.get(context.urls[page_name])
 
 
+@then('they are {redirect_or_on} the {page_name} page')
+def current_page_is(context, redirect_or_on, page_name: str):
+    expected_url = context.urls[page_name]
+    assert context.webdriver.current_url.startswith(expected_url)
+
+
 @then('they see rooms in the room catalog')
 def rooms_in_catalog(context):
     assert context.webdriver.find_elements(By.CSS_SELECTOR, '.room-catalog .room')
@@ -38,7 +44,6 @@ def appliance_is_shown(context, appliance_names: str):
     appliance_names = map(lambda a: a.strip().replace('"', ''), appliance_names.split(","))
     for appliance_name in appliance_names:
         assert any(a.find_element(By.CLASS_NAME, 'name').text == appliance_name for a in ve_page.appliances())
-
 
 @then('they see the persons {person_names}')
 def appliance_is_shown(context, person_names: str):
