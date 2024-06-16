@@ -62,6 +62,7 @@ def browser_setup_and_teardown(context, timeout=30, **kwargs):
 
     context.webdriver = browser
     context.urls = {
+        'home': context.base_url,
         'virtual entities': VirtualEntityPage.url(context.base_url)
     }
     yield
