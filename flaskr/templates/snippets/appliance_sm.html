@@ -6,7 +6,7 @@
             {% include "snippets/appliance_icon.html" %}
             </span>
             {% endwith %}
-            <a href="{{url_for('appliance', name=appliance.name)}}">{{ appliance.name }}</a>
+            <a class="name" href="{{url_for('appliance', name=appliance.name)}}">{{ appliance.name }}</a>
         </h4>
     </div>
     <div class="card-body">

@@ -51,7 +51,7 @@ things:
       planned_notifications:
         - mqtt_topic: home/things/robot-cleaner
           cron_expression: '* * * * * */30'
-  - name: parents-bedroom
+  - name: Parents bedroom
     type: room
     temperature_thresholds:
       optimal:
@@ -76,7 +76,7 @@ things:
       planned_notifications:
         - mqtt_topic: home/rooms/parents-bedroom
           cron_expression: '* * * * *'
-  - name: hallway
+  - name: Hallway
     type: room
     temperature_thresholds:
       optimal:
@@ -101,7 +101,7 @@ things:
       planned_notifications:
         - mqtt_topic: home/rooms/hallway
           cron_expression: '* * * * *'
-  - name: bathroom
+  - name: Bathroom
     type: room
     temperature_thresholds:
       optimal:
@@ -126,7 +126,7 @@ things:
       planned_notifications:
         - mqtt_topic: home/rooms/bathroom
           cron_expression: '* * * * *'
-  - name: kitchen
+  - name: Kitchen
     type: room
     temperature_thresholds:
       optimal:
@@ -151,7 +151,7 @@ things:
       planned_notifications:
         - mqtt_topic: home/rooms/kitchen
           cron_expression: '* * * * *'
-  - name: living-room
+  - name: Living room
     type: room
     temperature_thresholds:
       optimal:
@@ -176,7 +176,7 @@ things:
       planned_notifications:
         - mqtt_topic: home/rooms/living-room
           cron_expression: '* * * * *'
-  - name: terrace
+  - name: Terrace
     type: room
     temperature_thresholds:
       optimal:
@@ -201,6 +201,10 @@ things:
       planned_notifications:
         - mqtt_topic: home/rooms/terrace
           cron_expression: '* * * * *'
+  - name: Ash
+    type: person
+  - name: Robin
+    type: person
 flaskr:
   HOST: 0.0.0.0
   PORT: 8080
