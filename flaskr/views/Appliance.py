@@ -9,7 +9,7 @@ from iot.infrastructure.machine.appliance_depot import ApplianceDepot
 from iot.infrastructure.machine.machine_service import MachineService
 
 
-class ApplianceDetails(View):
+class Details(View):
     def __init__(self, appliance_depot: ApplianceDepot):
         self.appliance_depot = appliance_depot
 
@@ -22,7 +22,7 @@ class ApplianceDetails(View):
             return redirect(url_for("ve_list"))
 
 
-class UpdateAppliance(View):
+class Configuration(View):
     methods = ['GET', 'POST']
 
     def __init__(self, appliance_service: MachineService, configuration_manager: ConfigurationManager):
@@ -41,4 +41,4 @@ class UpdateAppliance(View):
             return redirect(url_for('appliance', name=name))
         appliance_form.name.default = appliance.name
         appliance_form.process()
-        return render_template("appliance_update.html", appliance=appliance, form=appliance_form)
+        return render_template("appliance_configuration.html", appliance=appliance, form=appliance_form)

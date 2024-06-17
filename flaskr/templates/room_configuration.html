@@ -16,11 +16,11 @@
         <div class="row mt-4">
             <div class="col-10 col-sm-11">
                 <div class="row">
-                    <h2 class="col-10 col-sm-auto mb-0">
+                    <h1 class="col-10 col-sm-auto mb-0">
                         <span class="name">{{ room.name }}</span>
-                    </h2>
+                    </h1>
                     <div class="col-2 col-sm-auto p-0" style="max-width: 50px">
-                        <a href="{{ url_for('room', name=room.name) }}"
+                        <a href="{{ url_for('room', name=room.name) }}" class="back"
                            data-bs-title="{{ _('Back to details') }}"
                            data-bs-toggle="tooltip">
                             <button type="button" class="btn btn-light p-1">

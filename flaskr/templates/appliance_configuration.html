@@ -27,13 +27,25 @@
             </div>
             <div class="col-10 col-sm-auto">
                 <div class="row">
-                    <h2 class="col mb-0">
-                        {{ _('Edit %(appliance_name)s', appliance_name=appliance.name) }}
-                    </h2>
+                    <h1 class="col-10 col-sm-auto mb-0">
+                        {{ _('Configure %(appliance_name)s', appliance_name=appliance.name) }}
+                    </h1>
+                    <div class="col-2 col-sm-auto p-0" style="max-width: 50px">
+                        <a href="{{ url_for('appliance', name=appliance.name) }}" class="back"
+                           data-bs-title="{{ _('Back to details') }}"
+                           data-bs-toggle="tooltip">
+                            <button type="button" class="btn btn-light p-1">
+                                <img alt="{{ _('Back to details') }}"
+                                     class="icon back-to-appliance icon-primary"
+                                     src="{{ url_for('static', filename='img/flaticon/controls_back.png') }}"/>
+                            </button>
+                        </a>
+                    </div>
+
                 </div>
             </div>
         </div>
-        <form class="row g-4 mt-0" method="POST" action="{{ url_for('appliance_update', name=appliance.name ) }}">
+        <form class="row g-4 mt-0" method="POST" action="{{ url_for('appliance_configuration', name=appliance.name ) }}">
             {{ form.csrf_token }}
             <div class="col-12">
                 {{ form.name.label(class='form-label') }}

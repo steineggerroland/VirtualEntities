@@ -4,12 +4,15 @@ import re
 from behave import *
 from selenium.webdriver.common.by import By
 
-from features.pages.virtual_entity_page import VirtualEntityPage
-
 
 @given('the user goes to the {page_name} page')
 def load_page(context, page_name: str):
-    context.webdriver.get(context.urls[page_name])
+    context.pages[page_name].navigate_to()
+
+
+@given('the user goes to the {page_name} page of the {entity_name}')
+def load_page(context, page_name: str, entity_name: str):
+    context.pages[page_name].navigate_to_entity(entity_name)
 
 
 @When('the power consumption of the {appliance_name} is updated')
@@ -25,10 +28,32 @@ def send_room_climate(context, room_name: str):
     context.rooms[room_name].send_room_climate_update(context.new_value)
 
 
+@When('they click on the {entity_name}')
+def click_on_name(context, entity_name: str):
+    clicked = False
+    for name_element in context.webdriver.find_elements(By.CLASS_NAME, 'name'):
+        if name_element.text.find(entity_name) >= 0:
+            name_element.click()
+            clicked = True
+            break
+    assert clicked
+
+
+@When('they click the {class_name} button')
+def click_on_button(context, class_name: str):
+    clicked = False
+    buttons_matching_class = context.webdriver.find_elements(By.CSS_SELECTOR,
+                                                             'button.%s' % class_name.lower().replace(' ', '-'))
+    for matching_element in buttons_matching_class:
+        matching_element.click()
+        clicked = True
+        break
+    assert clicked
+
+
 @then('they are {redirect_or_on} the {page_name} page')
 def current_page_is(context, redirect_or_on, page_name: str):
-    expected_url = context.urls[page_name]
-    assert context.webdriver.current_url.startswith(expected_url)
+    assert context.pages[page_name].is_current_page()
 
 
 @then('they see rooms in the room catalog')
@@ -48,26 +73,26 @@ def persons_in_register(context):
 
 @then('they see the rooms {room_names}')
 def room_is_shown(context, room_names: str):
-    ve_page = VirtualEntityPage(context.webdriver)
     room_names = map(lambda r: r.strip().replace('"', ''), room_names.split(","))
     for room_name in room_names:
-        assert any(r.find_element(By.CLASS_NAME, 'name').text == room_name for r in ve_page.rooms())
+        assert any(
+            r.find_element(By.CLASS_NAME, 'name').text == room_name for r in context.pages['virtual entities'].rooms())
 
 
 @then('they see the appliances {appliance_names}')
 def appliance_is_shown(context, appliance_names: str):
-    ve_page = VirtualEntityPage(context.webdriver)
     appliance_names = map(lambda a: a.strip().replace('"', ''), appliance_names.split(","))
     for appliance_name in appliance_names:
-        assert any(a.find_element(By.CLASS_NAME, 'name').text == appliance_name for a in ve_page.appliances())
+        assert any(a.find_element(By.CLASS_NAME, 'name').text == appliance_name for a in
+                   context.pages['virtual entities'].appliances())
 
 
 @then('they see the persons {person_names}')
 def appliance_is_shown(context, person_names: str):
-    ve_page = VirtualEntityPage(context.webdriver)
     person_names = map(lambda p: p.strip().replace('"', ''), person_names.split(","))
     for person_name in person_names:
-        assert any(p.find_element(By.CLASS_NAME, 'name').text == person_name for p in ve_page.persons())
+        assert any(p.find_element(By.CLASS_NAME, 'name').text == person_name for p in
+                   context.pages['virtual entities'].persons())
 
 
 @then('the user sees the new {property_name} for the {entity_name} after a refresh')
@@ -84,3 +109,20 @@ def appliance_has_power_consumption(context, property_name, entity_name):
             assert extracted_float == float(new_value)
             found_matching_entity = True
     assert found_matching_entity
+
+
+@then('the main headline contains {some_string}')
+def headline_contains(context, some_string):
+    return context.webdriver.find_element(By.TAG_NAME, 'h1').text.find(some_string) >= 0
+
+
+@then('they see an icon indicating {entity_type} being the type of {entity_category}')
+def icon_indicating_entity_type(context, entity_type: str, entity_category: str):
+    assert any(icon_element.get_attribute('src').lower().find(entity_type.lower()) for icon_element in
+               context.webdriver.find_elements(By.CSS_SELECTOR, '.%s img.icon' % entity_category))
+
+
+@then('they see the {class_name} is {some_string}')
+def some_string_in_class_name(context, class_name: str, some_string: str):
+    elements = context.webdriver.find_elements(By.CLASS_NAME, class_name)
+    assert any(matching_element.text.lower().find(some_string.lower()) >= 0 for matching_element in elements)
