@@ -22,3 +22,9 @@ Feature: Showing general information of virtual entities
     Given the user goes to the virtual entities page
     When the power consumption of the Dryer is updated
     Then the user sees the new power consumption for the Dryer after a refresh
+
+  Scenario: Room climate updates are displayed
+    Given the user goes to the virtual entities page
+    When the room climate of the Kitchen is updated
+    Then the user sees the new temperature for the Kitchen after a refresh
+    And the user sees the new humidity for the Kitchen after a refresh

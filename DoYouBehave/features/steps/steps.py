@@ -1,4 +1,5 @@
 import random
+import re
 
 from behave import *
 from selenium.webdriver.common.by import By
@@ -13,8 +14,15 @@ def load_page(context, page_name: str):
 
 @When('the power consumption of the {appliance_name} is updated')
 def send_power_consumption(context, appliance_name: str):
-    context.new_value = random.random() * 2400
+    context.new_value = round(random.random() * 2400, 2)
     context.appliances[appliance_name].send_power_consumption_update(context.new_value)
+
+
+@When('the room climate of the {room_name} is updated')
+def send_room_climate(context, room_name: str):
+    context.new_value = {'temperature': round(random.random() * 6 + 18, 2),
+                         'humidity': round(random.random() * 40 + 50, 2)}
+    context.rooms[room_name].send_room_climate_update(context.new_value)
 
 
 @then('they are {redirect_or_on} the {page_name} page')
@@ -62,13 +70,17 @@ def appliance_is_shown(context, person_names: str):
         assert any(p.find_element(By.CLASS_NAME, 'name').text == person_name for p in ve_page.persons())
 
 
-@then('the user sees the new power consumption for the {appliance_name} after a refresh')
-def appliance_has_power_consumption(context, appliance_name):
+@then('the user sees the new {property_name} for the {entity_name} after a refresh')
+def appliance_has_power_consumption(context, property_name, entity_name):
     context.webdriver.refresh()
-    found_matching_appliance = False
-    for appliance_element in context.webdriver.find_elements(By.CSS_SELECTOR, '.appliance'):
-        if appliance_element.find_element(By.CLASS_NAME, 'name').text == appliance_name:
-            watt_text = appliance_element.find_element(By.CLASS_NAME, 'power-consumption').text
-            assert float(watt_text.replace('W', '')) == float(context.new_value)
-            found_matching_appliance = True
-    assert found_matching_appliance
+    entity_type = 'appliance' if property_name in ['power consumption'] else 'room'
+    entity_name_in_class = property_name.replace(' ', '-')
+    new_value = context.new_value if type(context.new_value) is not dict else context.new_value[property_name]
+    found_matching_entity = False
+    for appliance_element in context.webdriver.find_elements(By.CSS_SELECTOR, '.%s' % entity_type):
+        if appliance_element.find_element(By.CLASS_NAME, 'name').text == entity_name:
+            value_with_unit = appliance_element.find_element(By.CLASS_NAME, entity_name_in_class).text
+            extracted_float = float(re.search(r'[-+]?[0-9]*\.?[0-9]+', value_with_unit).group(0))
+            assert extracted_float == float(new_value)
+            found_matching_entity = True
+    assert found_matching_entity
