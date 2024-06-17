@@ -1,3 +1,4 @@
+import json
 import logging
 import os.path
 import sys
@@ -48,6 +49,18 @@ class Appliance:
         self.mqtt_client.publish(self.power_consumption_topic, new_watt)
 
 
+class Room:
+    def __init__(self, mqtt_client: paho_mqtt.Client, name: str, rc_topic, t_topic=None, h_topic=None):
+        self.mqtt_client = mqtt_client
+        self.name = name
+        self.room_climate_topic = rc_topic
+        self.temperature_topic = t_topic
+        self.humidity_topic = h_topic
+
+    def send_room_climate_update(self, new_values: dict):
+        self.mqtt_client.publish(self.room_climate_topic, json.dumps(new_values))
+
+
 @fixture
 def appliances_setup(context, timeout=10, **kwargs):
     client = DockerClient()
@@ -57,16 +70,20 @@ def appliances_setup(context, timeout=10, **kwargs):
     context.appliances = {
         'Washing machine': Appliance(mqtt_client, 'Washing machine',
                                      'measurements/home/indoor/washing_machine/power/power',
-                                     'home/things/washing_machine/load',
-                                     'home/things/washing_machine/unload'),
+                                     'home/things/washing_machine/load', 'home/things/washing_machine/unload'),
         'Dishwasher': Appliance(mqtt_client, 'Dishwasher',
-                                'measurements/home/indoor/dishwasher/power',
-                                'home/things/dishwasher/load',
+                                'measurements/home/indoor/dishwasher/power', 'home/things/dishwasher/load',
                                 'home/things/dishwasher/unload'),
         'Dryer': Appliance(mqtt_client, 'Dryer',
-                           'zigbee/home/indoor/dryer',
-                           'home/things/dryer/load',
-                           'home/things/dryer/unload')
+                           'zigbee/home/indoor/dryer', 'home/things/dryer/load', 'home/things/dryer/unload')
+    }
+    context.rooms = {
+        'Kitchen': Room(mqtt_client, 'Kitchen', 'zigbee/home/kitchen/sensor01'),
+        'Living room': Room(mqtt_client, 'Living room', 'zigbee/home/living-room/sensor01'),
+        'Terrace': Room(mqtt_client, 'Terrace', 'zigbee/home/terrace/sensor01'),
+        'Bathroom': Room(mqtt_client, 'Bathroom', 'zigbee/home/bathroom/sensor01'),
+        'Hallway': Room(mqtt_client, 'Hallway', 'zigbee/home/hallway/sensor01'),
+        'Parents bedroom': Room(mqtt_client, 'Parents bedroom', 'zigbee/home/parents-bedroom/sensor01')
     }
 
 
