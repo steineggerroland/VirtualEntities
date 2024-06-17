@@ -1,12 +1,7 @@
 from flask import render_template, redirect, url_for, flash
 from flask.views import View
 from flask_babel import gettext
-from python_event_bus import EventBus
 
-from flaskr.forms.ApplianceForm import ApplianceForm
-from iot.core.configuration import ConfigurationManager
-from iot.infrastructure.machine.appliance_depot import ApplianceDepot
-from iot.infrastructure.machine.machine_service import MachineService
 from iot.infrastructure.room_catalog import RoomCatalog
 
 

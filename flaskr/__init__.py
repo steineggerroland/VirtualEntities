@@ -8,8 +8,7 @@ from flask_bootstrap import Bootstrap5
 
 from flaskr.api.ApplianceDepot import appliance_depot_api
 from flaskr.api.RoomCatalog import room_catalog_api
-from flaskr.views import VirtualEntities, Room
-from flaskr.views.Appliance import ApplianceDetails, UpdateAppliance
+from flaskr.views import VirtualEntities, Room, Appliance
 from flaskr.views.Homepage import Homepage
 from iot.core.configuration import ConfigurationManager
 from iot.core.time_series_storage import TimeSeriesStorage
@@ -40,17 +39,17 @@ def create_app(default_config_file_name: str, machine_service: MachineService, a
     )
 
     app.add_url_rule(
-        "/appliance/<name>/",
-        view_func=ApplianceDetails.as_view('appliance', appliance_depot)
+        "/appliance/<name>",
+        view_func=Appliance.Details.as_view('appliance', appliance_depot)
     )
     app.add_url_rule(
-        "/appliance/<name>/update",
-        view_func=UpdateAppliance.as_view('appliance_update', machine_service, configuration_manager)
+        "/appliance/<name>/configuration",
+        view_func=Appliance.Configuration.as_view('appliance_configuration', machine_service, configuration_manager)
     )
     app.register_blueprint(appliance_depot_api(appliance_depot, time_series_storage), url_prefix='/api/')
 
     app.add_url_rule(
-        "/room/<name>/",
+        "/room/<name>",
         view_func=Room.Details.as_view('room', room_catalog)
     )
     app.add_url_rule(

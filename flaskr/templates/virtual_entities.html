@@ -2,8 +2,9 @@
 {% block title %}<title>{{_('Virtual Entities')}}</title>{% endblock %}
 {% block content %}
 <main class="container">
-    <section class="appliance-depot row my-4 g-3">
-        <h3>{{_('Appliance depot')}}</h3>
+    <h1 class="mt-4 mb-0">{{_('Virtual Entities')}}</h1>
+    <section class="appliance-depot row mt-0 mb-4 g-3">
+        <h2>{{_('Appliance depot')}}</h2>
         {% if entities.appliance_depot %}
         {% for appliance in entities.appliance_depot %}
         <div class="col-6 col-md-4 col-xl-3">{% include "snippets/appliance_sm.html" %}</div>
@@ -15,7 +16,7 @@
         {% endif %}
     </section>
     <section class="room-catalog row my-4 g-3">
-        <h3>{{_('Room catalog')}}</h3>
+        <h2>{{_('Room catalog')}}</h2>
         {% if entities.room_catalog %}
         {% for room in entities.room_catalog %}
         <div class="col-6 col-md-4 col-xl-3">{% include "snippets/room_sm.html" %}</div>
@@ -27,7 +28,7 @@
         {% endif %}
     </section>
     <section class="register-of-persons row my-4 g-3">
-        <h3>{{_('Register of Persons')}}</h3>
+        <h2>{{_('Register of Persons')}}</h2>
         {% if entities.register_of_persons %}
         {% for person in entities.register_of_persons %}
         <div class="col-6 col-md-4 col-xl-3">{% include "snippets/person_sm.html" %}</div>

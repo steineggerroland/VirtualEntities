@@ -27,23 +27,23 @@
             </div>
             <div class="col-10 col-sm-11">
                 <div class="row">
-                    <h2 class="col-10 col-sm-auto mb-0">
+                    <h1 class="col-10 col-sm-auto mb-0">
                         <span class="name">{{ appliance.name }}</span>
-                    </h2>
+                    </h1>
                     <div class="col-2 col-sm-auto p-0" style="max-width: 50px">
-                        <a href="{{ url_for('appliance_update', name=appliance.name) }}"
+                        <a href="{{ url_for('appliance_configuration', name=appliance.name) }}"
                            data-bs-title="{{ _('Edit %(appliance_name)s', appliance_name=appliance.name) }}"
                            data-bs-toggle="tooltip">
-                            <button type="button" class="btn btn-light p-1">
-                                <img alt="{{ _('Edit %(appliance_name)s', appliance_name=appliance.name) }}"
-                                     class="icon update-appliance icon-primary"
-                                     src="{{ url_for('static', filename='img/flaticon/controls_edit.png') }}"/>
+                            <button type="button" class="appliance-configuration btn btn-light p-1">
+                                <img alt="{{ _('Configure %(appliance_name)s', appliance_name=appliance.name) }}"
+                                     class="icon icon-primary"
+                                     src="{{ url_for('static', filename='img/flaticon/controls_control.png') }}"/>
                             </button>
                         </a>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col">
+                    <div class="col type">
                         {% if appliance.thing_type=='dishwasher' %}
                             {{ _('Dishwasher') }}
                         {% elif appliance.thing_type=='dryer' %}
@@ -91,7 +91,14 @@
         </div>
         <div class="row">
             <div class="col">
-                <h3>{{ _('Power consumption (Watt)') }}</h3>
+                <div class="d-flex align-items-center mb-2">
+                    <h3 class="mb-0">{{ _('Power consumption (Watt)') }}</h3>
+                    <div class="ms-2">
+                        {% with power_consumption=appliance.watt %}
+                            {% include "snippets/power_consumption_badge.html" %}
+                        {% endwith %}
+                    </div>
+                </div>
                 <div class="power-consumption diagram" data-thing-name="{{ appliance.name }}"></div>
             </div>
         </div>

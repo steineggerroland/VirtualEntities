@@ -11,6 +11,10 @@ from testcontainers_python_influxdb.influxdb2 import InfluxDb2Container
 
 from features.container.BehaveAppContainer import BehaveAppContainer
 from features.container.MosquittoContainer import MosquittoContainer
+from features.pages.appliance_configuration_page import ApplianceConfigurationPage
+from features.pages.appliance_page import AppliancePage
+
+from features.pages.base import BasePage
 from features.pages.virtual_entity_page import VirtualEntityPage
 
 
@@ -115,9 +119,11 @@ def browser_setup_and_teardown(context, timeout=30, **kwargs):
     browser.get(context.base_url)
 
     context.webdriver = browser
-    context.urls = {
-        'home': context.base_url,
-        'virtual entities': VirtualEntityPage.url(context.base_url)
+    context.pages = {
+        'home': BasePage(browser, context.base_url),
+        'virtual entities': VirtualEntityPage(browser, context.base_url),
+        'appliance': AppliancePage(browser, context.base_url),
+        'appliance configuration': ApplianceConfigurationPage(browser, context.base_url)
     }
     yield
 
