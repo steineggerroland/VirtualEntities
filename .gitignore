@@ -11,6 +11,7 @@ venv
 .idea
 /DoYouBehave/.idea
 /DoYouBehave/*.iml
+/DoYouBehave/screenshots
 
 #build
 htmlcov
