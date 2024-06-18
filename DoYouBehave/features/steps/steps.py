@@ -3,16 +3,21 @@ import re
 
 from behave import *
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
 
 
 @given('the user goes to the {page_name} page')
 def load_page(context, page_name: str):
     context.pages[page_name].navigate_to()
+    WebDriverWait(context.webdriver, 10).until(context.pages[page_name].is_current_page_matcher(),
+                                               "Failed to navigate to %s page" % page_name)
 
 
 @given('the user goes to the {page_name} page of the {entity_name}')
 def load_page(context, page_name: str, entity_name: str):
     context.pages[page_name].navigate_to_entity(entity_name)
+    WebDriverWait(context.webdriver, 10).until(context.pages[page_name].is_current_page_matcher(),
+                                               "Failed to navigate to %s page of entity %s" % (page_name, entity_name))
 
 
 @When('the power consumption of the {appliance_name} is updated')
@@ -53,22 +58,29 @@ def click_on_button(context, class_name: str):
 
 @then('they are {redirect_or_on} the {page_name} page')
 def current_page_is(context, redirect_or_on, page_name: str):
-    assert context.pages[page_name].is_current_page()
+    WebDriverWait(context.webdriver, 10).until(context.pages[page_name].is_current_page_matcher(),
+                                               f"Not redirect to {page_name} page")
 
 
 @then('they see rooms in the room catalog')
 def rooms_in_catalog(context):
-    assert context.webdriver.find_elements(By.CSS_SELECTOR, '.room-catalog .room')
+    WebDriverWait(context.webdriver, 10).until(
+        lambda d: context.webdriver.find_elements(By.CSS_SELECTOR, '.room-catalog .room'),
+        "No room catalog containing rooms")
 
 
 @then('they see appliances in the appliance depot')
 def appliances_in_depot(context):
-    assert context.webdriver.find_elements(By.CSS_SELECTOR, '.appliance-depot .appliance')
+    WebDriverWait(context.webdriver, 10).until(
+        lambda d: context.webdriver.find_elements(By.CSS_SELECTOR, '.appliance-depot .appliance'),
+        "No appliance depot containing appliances")
 
 
 @then('they see person in the register of persons')
 def persons_in_register(context):
-    assert context.webdriver.find_elements(By.CSS_SELECTOR, '.register-of-persons .person')
+    WebDriverWait(context.webdriver, 10).until(
+        lambda d: context.webdriver.find_elements(By.CSS_SELECTOR, '.register-of-persons .person'),
+        "No register of persons containing persons")
 
 
 @then('they see the rooms {room_names}')
@@ -96,19 +108,24 @@ def appliance_is_shown(context, person_names: str):
 
 
 @then('the user sees the new {property_name} for the {entity_name} after a refresh')
-def appliance_has_power_consumption(context, property_name, entity_name):
+def property_has_new_value(context, property_name, entity_name):
     context.webdriver.refresh()
     entity_type = 'appliance' if property_name in ['power consumption'] else 'room'
-    entity_name_in_class = property_name.replace(' ', '-')
-    new_value = context.new_value if type(context.new_value) is not dict else context.new_value[property_name]
-    found_matching_entity = False
-    for appliance_element in context.webdriver.find_elements(By.CSS_SELECTOR, '.%s' % entity_type):
+    property_name_in_class = property_name.replace(' ', '-')
+    new_value = context.new_value if type(context.new_value) is not dict else context.new_value[
+        property_name.replace(' ', '_')]
+    WebDriverWait(context.webdriver, 10).until(
+        lambda d: _property_has_value(d, entity_name, entity_type, property_name_in_class, new_value),
+        f"No property {property_name} of entity {entity_name} with value {new_value} found")
+
+
+def _property_has_value(d, entity_name, entity_type, property_name_in_class, value):
+    for appliance_element in d.find_elements(By.CLASS_NAME, entity_type):
         if appliance_element.find_element(By.CLASS_NAME, 'name').text == entity_name:
-            value_with_unit = appliance_element.find_element(By.CLASS_NAME, entity_name_in_class).text
+            value_with_unit = appliance_element.find_element(By.CLASS_NAME, property_name_in_class).text
             extracted_float = float(re.search(r'[-+]?[0-9]*\.?[0-9]+', value_with_unit).group(0))
-            assert extracted_float == float(new_value)
-            found_matching_entity = True
-    assert found_matching_entity
+            return extracted_float == float(value)
+    return False
 
 
 @then('the main headline contains {some_string}')
