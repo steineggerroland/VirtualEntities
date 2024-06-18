@@ -4,6 +4,7 @@ import re
 from behave import *
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support.expected_conditions import any_of, presence_of_element_located
 from selenium.webdriver.support.wait import WebDriverWait
 
 
@@ -159,3 +160,9 @@ def some_string_in_class_name(context, class_name: str, some_string: str):
 def input_with_value(context, field_name, value):
     WebDriverWait(context.webdriver, 10).until(
         lambda d: d.find_element(By.ID, field_name).get_attribute('value') == value)
+
+
+@then('they see a {message_type} message')
+def message_of_type(context, message_type):
+    WebDriverWait(context.webdriver, 10).until(
+        presence_of_element_located((By.CSS_SELECTOR, '.messages .message.%s' % message_type)))

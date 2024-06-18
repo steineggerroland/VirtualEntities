@@ -14,7 +14,7 @@ class Details(View):
         if room is not None:
             return render_template("room.html", room=room)
         else:
-            flash(gettext("No room found with name '%(name)s'", name=name))
+            flash(gettext("No room found with name '%(name)s'", name=name), category="danger")
             return redirect(url_for("ve_list"))
 
 
@@ -27,5 +27,5 @@ class Configuration(View):
         if room is not None:
             return render_template("room_configuration.html", room=room)
         else:
-            flash(gettext("No room found with name '%(name)s'", name=name))
+            flash(gettext("No room found with name '%(name)s'", name=name), category="danger")
             return redirect(url_for("ve_list"))

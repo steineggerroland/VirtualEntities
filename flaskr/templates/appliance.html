@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}<title>{{ _('Appliance %(name)s', name=appliance.name) }}</title>{% endblock %}
-{% block content %}
+{% block breadcrumb %}
     <aside class="container">
         <div class="row mt-4">
             <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '〉';">
@@ -12,6 +12,8 @@
             </nav>
         </div>
     </aside>
+{% endblock %}
+{% block content %}
     <main class="container appliance">
         <div class="row mt-4">
             <div class="col-2 col-sm-1 p-0">

@@ -18,7 +18,7 @@ class Details(View):
         if appliance is not None:
             return render_template("appliance.html", appliance=appliance)
         else:
-            flash(gettext("No appliance found with that name"))
+            flash(gettext("No appliance found with that name"), category="danger")
             return redirect(url_for("ve_list"))
 
 
@@ -32,13 +32,15 @@ class Configuration(View):
     def dispatch_request(self, name: str):
         appliance = self.appliance_service.get_machine(name)
         if appliance is None:
-            flash(gettext("No appliance found with that name"))
+            flash(gettext("No appliance found with that name"), category="danger")
             return redirect(url_for("ve_list"))
         appliance_form = ApplianceForm()
         if appliance_form.validate_on_submit():
             if name != appliance_form.name.data:
                 self.configuration_manager.rename_appliance(old_name=name, new_name=appliance_form.name.data)
-            return redirect(url_for('appliance', name=name))
+            flash(gettext("Appliance successfully updated"), category="success")
+        else:
+            flash(gettext("Failed to change appliance, see errors in the form"), category="danger")
         appliance_form.name.default = appliance.name
         appliance_form.process()
         return render_template("appliance_configuration.html", appliance=appliance, form=appliance_form)
