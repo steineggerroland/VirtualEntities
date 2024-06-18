@@ -1,10 +1,12 @@
 import json
 import logging
 import os.path
+import re
 import sys
 
 import paho.mqtt.client as paho_mqtt
 from behave import fixture, use_fixture
+from behave.model_core import Status
 from selenium import webdriver
 from testcontainers.core.docker_client import DockerClient
 from testcontainers_python_influxdb.influxdb2 import InfluxDb2Container
@@ -13,10 +15,10 @@ from features.container.BehaveAppContainer import BehaveAppContainer
 from features.container.MosquittoContainer import MosquittoContainer
 from features.pages.appliance_configuration_page import ApplianceConfigurationPage
 from features.pages.appliance_page import AppliancePage
-
 from features.pages.base import BasePage
 from features.pages.virtual_entity_page import VirtualEntityPage
 
+save_screenshot_of_failed_steps = True
 
 @fixture
 def influxdb_container_setup(context, timeout=20, **kwargs):
@@ -114,7 +116,6 @@ def browser_setup_and_teardown(context, timeout=30, **kwargs):
     browser = webdriver.Chrome()
 
     browser.maximize_window()
-    browser.implicitly_wait(10)
 
     browser.get(context.base_url)
 
@@ -125,6 +126,7 @@ def browser_setup_and_teardown(context, timeout=30, **kwargs):
         'appliance': AppliancePage(browser, context.base_url),
         'appliance configuration': ApplianceConfigurationPage(browser, context.base_url)
     }
+
     yield
 
     browser.close()
@@ -135,6 +137,10 @@ def before_all(context):
     app_container = use_fixture(app_container_setup, context)
     context.base_url = app_container.get_behave_url()
     use_fixture(appliances_setup, context)
+
+    screenshots_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'screenshots'))
+    if not os.path.exists(screenshots_path):
+        os.makedirs(screenshots_path)
 
 
 def before_scenario(context, scenario):
@@ -171,3 +177,12 @@ def before_tag(context, tag):
 def after_tag(context, tag):
     if tag == "debug":
         use_fixture(teardown_debug_logging, context, timeout=10)
+
+
+def after_step(context, step):
+    """Save screenshots of failed steps"""
+    if save_screenshot_of_failed_steps and step.status is Status.failed:
+        file_name = "fail.%s_%s_%s.png" % (
+            step.filename[step.filename.find('/') + 1:], step.line, re.sub('\W', '', step.name))
+        path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'screenshots', file_name))
+        context.webdriver.save_screenshot(path)
