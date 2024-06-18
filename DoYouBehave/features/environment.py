@@ -13,10 +13,7 @@ from testcontainers_python_influxdb.influxdb2 import InfluxDb2Container
 
 from features.container.BehaveAppContainer import BehaveAppContainer
 from features.container.MosquittoContainer import MosquittoContainer
-from features.pages.appliance_configuration_page import ApplianceConfigurationPage
-from features.pages.appliance_page import AppliancePage
-from features.pages.base import BasePage
-from features.pages.virtual_entity_page import VirtualEntityPage
+from features.pages.base import BasePage, VirtualEntityPage, AppliancePage, ApplianceConfigurationPage, RoomPage
 
 save_screenshot_of_failed_steps = True
 
@@ -121,16 +118,11 @@ def browser_setup_and_teardown(context, timeout=30, **kwargs):
     browser.get(context.base_url)
 
     context.webdriver = browser
-    home = BasePage(browser, context.base_url, 'home')
-    virtual_entity_page = VirtualEntityPage(browser, context.base_url)
-    appliance_page = AppliancePage(browser, context.base_url)
-    appliance_configuration_page = ApplianceConfigurationPage(browser, context.base_url)
-    context.pages = {
-        home.page_name: home,
-        virtual_entity_page.page_name: virtual_entity_page,
-        appliance_page.page_name: appliance_page,
-        appliance_configuration_page.page_name: appliance_configuration_page
-    }
+
+    pages = [BasePage(browser, context.base_url, 'home'), VirtualEntityPage(browser, context.base_url),
+             AppliancePage(browser, context.base_url), ApplianceConfigurationPage(browser, context.base_url),
+             RoomPage(browser, context.base_url)]
+    context.pages = dict([(page.page_name, page) for page in pages])
 
     yield
 
