@@ -20,6 +20,7 @@ from features.pages.virtual_entity_page import VirtualEntityPage
 
 save_screenshot_of_failed_steps = True
 
+
 @fixture
 def influxdb_container_setup(context, timeout=20, **kwargs):
     influxdb_container = InfluxDb2Container(host_port=8884, username="influx", password="influx",
@@ -120,11 +121,15 @@ def browser_setup_and_teardown(context, timeout=30, **kwargs):
     browser.get(context.base_url)
 
     context.webdriver = browser
+    home = BasePage(browser, context.base_url, 'home')
+    virtual_entity_page = VirtualEntityPage(browser, context.base_url)
+    appliance_page = AppliancePage(browser, context.base_url)
+    appliance_configuration_page = ApplianceConfigurationPage(browser, context.base_url)
     context.pages = {
-        'home': BasePage(browser, context.base_url),
-        'virtual entities': VirtualEntityPage(browser, context.base_url),
-        'appliance': AppliancePage(browser, context.base_url),
-        'appliance configuration': ApplianceConfigurationPage(browser, context.base_url)
+        home.page_name: home,
+        virtual_entity_page.page_name: virtual_entity_page,
+        appliance_page.page_name: appliance_page,
+        appliance_configuration_page.page_name: appliance_configuration_page
     }
 
     yield
