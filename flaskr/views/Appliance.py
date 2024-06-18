@@ -34,13 +34,16 @@ class Configuration(View):
         if appliance is None:
             flash(gettext("No appliance found with that name"), category="danger")
             return redirect(url_for("ve_list"))
+
         appliance_form = ApplianceForm()
-        if appliance_form.validate_on_submit():
-            if name != appliance_form.name.data:
+        if appliance_form.is_submitted():
+            if appliance_form.validate() and name != appliance_form.name.data:
                 self.configuration_manager.rename_appliance(old_name=name, new_name=appliance_form.name.data)
-            flash(gettext("Appliance successfully updated"), category="success")
+                flash(gettext("Appliance successfully updated"), category="success")
+                return redirect(url_for('appliance', name=appliance_form.name.data))
+            else:
+                flash(gettext("Failed to change appliance, see errors in the form"), category="danger")
         else:
-            flash(gettext("Failed to change appliance, see errors in the form"), category="danger")
-        appliance_form.name.default = appliance.name
-        appliance_form.process()
+            appliance_form.name.default = appliance.name
+            appliance_form.process()
         return render_template("appliance_configuration.html", appliance=appliance, form=appliance_form)
