@@ -80,12 +80,15 @@ class InfluxDbTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
         self._rename_thing_in_time_series(POWER_CONSUMPTION_SERIES, old_name, new_name)
 
     def _rename_thing_in_time_series(self, time_series_name: str, old_name: str, new_name: str):
-        rs = self.influxdb.query(f"SELECT * FROM {time_series_name}")
-        old_points = rs.get_points(measurement=time_series_name, tags={THING_NAME_TAG: old_name})
-        if old_points:
-            reassigned_points = list(map(lambda p: self._change_thing_name_of_point(p, new_name), old_points))
-            self.influxdb.write_points(reassigned_points)
-            self.influxdb.delete_series(measurement=time_series_name, tags={THING_NAME_TAG: old_name})
+        try:
+            rs = self.influxdb.query(f"SELECT * FROM {time_series_name}")
+            old_points = rs.get_points(measurement=time_series_name, tags={THING_NAME_TAG: old_name})
+            if old_points:
+                reassigned_points = list(map(lambda p: self._change_thing_name_of_point(p, new_name), old_points))
+                self.influxdb.write_points(reassigned_points)
+                self.influxdb.delete_series(measurement=time_series_name, tags={THING_NAME_TAG: old_name})
+        except InfluxDBClientError:  # Exception is raised on query when no data exists (404 by db)
+            self.logger.debug(f'No climate data to rename for entity {old_name}')
 
     @staticmethod
     def _change_thing_name_of_point(point: dict, new_name: str) -> dict:
