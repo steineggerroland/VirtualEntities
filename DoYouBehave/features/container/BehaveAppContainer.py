@@ -19,12 +19,14 @@ class BehaveAppContainer(DockerContainer):
         super().__init__('python:3.11', **kwargs)
         self.port = port
         self.with_bind_ports(8080, self.port)
-        self.with_command('/bin/sh /behave/test-data/start.sh')
-        self.with_volume_mapping(app_path, '/behave', 'rw')
+        self.with_command('/bin/sh /behave_runtime/test-data/start.sh')
+        self.with_volume_mapping(app_path, '/behave', 'ro')
         shutil.copy(os.path.join(file_dir, 'container', 'app', 'config', '.default_config.yaml'),
                     os.path.join(file_dir, 'container', 'app', 'config', 'config.yaml'))
-        self.with_volume_mapping(os.path.join(file_dir, 'container', 'app', 'config'), '/behave/test-config', 'rw')
-        self.with_volume_mapping(os.path.join(file_dir, 'container', 'app', 'data'), '/behave/test-data', 'rw')
+        self.with_volume_mapping(os.path.join(file_dir, 'container', 'app', 'config'),
+                                 '/behave_runtime/test-config', 'rw')
+        self.with_volume_mapping(os.path.join(file_dir, 'container', 'app', 'data'),
+                                 '/behave_runtime/test-data', 'rw')
 
         self.logger_thread = Thread(target=self._poll_log, daemon=True)
         self.logger_thread.start()

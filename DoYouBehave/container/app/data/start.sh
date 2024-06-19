@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd "$(dirname "$0")/.." || exit
+cd "$(dirname "$0")/../../behave" || exit
 
 if [ ! -f main.py ]; then
     echo "Error: main.py does not exist."
@@ -8,4 +8,4 @@ if [ ! -f main.py ]; then
 fi
 
 pip install -r requirements.txt || echo "Failed to install requirements"
-python3 main.py /behave/test-config/config.yaml /behave/test-data/config.json || echo "Failed to run behave"
+python3 -d main.py /behave_runtime/test-config/config.yaml /behave_runtime/test-data/db.json /behave_runtime/test-data/default.log || echo "Failed to run behave"
