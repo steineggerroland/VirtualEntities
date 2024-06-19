@@ -16,6 +16,7 @@ from features.container.MosquittoContainer import MosquittoContainer
 from features.pages.base import BasePage, VirtualEntityPage, AppliancePage, ApplianceConfigurationPage, RoomPage
 
 save_screenshot_of_failed_steps = True
+global_debug_logging = False
 
 
 @fixture
@@ -103,6 +104,8 @@ def app_container_setup(context, timeout=30, **kwargs):
     try:
         behave_app_container.start()
         yield behave_app_container
+    except Exception as e:
+        logging.getLogger(__file__).exception(e)
     finally:
         behave_app_container.stop()
 
@@ -110,13 +113,9 @@ def app_container_setup(context, timeout=30, **kwargs):
 @fixture
 def browser_setup_and_teardown(context, timeout=30, **kwargs):
     use_selenoid = False  # set to True to run tests with Selenoid
-
     browser = webdriver.Chrome()
-
     browser.maximize_window()
-
     browser.get(context.base_url)
-
     context.webdriver = browser
 
     pages = [BasePage(browser, context.base_url, 'home'), VirtualEntityPage(browser, context.base_url),
@@ -131,6 +130,8 @@ def browser_setup_and_teardown(context, timeout=30, **kwargs):
 
 
 def before_all(context):
+    if global_debug_logging:
+        _enable_debug_logging()
     app_container = use_fixture(app_container_setup, context)
     context.base_url = app_container.get_behave_url()
     use_fixture(appliances_setup, context)
@@ -145,6 +146,16 @@ def before_scenario(context, scenario):
 
 
 def setup_debug_logging(context, timeout=5, **kwargs):
+    if not global_debug_logging:
+        _enable_debug_logging()
+
+
+def teardown_debug_logging(context, timeout=5, **kwargs):
+    if not global_debug_logging:
+        _enable_info_logging()
+
+
+def _enable_debug_logging():
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setLevel(logging.DEBUG)
     logging.basicConfig(encoding='utf-8',
@@ -153,9 +164,7 @@ def setup_debug_logging(context, timeout=5, **kwargs):
                         handlers=[stdout_handler],
                         force=True)
     logging.getLogger('urllib3.connectionpool').setLevel(logging.INFO)
-
-
-def teardown_debug_logging(context, timeout=5, **kwargs):
+def _enable_info_logging():
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setLevel(logging.INFO)
     logging.basicConfig(encoding='utf-8',
