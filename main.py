@@ -23,6 +23,7 @@ from iot.mqtt.mqtt_room_mediator import MqttRoomMediator
 DEFAULT_FLASK_CONFIG_FILE_NAME = "default_flask.yaml"
 DB_JSON_FILE = sys.argv[2] if len(sys.argv) > 2 else 'data/db.json'
 CONFIG_FILE_NAME = sys.argv[1] if len(sys.argv) > 1 else 'config.yaml'
+LOG_FILE_NAME = sys.argv[3] if len(sys.argv) > 3 else 'data/default.log'
 
 
 def run():
@@ -91,7 +92,7 @@ def run():
 if __name__ == '__main__':
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setLevel(logging.DEBUG)
-    logging.basicConfig(level=logging.DEBUG if sys.flags.debug else logging.DEBUG,
+    logging.basicConfig(level=logging.DEBUG if sys.flags.debug else logging.INFO,
                         format='%(asctime)s - %(name)s(%(lineno)s) - %(levelname)s - %(message)s',
-                        handlers=[stdout_handler, logging.FileHandler(filename='data/default.log', encoding='utf-8')])
+                        handlers=[stdout_handler, logging.FileHandler(filename=LOG_FILE_NAME, encoding='utf-8')])
     run()
