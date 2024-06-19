@@ -1,7 +1,8 @@
+import logging
+
 from flask import render_template, redirect, url_for, flash
-from flask.views import View
+from flask.views import View, MethodView
 from flask_babel import gettext
-from python_event_bus import EventBus
 
 from flaskr.forms.ApplianceForm import ApplianceForm
 from iot.core.configuration import ConfigurationManager
@@ -22,28 +23,42 @@ class Details(View):
             return redirect(url_for("ve_list"))
 
 
-class Configuration(View):
+class Configuration(MethodView):
+    init_every_request = False
     methods = ['GET', 'POST']
 
     def __init__(self, appliance_service: MachineService, configuration_manager: ConfigurationManager):
         self.appliance_service = appliance_service
         self.configuration_manager = configuration_manager
+        self.logger = logging.getLogger('Appliance.Configuration')
 
-    def dispatch_request(self, name: str):
+    def get(self, name: str):
         appliance = self.appliance_service.get_machine(name)
         if appliance is None:
             flash(gettext("No appliance found with that name"), category="danger")
             return redirect(url_for("ve_list"))
 
         appliance_form = ApplianceForm()
-        if appliance_form.is_submitted():
-            if appliance_form.validate() and name != appliance_form.name.data:
+        appliance_form.name.default = appliance.name
+        appliance_form.process()
+        return render_template("appliance_configuration.html", appliance=appliance, form=appliance_form)
+
+    def post(self, name: str):
+        appliance = self.appliance_service.get_machine(name)
+        if appliance is None:
+            flash(gettext("No appliance found with that name"), category="danger")
+            return redirect(url_for("ve_list"))
+
+        appliance_form = ApplianceForm()
+        if name != appliance_form.name.data and appliance_form.validate():
+            try:
                 self.configuration_manager.rename_appliance(old_name=name, new_name=appliance_form.name.data)
                 flash(gettext("Appliance successfully updated"), category="success")
-                return redirect(url_for('appliance', name=appliance_form.name.data))
-            else:
-                flash(gettext("Failed to change appliance, see errors in the form"), category="danger")
+                return redirect(url_for('appliance_configuration.html', name=appliance_form.name.data))
+            except Exception as e:
+                self.logger.exception(e)
+                flash(gettext("Something went wrong"), category="danger")
+            return render_template("appliance_configuration.html", appliance=appliance, form=appliance_form)
         else:
-            appliance_form.name.default = appliance.name
-            appliance_form.process()
-        return render_template("appliance_configuration.html", appliance=appliance, form=appliance_form)
+            flash(gettext("Failed to change appliance, see errors in the form"), category="danger")
+            return render_template("appliance_configuration.html", appliance=appliance, form=appliance_form)
