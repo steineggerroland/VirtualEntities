@@ -22,14 +22,14 @@ INDOOR_CLIMATE_SERIES = "indoor_climate"
 
 class InfluxDbTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
     def __init__(self, time_series_config: TimeSeriesConfig):
-        self.influxdb = InfluxDBClient(host=time_series_config.url, username=time_series_config.username,
-                                       password=time_series_config.password)
+        self.influxdb = InfluxDBClient(host=time_series_config.url, port=time_series_config.port,
+                                       username=time_series_config.username, password=time_series_config.password,
+                                       database=time_series_config.bucket_name)
         self.bucket_name = time_series_config.bucket_name
-        self.influxdb.switch_database(self.bucket_name)
         self.logger = logging.getLogger(self.__class__.__qualname__)
 
     def start(self):
-        self.influxdb.ping()
+        assert self.bucket_name in self.influxdb.get_list_database()
 
     def shutdown(self):
         self.influxdb.close()
