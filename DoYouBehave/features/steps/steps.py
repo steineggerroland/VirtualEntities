@@ -1,10 +1,12 @@
+import logging
 import random
 import re
+from typing import Optional
 
 from behave import *
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support.expected_conditions import any_of, presence_of_element_located
+from selenium.webdriver.support.expected_conditions import presence_of_element_located
 from selenium.webdriver.support.wait import WebDriverWait
 
 
@@ -126,16 +128,27 @@ def property_has_new_value(context, property_name, entity_name):
     new_value = context.new_value if type(context.new_value) is not dict else context.new_value[
         property_name.replace(' ', '_')]
     WebDriverWait(context.webdriver, 10).until(
-        lambda d: _property_has_value(d, entity_name, entity_type, property_name_in_class, new_value),
+        lambda d: _verify_property(d, entity_name, entity_type, property_name_in_class, new_value),
         f"No property {property_name} of entity {entity_name} with value {new_value} found")
 
 
-def _property_has_value(d, entity_name, entity_type, property_name_in_class, value):
-    for appliance_element in d.find_elements(By.CLASS_NAME, entity_type):
-        if appliance_element.find_element(By.CLASS_NAME, 'name').text == entity_name:
-            value_with_unit = appliance_element.find_element(By.CLASS_NAME, property_name_in_class).text
-            extracted_float = float(re.search(r'[-+]?[0-9]*\.?[0-9]+', value_with_unit).group(0))
-            return extracted_float == float(value)
+@then('the user sees the {property_name} for the {entity_name}')
+def property_has_new_value(context, property_name, entity_name):
+    entity_type = 'appliance' if property_name in ['power consumption'] else 'room'
+    property_name_in_class = property_name.replace(' ', '-')
+    WebDriverWait(context.webdriver, 10).until(
+        lambda d: _verify_property(d, entity_name, entity_type, property_name_in_class),
+        f"No property {property_name} of entity {entity_name} found")
+
+
+def _verify_property(d, entity_name, entity_type, property_name_in_class, value=None):
+    for entity_element in d.find_elements(By.CLASS_NAME, entity_type):
+        if entity_element.find_element(By.CLASS_NAME, 'name').text == entity_name:
+            value_with_unit = entity_element.find_element(By.CLASS_NAME, property_name_in_class).text
+            extracted_float = float(
+                re.search(r'[-+]?[0-9]*\.?[0-9]+', value_with_unit).group(0)) if value_with_unit.find(
+                '?') < 0 else None
+            return extracted_float == float(value) if value is not None else True
     return False
 
 
@@ -166,3 +179,28 @@ def input_with_value(context, field_name, value):
 def message_of_type(context, message_type):
     WebDriverWait(context.webdriver, 10).until(
         presence_of_element_located((By.CSS_SELECTOR, '.messages .message.%s' % message_type)))
+
+
+@then(u'the user sees a diagram with {property_type} values')
+def step_impl(context, property_type: str):
+    value = _get_diagram_path_for_property(context.webdriver, property_type)
+    setattr(context, f'prop_{property_type}', value)
+
+
+@then(u'the user sess the diagram with updated {property_type} values')
+def step_impl(context, property_type):
+    old_value = getattr(context, f'prop_{property_type}')
+    WebDriverWait(context.webdriver, 10, 1).until(lambda d: _get_diagram_path_for_property(d,
+                                                                                        property_type) is not None and old_value != _get_diagram_path_for_property(
+        d, property_type))
+    setattr(context, f'prop_{property_type}', _get_diagram_path_for_property(context.webdriver, property_type))
+
+
+def _get_diagram_path_for_property(webdriver, property_type) -> Optional[str]:
+    webdriver.refresh()
+    try:
+        css_selector = '.diagram[data-attribute="%s"] svg > g > path' % property_type.replace(' ', '-')
+        new_value = webdriver.find_element(By.CSS_SELECTOR, css_selector).get_dom_attribute('d')
+        return new_value
+    except:
+        return None
