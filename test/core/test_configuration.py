@@ -21,6 +21,7 @@ class ConfigurationTest(unittest.TestCase):
         self.assertEqual("my-client", config.mqtt.client_id)
 
         self.assertEqual("influxdb.url", config.time_series.url)
+        self.assertEqual(8712, config.time_series.port)
         self.assertEqual("influxdb", config.time_series.username)
         self.assertEqual("secret", config.time_series.password)
         self.assertEqual("bucket_to_save_to", config.time_series.bucket_name)

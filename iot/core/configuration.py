@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import List, Any, Optional
 
 import yaml
 import yamlenv
@@ -13,8 +13,9 @@ class IncompleteConfiguration(Exception):
 
 
 class TimeSeriesConfig:
-    def __init__(self, url: str, username: str, password: str, bucket_name: str):
+    def __init__(self, url: str, port: Optional[int], username: str, password: str, bucket_name: str):
         self.url = url
+        self.port = port if port is None else int(port)
         self.username = username
         self.password = password
         self.bucket_name = bucket_name
@@ -332,8 +333,10 @@ def _read_things(conf_dict, calendars) -> List[IotThingConfig]:
 
 def _read_time_series_config(time_series_config) -> TimeSeriesConfig:
     _verify_keys(time_series_config, ['url', 'username', 'password', 'bucket_name'], 'time_series')
-    return TimeSeriesConfig(time_series_config['url'], time_series_config['username'], time_series_config['password'],
-                            time_series_config['bucket_name'])
+    return TimeSeriesConfig(time_series_config['url'],
+                            time_series_config['port'] if 'port' in time_series_config else None,
+                            time_series_config['username'],
+                            time_series_config['password'], time_series_config['bucket_name'])
 
 
 def _read_configuration(conf_dict) -> Configuration:

@@ -6,6 +6,7 @@ mqtt:
   client_id: my-client
 time_series:
   url: influxdb.url
+  port: 8712
   username: influxdb
   password: secret
   bucket_name: bucket_to_save_to
