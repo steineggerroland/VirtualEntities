@@ -9,31 +9,40 @@ from behave import fixture, use_fixture
 from behave.model_core import Status
 from selenium import webdriver
 from testcontainers.core.docker_client import DockerClient
-from testcontainers_python_influxdb.influxdb2 import InfluxDb2Container
 
 from features.container.BehaveAppContainer import BehaveAppContainer
+from features.container.InfluxDbContainer import InfluxDbContainerWrapper
 from features.container.MosquittoContainer import MosquittoContainer
 from features.pages.base import BasePage, VirtualEntityPage, AppliancePage, ApplianceConfigurationPage, RoomPage
 
 save_screenshot_of_failed_steps = True
-global_debug_logging = False
+global_logging = False
+app_logging = False
+influxdb_logging = False
+mqtt_logging = False
+BUCKET_NAME = "time_series"
+app_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+stdout_handler = logging.StreamHandler(sys.stdout)
 
 
 @fixture
 def influxdb_container_setup(context, timeout=20, **kwargs):
-    influxdb_container = InfluxDb2Container(host_port=8884, username="influx", password="influx",
-                                            bucket="time_series")
+    influxdb_container = InfluxDbContainerWrapper(image='influxdb:1.8', app_dir=app_dir, log_container_logs=influxdb_logging,
+                                                  host_port=8884, username="influxdb", password="influxdb",
+                                                  bucket=BUCKET_NAME, org_name='behave', init_mode='setup')
     context.influxdb_container = influxdb_container
     try:
         influxdb_container.start()
         yield influxdb_container
+    except Exception as e:
+        logging.getLogger(__file__).exception(e)
     finally:
         influxdb_container.stop()
 
 
 @fixture
 def mqtt_container_setup(context, timeout=20, **kwargs):
-    mqtt_container = MosquittoContainer(8883)
+    mqtt_container = MosquittoContainer(log_container_logs=mqtt_logging, port=8883)
     context.mqtt_container = mqtt_container
     try:
         mqtt_container.start()
@@ -97,8 +106,7 @@ def app_container_setup(context, timeout=30, **kwargs):
     influxdb_container = use_fixture(influxdb_container_setup, context)
     mqtt_container = use_fixture(mqtt_container_setup, context)
     client = DockerClient()
-    app_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-    behave_app_container = BehaveAppContainer(app_dir, 8086)
+    behave_app_container = BehaveAppContainer(app_dir, app_logging, port=8090)
     behave_app_container.configure_influxdb(client.gateway_ip(influxdb_container.get_wrapped_container().id))
     behave_app_container.configure_mqtt(client.gateway_ip(mqtt_container.get_wrapped_container().id))
     try:
@@ -130,7 +138,15 @@ def browser_setup_and_teardown(context, timeout=30, **kwargs):
 
 
 def before_all(context):
-    if global_debug_logging:
+    logging.basicConfig(encoding='utf-8',
+                        level=logging.DEBUG if global_logging else logging.ERROR,
+                        format='%(asctime)s - %(name)s(%(lineno)s) - %(levelname)s - %(message)s',
+                        handlers=[stdout_handler],
+                        force=True)
+    logging.getLogger('BehaveAppContainer').setLevel(logging.DEBUG)
+    logging.getLogger('InfluxDBContainer').setLevel(logging.DEBUG)
+    logging.getLogger('MosquittoContainer').setLevel(logging.DEBUG)
+    if global_logging:
         _enable_debug_logging()
     app_container = use_fixture(app_container_setup, context)
     context.base_url = app_container.get_behave_url()
@@ -146,33 +162,21 @@ def before_scenario(context, scenario):
 
 
 def setup_debug_logging(context, timeout=5, **kwargs):
-    if not global_debug_logging:
+    if not global_logging:
         _enable_debug_logging()
 
 
 def teardown_debug_logging(context, timeout=5, **kwargs):
-    if not global_debug_logging:
+    if not global_logging:
         _enable_info_logging()
 
 
 def _enable_debug_logging():
-    stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setLevel(logging.DEBUG)
-    logging.basicConfig(encoding='utf-8',
-                        level=logging.DEBUG,
-                        format='%(asctime)s - %(name)s(%(lineno)s) - %(levelname)s - %(message)s',
-                        handlers=[stdout_handler],
-                        force=True)
-    logging.getLogger('urllib3.connectionpool').setLevel(logging.INFO)
+
+
 def _enable_info_logging():
-    stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setLevel(logging.INFO)
-    logging.basicConfig(encoding='utf-8',
-                        level=logging.INFO,
-                        format='%(asctime)s - %(name)s(%(lineno)s) - %(levelname)s - %(message)s',
-                        handlers=[stdout_handler],
-                        force=True)
-    logging.getLogger('urllib3.connectionpool').setLevel(logging.INFO)
 
 
 def before_tag(context, tag):

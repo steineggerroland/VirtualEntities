@@ -7,8 +7,8 @@ mqtt:
 time_series:
   url: $INFLUXDB_HOST$
   port: 8884
-  username: influx
-  password: influx
+  username: integration-test-user
+  password: the-giant-pink-unicorn
   bucket_name: time_series
 things:
   - name: Washing machine

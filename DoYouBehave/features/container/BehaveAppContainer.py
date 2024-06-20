@@ -15,7 +15,7 @@ file_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 
 class BehaveAppContainer(DockerContainer):
-    def __init__(self, app_path: str, port: int = 8080, **kwargs) -> None:
+    def __init__(self, app_path: str, app_logging=False, port: int = 8080, **kwargs) -> None:
         super().__init__('python:3.11', **kwargs)
         self.port = port
         self.with_bind_ports(8080, self.port)
@@ -27,16 +27,15 @@ class BehaveAppContainer(DockerContainer):
                                  '/behave_runtime/test-config', 'rw')
         self.with_volume_mapping(os.path.join(file_dir, 'container', 'app', 'data'),
                                  '/behave_runtime/test-data', 'rw')
-
         self.logger_thread = Thread(target=self._poll_log, daemon=True)
-        self.logger_thread.start()
+        self.app_logging = app_logging
 
     def start(self) -> 'BehaveAppContainer':
+        if self.app_logging:
+            self.logger_thread.start()
         super().start()
-
         wait_for_logs(self, '.*Serving Flask app.*')
         self._connect(self.get_container_host_ip(), self.port)
-
         return self
 
     def _poll_log(self):
