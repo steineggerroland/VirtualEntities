@@ -54,11 +54,11 @@ class Configuration(MethodView):
             try:
                 self.configuration_manager.rename_appliance(old_name=name, new_name=appliance_form.name.data)
                 flash(gettext("Appliance successfully updated"), category="success")
-                return redirect(url_for('appliance_configuration.html', name=appliance_form.name.data))
+                return redirect(url_for("appliance_configuration", name=appliance_form.name.data))
             except Exception as e:
                 self.logger.exception(e)
                 flash(gettext("Something went wrong"), category="danger")
-            return render_template("appliance_configuration.html", appliance=appliance, form=appliance_form)
+                return render_template("appliance_configuration.html", appliance=appliance, form=appliance_form)
         else:
             flash(gettext("Failed to change appliance, see errors in the form"), category="danger")
             return render_template("appliance_configuration.html", appliance=appliance, form=appliance_form)
