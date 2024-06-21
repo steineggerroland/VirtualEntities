@@ -13,7 +13,8 @@ from testcontainers.core.docker_client import DockerClient
 from features.container.BehaveAppContainer import BehaveAppContainer
 from features.container.InfluxDbContainer import InfluxDbContainerWrapper
 from features.container.MosquittoContainer import MosquittoContainer
-from features.pages.base import BasePage, VirtualEntityPage, AppliancePage, ApplianceConfigurationPage, RoomPage
+from features.pages.base import BasePage, VirtualEntityPage, AppliancePage, ApplianceConfigurationPage, RoomPage, \
+    RoomConfigurationPage
 
 save_screenshot_of_failed_steps = True
 global_logging = False
@@ -126,9 +127,12 @@ def browser_setup_and_teardown(context, timeout=30, **kwargs):
     browser.get(context.base_url)
     context.webdriver = browser
 
-    pages = [BasePage(browser, context.base_url, 'home'), VirtualEntityPage(browser, context.base_url),
-             AppliancePage(browser, context.base_url), ApplianceConfigurationPage(browser, context.base_url),
-             RoomPage(browser, context.base_url)]
+    pages = [BasePage(browser, context.base_url, 'home'),
+             VirtualEntityPage(browser, context.base_url),
+             AppliancePage(browser, context.base_url),
+             ApplianceConfigurationPage(browser, context.base_url),
+             RoomPage(browser, context.base_url),
+             RoomConfigurationPage(browser, context.base_url)]
     context.pages = dict([(page.page_name, page) for page in pages])
 
     yield

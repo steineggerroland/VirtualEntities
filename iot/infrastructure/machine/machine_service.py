@@ -59,7 +59,7 @@ class MachineService:
         self.time_series_storage = time_series_storage
         self.config_manager = config_manager
         self.managed_machines = ManagedMachines()
-        EventBus.subscribe("thing_configs/changed_name", self.change_name, priority=0)
+        EventBus.subscribe("appliance/changed_config_name", self.change_name, priority=0)
 
     def add_machines_by_config(self, thing_configs: List[IotThingConfig]):
         for thing_config in thing_configs:
@@ -140,11 +140,9 @@ class MachineService:
     def change_name(self, name: str, old_name: str):
         managed_machine = self.managed_machines.find(old_name)
         if managed_machine.has_running_check():
-            managed_machine.change_name(name,
-                                        self._create_thread_for_is_running_check(managed_machine))
+            managed_machine.change_name(name,self._create_thread_for_is_running_check(managed_machine))
         else:
             managed_machine.change_name(name)
-        EventBus.call("machine/changed_name", name=name, old_name=old_name)
 
     def get_machine(self, machine_name: str) -> MachineThatCanBeLoaded:
         return self.appliance_depot.retrieve(machine_name)

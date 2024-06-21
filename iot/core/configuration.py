@@ -402,7 +402,14 @@ class ConfigurationManager:
             thing = list(filter(lambda t: t.name == old_name, self.configuration.things)).pop()
             thing.name = new_name
             self.save()
-            EventBus.call("thing_configs/changed_name", name=new_name, old_name=old_name)
+            EventBus.call("appliance/changed_config_name", name=new_name, old_name=old_name)
+
+    def rename_room(self, old_name, new_name):
+        if new_name != old_name:
+            thing = list(filter(lambda t: t.name == old_name, self.configuration.things)).pop()
+            thing.name = new_name
+            self.save()
+            EventBus.call("room/changed_config_name", name=new_name, old_name=old_name)
 
     def save(self):
         _save_configuration(self.configuration, self.config_path)

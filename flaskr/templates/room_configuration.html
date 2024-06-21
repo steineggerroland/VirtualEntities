@@ -19,7 +19,7 @@
             <div class="col-10 col-sm-11">
                 <div class="row">
                     <h1 class="col-10 col-sm-auto mb-0">
-                        <span class="name">{{ room.name }}</span>
+                        {{ _('Configure %(room_name)s', room_name=room.name ) }}
                     </h1>
                     <div class="col-2 col-sm-auto p-0" style="max-width: 50px">
                         <a href="{{ url_for('room', name=room.name) }}" class="back"
@@ -33,24 +33,42 @@
                         </a>
                     </div>
                 </div>
-                <div class="row mt-4">
-                    <h3 class="col-12">{{ _('Temperature thresholds') }}</h3>
-                    <div class="col-12">
-                        {{ _('Optimum from %(lower_bound_degree)s°C to %(upper_bound_degree)s°C', lower_bound_degree=room.temperature_thresholds.optimal.lower_value, upper_bound_degree=room.temperature_thresholds.optimal.upper_value) }}
-                    </div>
-                    <div class="col-12">
-                        {{ _('Critical below %(critical_lower_degree)s°C and above %(critical_upper_degree)s°C', critical_lower_degree=room.temperature_thresholds.frostiness_threshold, critical_upper_degree=room.temperature_thresholds.heat_threshold) }}
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <h3 class="col-12">{{ _('Humidity thresholds') }}</h3>
-                    <div class="col-12">
-                        {{ _('Optimum from %(lower_bound_percentage)s%% to %(upper_bound_percentage)s%%', lower_bound_percentage=room.humidity_thresholds.optimal.lower_value, upper_bound_percentage=room.humidity_thresholds.optimal.upper_value) }}
-                    </div>
-                    <div class="col-12">
-                        {{ _('Critical below %(critical_lower_percentage)s%% and above %(critical_upper_percentage)s%%', critical_lower_percentage=room.humidity_thresholds.drought_threshold, critical_upper_percentage=room.humidity_thresholds.wetness_threshold) }}
-                    </div>
-                </div>
+            </div>
+        </div>
+        <form class="row g-4 mt-0" method="POST"
+              action="{{ url_for('room_configuration', name=room.name ) }}">
+            {{ form.csrf_token }}
+            <div class="col-12 col-sm-auto">
+                {{ form.name.label(class='form-label') }}
+                {{ form.name(class='form-control',style='width: fit-content') }}
+                {% if form.name.errors %}
+                    <div class="invalid-feedback">{% for error in form.name.errors %}{{ error }}{% endfor %}</div>
+                {% endif %}
+            </div>
+            <div class="col-12 col-sm-auto align-content-end">
+                <a href="{{ url_for('room', name=room.name) }}">
+                    <button type="button" class="btn btn-outline-secondary"
+                            value="{{ _('Cancel') }}">{{ _('Cancel') }}</button>
+                </a>
+                <button type="submit" class="btn btn-primary ms-2" value="{{ _('Save') }}">{{ _('Save') }}</button>
+            </div>
+        </form>
+        <div class="row mt-4">
+            <h3 class="col-12">{{ _('Temperature thresholds') }}</h3>
+            <div class="col-12">
+                {{ _('Optimum from %(lower_bound_degree)s°C to %(upper_bound_degree)s°C', lower_bound_degree=room.temperature_thresholds.optimal.lower_value, upper_bound_degree=room.temperature_thresholds.optimal.upper_value) }}
+            </div>
+            <div class="col-12">
+                {{ _('Critical below %(critical_lower_degree)s°C and above %(critical_upper_degree)s°C', critical_lower_degree=room.temperature_thresholds.frostiness_threshold, critical_upper_degree=room.temperature_thresholds.heat_threshold) }}
+            </div>
+        </div>
+        <div class="row mt-2">
+            <h3 class="col-12">{{ _('Humidity thresholds') }}</h3>
+            <div class="col-12">
+                {{ _('Optimum from %(lower_bound_percentage)s%% to %(upper_bound_percentage)s%%', lower_bound_percentage=room.humidity_thresholds.optimal.lower_value, upper_bound_percentage=room.humidity_thresholds.optimal.upper_value) }}
+            </div>
+            <div class="col-12">
+                {{ _('Critical below %(critical_lower_percentage)s%% and above %(critical_upper_percentage)s%%', critical_lower_percentage=room.humidity_thresholds.drought_threshold, critical_upper_percentage=room.humidity_thresholds.wetness_threshold) }}
             </div>
         </div>
         {% if debug %}{{ room.to_dict() }}{% endif %}
