@@ -16,7 +16,8 @@ class TimeSeriesStorage(metaclass=ABCMeta):
             self.time_series_storage_strategy = InfluxDbTimeSeriesStorageStrategy(time_series_config)
         else:
             self.time_series_storage_strategy = InMemoryTimeSeriesStorageStrategy()
-        EventBus.subscribe("thing_configs/changed_name", self.rename)
+        EventBus.subscribe("appliance/changed_config_name", self.rename)
+        EventBus.subscribe("room/changed_config_name", self.rename)
 
     def start(self):
         self.time_series_storage_strategy.start()

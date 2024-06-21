@@ -44,6 +44,9 @@ class InMemoryTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
         if old_name in self.power_consumption_values:
             self.power_consumption_values[new_name] = self.power_consumption_values[old_name]
             del self.power_consumption_values[old_name]
+        if old_name in self.climate_values:
+            self.climate_values[new_name] = self.climate_values[old_name]
+            del self.climate_values[old_name]
 
     def get_room_climate_for_last_seconds(self, seconds: int, name: str) -> List[TemperatureHumidityMeasurement]:
         if name in self.climate_values:

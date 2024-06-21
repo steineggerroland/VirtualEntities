@@ -25,7 +25,7 @@
                         <a href="{{ url_for('room_configuration', name=room.name) }}"
                            data-bs-title="{{ _('Edit %(room_name)s', room_name=room.name) }}"
                            data-bs-toggle="tooltip">
-                            <button type="button" class="btn btn-light p-1">
+                            <button type="button" class="btn room-configuration btn-light p-1">
                                 <img alt="{{ _('Configure %(room_name)s', room_name=room.name) }}"
                                      class="icon configure-room icon-primary"
                                      src="{{ url_for('static', filename='img/flaticon/controls_control.png') }}"/>

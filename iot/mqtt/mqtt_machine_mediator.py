@@ -12,7 +12,7 @@ class MqttMachineMediator(MqttMediator):
         self.machine_service = machine_service
         self.sources = {}
         self.destinations = {}
-        EventBus.subscribe("thing_configs/changed_name", self.rename)
+        EventBus.subscribe("thing_configs/changed_config_name", self.rename)
 
     def add_thing_by_config(self, machine_name: str, mqtt_sources: Sources | None = None,
                             destinations: Destinations | None = None):
