@@ -1,4 +1,3 @@
-import logging
 import random
 import re
 from typing import Optional
@@ -122,13 +121,13 @@ def appliance_is_shown(context, person_names: str):
 
 @then('the user sees the new {property_name} for the {entity_name} after a refresh')
 def property_has_new_value(context, property_name, entity_name):
-    context.webdriver.refresh()
     entity_type = 'appliance' if property_name in ['power consumption'] else 'room'
     property_name_in_class = property_name.replace(' ', '-')
     new_value = context.new_value if type(context.new_value) is not dict else context.new_value[
         property_name.replace(' ', '_')]
     WebDriverWait(context.webdriver, 10).until(
-        lambda d: _verify_property(d, entity_name, entity_type, property_name_in_class, new_value),
+        lambda d: _verify_property(d, entity_name, entity_type, property_name_in_class, new_value,
+                                   refresh=context.webdriver),
         f"No property {property_name} of entity {entity_name} with value {new_value} found")
 
 
@@ -141,7 +140,9 @@ def property_has_new_value(context, property_name, entity_name):
         f"No property {property_name} of entity {entity_name} found")
 
 
-def _verify_property(d, entity_name, entity_type, property_name_in_class, value=None):
+def _verify_property(d, entity_name, entity_type, property_name_in_class, value=None, refresh=None):
+    if refresh is not None:
+        refresh.refresh()
     for entity_element in d.find_elements(By.CLASS_NAME, entity_type):
         if entity_element.find_element(By.CLASS_NAME, 'name').text == entity_name:
             value_with_unit = entity_element.find_element(By.CLASS_NAME, property_name_in_class).text
@@ -191,7 +192,7 @@ def step_impl(context, property_type: str):
 def step_impl(context, property_type):
     old_value = getattr(context, f'prop_{property_type}')
     WebDriverWait(context.webdriver, 10, 1).until(lambda d: _get_diagram_path_for_property(d,
-                                                                                        property_type) is not None and old_value != _get_diagram_path_for_property(
+                                                                                           property_type) is not None and old_value != _get_diagram_path_for_property(
         d, property_type))
     setattr(context, f'prop_{property_type}', _get_diagram_path_for_property(context.webdriver, property_type))
 
