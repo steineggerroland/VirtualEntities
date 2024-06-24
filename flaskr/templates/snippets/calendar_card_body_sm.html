@@ -1,5 +1,9 @@
 <div class="card-body">
-    <div class="card-text"><span style="color:#{{calendar.color}}">⬤</span> {{_('Calendar')}}: {{calendar.name}} <small
+    <div class="card-text">
+        <svg height="20" width="20" xmlns="http://www.w3.org/2000/svg">
+            <circle r="8" cx="10" cy="10" stroke-width="2" fill="#{{ calendar.color }}" stroke="black"></circle>
+        </svg>
+        {{ _('Calendar') }}: {{ calendar.name }} <small
             class="text-body-secondary">
-        ({{ngettext('%(num)d Appointment', '%(num)d Appointments', calendar.appointments|length)}})</small></div>
+        ({{ ngettext('%(num)d Appointment', '%(num)d Appointments', calendar.appointments|length) }})</small></div>
 </div>
