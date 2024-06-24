@@ -17,3 +17,4 @@ venv
 htmlcov
 .coverage
 /DoYouBehave/.idea/misc.xml
+/DoYouBehave/runs/**
