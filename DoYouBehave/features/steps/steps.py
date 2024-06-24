@@ -15,8 +15,11 @@ def load_page(context, page_name: str):
     context.pages[page_name].is_current_page()
 
 
-@given('the user goes to the {page_name} page of the {entity_name}')
+@given('the user goes to the {page_name} page of {entity_name}')
 def load_page(context, page_name: str, entity_name: str):
+    # "the" may be added to entity name because of grammar, thus, remove it
+    entity_name = entity_name.replace('the ', '')
+    context.entity_name = entity_name
     context.pages[page_name].navigate_to_entity(entity_name)
     context.pages[page_name].is_current_page()
 
@@ -126,7 +129,7 @@ def property_has_new_value(context, property_name, entity_name):
     new_value = context.new_value if type(context.new_value) is not dict else context.new_value[
         property_name.replace(' ', '_')]
     WebDriverWait(context.webdriver, 10).until(
-        lambda d: _verify_property(d, entity_name, entity_type, property_name_in_class, new_value,
+        lambda d: _verify_property(d, entity_name, entity_type, f'.{property_name_in_class}', new_value,
                                    refresh=context.webdriver),
         f"No property {property_name} of entity {entity_name} with value {new_value} found")
 
@@ -136,16 +139,16 @@ def property_has_new_value(context, property_name, entity_name):
     entity_type = 'appliance' if property_name in ['power consumption'] else 'room'
     property_name_in_class = property_name.replace(' ', '-')
     WebDriverWait(context.webdriver, 10).until(
-        lambda d: _verify_property(d, entity_name, entity_type, property_name_in_class),
+        lambda d: _verify_property(d, entity_name, entity_type, f'.{property_name_in_class}'),
         f"No property {property_name} of entity {entity_name} found")
 
 
-def _verify_property(d, entity_name, entity_type, property_name_in_class, value=None, refresh=None):
+def _verify_property(d, entity_name, entity_type, property_selector, value=None, refresh=None):
     if refresh is not None:
         refresh.refresh()
     for entity_element in d.find_elements(By.CLASS_NAME, entity_type):
         if entity_element.find_element(By.CLASS_NAME, 'name').text == entity_name:
-            value_with_unit = entity_element.find_element(By.CLASS_NAME, property_name_in_class).text
+            value_with_unit = entity_element.find_element(By.CSS_SELECTOR, property_selector).text
             extracted_float = float(
                 re.search(r'[-+]?[0-9]*\.?[0-9]+', value_with_unit).group(0)) if value_with_unit.find(
                 '?') < 0 else None
@@ -195,6 +198,14 @@ def step_impl(context, property_type):
                                                                                            property_type) is not None and old_value != _get_diagram_path_for_property(
         d, property_type))
     setattr(context, f'prop_{property_type}', _get_diagram_path_for_property(context.webdriver, property_type))
+
+
+@then('they see the calendar called {calendar_name}')
+def find_calendar(context, calendar_name: str):
+    context.webdriver.find_elements()
+    WebDriverWait(context.webdriver, 10).until(
+        lambda d: _verify_property(d, context.entity_name, 'person', 'calendar', calendar_name),
+        f"No calendar {calendar_name} of person {context.entity_name} found")
 
 
 def _get_diagram_path_for_property(webdriver, property_type) -> Optional[str]:
