@@ -1,7 +1,7 @@
 <div class="card person">
     <div class="card-header">
-        <h4 class="card-title mb-0 name">
-            {{ person.name }}
+        <h4 class="card-title mb-0">
+            <a class="name" href="{{url_for('person', name=person.name)}}">{{ person.name }}</a>
         </h4>
     </div>
     <div class="card-body">

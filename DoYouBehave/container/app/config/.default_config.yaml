@@ -204,6 +204,21 @@ things:
     type: person
   - name: Robin
     type: person
+  - name: Billy
+    type: person
+    sources:
+      - application: calendar
+        name: Billy Private
+        url: http://$CALDAV_HOST$:9086/billy/billy--billy-private
+        username: billy
+        password: secret12112
+        update_cron: "* * * * * 0/5"
+        color_hex: f439c4
+    destinations:
+      planned_notifications:
+        - mqtt_topic: persons/billy/appointments
+          subject: daily-appointments
+          cron_expression: "* * * * * 0/30"
 flaskr:
   HOST: 0.0.0.0
   PORT: 8080

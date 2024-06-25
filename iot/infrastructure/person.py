@@ -3,7 +3,7 @@ from functools import reduce
 from typing import List
 
 from iot.infrastructure.thing import Thing
-from iot.infrastructure.time.calendar import Calendar
+from iot.infrastructure.time.calendar import Calendar, Appointment
 
 
 class Person(Thing):
@@ -12,8 +12,13 @@ class Person(Thing):
         super().__init__(name, "person", last_updated_at, last_seen_at, online_delta_in_seconds=60 * 10)
         self.calendars = calendars
 
-    def get_appointments_for(self, start: datetime, delta: timedelta):
+    def get_appointments_for(self, start: datetime, delta: timedelta) -> List[Appointment]:
         return list(reduce(lambda a, b: a + b, map(lambda c: c.find_appointments(start, delta), self.calendars), []))
+
+    def get_n_upcoming_appointments(self, n: int) -> List[Appointment]:
+        all_appointments = reduce(lambda a, b: a + b, map(lambda c: c.appointments, self.calendars), [])
+        all_appointments.sort(key=lambda a: a.start_at)
+        return list(all_appointments)[:n]
 
     def to_dict(self):
         return {"name": self.name,

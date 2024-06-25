@@ -61,12 +61,9 @@ class MqttPersonMediator(MqttMediator):
                     password=calendar_source.password) if calendar_source.has_credentials()
                   else caldav.DAVClient(url=calendar_source.url)
                   as client):
-                if self.has_daily_appointment_notification:
-                    start = datetime.combine(datetime.now(), datetime.min.time())
-                    end = datetime.combine(datetime.now(), datetime.max.time())
-                else:
-                    self.logger.debug("There are no planned updates for the calendar, therefore, no data is requested")
-                    return
+                # load the next 7 days which are needed for the website
+                start = datetime.combine(datetime.now(), datetime.min.time())
+                end = datetime.combine(datetime.now() + timedelta(days=6), datetime.max.time())
                 caldav_calendar = client.calendar(url=calendar_source.url)
                 relevant_events = caldav_calendar.search(start=start,
                                                          end=end,
