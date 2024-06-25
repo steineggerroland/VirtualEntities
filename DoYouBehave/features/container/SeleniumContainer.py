@@ -4,6 +4,9 @@ from time import sleep
 
 import urllib3
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.edge.options import Options as EdgeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from testcontainers.core.container import DockerContainer
 from testcontainers.core.waiting_utils import wait_container_is_ready
 
@@ -18,7 +21,7 @@ def get_image_name(browser):
     return IMAGES[browser]
 
 
-def get_options(browser):
+def get_options(browser) -> ChromeOptions | EdgeOptions | FirefoxOptions:
     if browser == 'firefox':
         return webdriver.FirefoxOptions()
     elif browser == 'chrome':
@@ -33,9 +36,10 @@ class SeleniumContainer(DockerContainer):
     def __init__(self, browser, log_container_logs=False, image=None, **kwargs):
         self.image = image or get_image_name(browser)
         self.options = get_options(browser)
+
         self.port_to_expose = 4444
         self.vnc_port_to_expose = 4444
-        super(SeleniumContainer, self).__init__(image=self.image, **kwargs)
+        super(SeleniumContainer, self).__init__(image=self.image, shm_size="2g",**kwargs)
         self.with_bind_ports(self.port_to_expose, self.vnc_port_to_expose)
         self.with_bind_ports(7900, 7900)
         if log_container_logs:

@@ -23,6 +23,7 @@ from features.container.SeleniumContainer import SeleniumContainer
 from features.pages.base import BasePage, VirtualEntityPage, AppliancePage, ApplianceConfigurationPage, RoomPage, \
     RoomConfigurationPage, PersonPage
 
+BROWSER = 'firefox'
 save_screenshot_of_failed_steps = True
 global_logging = False
 app_logging = False
@@ -167,7 +168,7 @@ def app_container_setup(context, timeout=30, **kwargs):
 
 @fixture
 def browser_setup_and_teardown(context, timeout=30, **kwargs):
-    context.webdriver_container = SeleniumContainer('firefox')
+    context.webdriver_container = SeleniumContainer(BROWSER)
     context.webdriver_container.start()
     browser = context.webdriver_container.get_driver()
     browser.maximize_window()
