@@ -73,3 +73,8 @@ class RoomConfigurationPage(EntityPage):
     def __init__(self, driver, base_url):
         super().__init__(driver, base_url, 'room configuration', path_prefix='room',
                          path_suffix='configuration')
+
+
+class PersonPage(EntityPage):
+    def __init__(self, driver, base_url):
+        super().__init__(driver, base_url, 'person details', path_prefix='person')

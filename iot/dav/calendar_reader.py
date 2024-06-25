@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 
 from caldav import CalendarObjectResource
@@ -31,16 +32,17 @@ class CalendarLoader:
         appointments = []
         for event in caldav_events:
             ical_component = event.icalendar_component
-            summary = str(ical_component["SUMMARY"])
-            start_at = ical_component["DTSTART"].dt
-            end_at = ical_component["DTEND"].dt
+            summary = str(ical_component['SUMMARY'])
+            description = str(ical_component['DESCRIPTION']) if 'DESCRIPTION' in ical_component else ''
+            start_at = ical_component['DTSTART'].dt
+            end_at = ical_component['DTEND'].dt
             color = self.search_color_for_category(default_color, ical_component)
-            appointments.append(Appointment(summary, start_at, end_at, color))
-        return Calendar(name, url, default_color, appointments)
+            appointments.append(Appointment(summary, start_at, end_at, color, description))
+        return Calendar(name, url, default_color, appointments, last_seen_at=datetime.now())
 
     def search_color_for_category(self, default_color: str, ical_component) -> str:
-        if "CATEGORIES" in ical_component and ical_component["CATEGORIES"] and ical_component["CATEGORIES"].cats:
-            categories: vCategory = ical_component["CATEGORIES"]
+        if 'CATEGORIES' in ical_component and ical_component['CATEGORIES'] and ical_component['CATEGORIES'].cats:
+            categories: vCategory = ical_component['CATEGORIES']
             for category in categories.cats:
                 if self.config.has_color_for(category):
                     return self.config.get_color_for(category)

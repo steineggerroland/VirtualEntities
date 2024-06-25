@@ -10,7 +10,7 @@ from testcontainers_python_influxdb.influxdb2 import InfluxDb2Container
 
 
 class InfluxDbContainerWrapper(InfluxDb2Container):
-    def __init__(self, app_dir: str, log_container_logs=False, image: str = "influxdb:latest",
+    def __init__(self, test_dir: str, log_container_logs=False, image: str = "influxdb:latest",
                  container_port: int = 8086, host_port: Optional[int] = None,
                  init_mode: Optional[str] = None,
                  admin_token: Optional[str] = None, username: Optional[str] = None, password: Optional[str] = None,
@@ -18,7 +18,7 @@ class InfluxDbContainerWrapper(InfluxDb2Container):
                  **docker_client_kw):
         super().__init__(image, container_port, host_port, init_mode, admin_token, username, password, org_name, bucket,
                          retention, **docker_client_kw)
-        path = os.path.join(app_dir, 'container', 'influxdb', 'scripts')
+        path = os.path.join(test_dir, 'scripts')
         self.with_volume_mapping(path, '/docker-entrypoint-initdb.d', 'rw')
         self.log_container_logs = log_container_logs
         self.log_thread = Thread(target=self._poll_log, daemon=True)

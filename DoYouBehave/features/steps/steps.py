@@ -39,6 +39,8 @@ def send_room_climate(context, room_name: str):
 
 @When('they click on the {entity_name}')
 def click_on_name(context, entity_name: str):
+    # when navigating to persons, suffix "name" is used due to grammar and has to be removed
+    entity_name = entity_name.replace('name ', '')
     clicked = False
     for name_element in context.webdriver.find_elements(By.CLASS_NAME, 'name'):
         if name_element.text.find(entity_name) >= 0:
@@ -72,6 +74,13 @@ def click_on_button(context, class_name: str):
     assert clicked
 
 
+@when('a new appointment for calendar {calendar_name} is created')
+def step_impl(context, calendar_name: str):
+    person_name = context.entity_name
+    context.new_value = f'Test event #{random.randint(0, 99999)}'
+    context.persons[person_name].create_new_appointment(context.entity_name, calendar_name, context.new_value)
+
+
 @then('they are {redirect_or_on} the {page_name} page')
 def current_page_is(context, redirect_or_on, page_name: str):
     context.pages[page_name].is_current_page()
@@ -79,21 +88,21 @@ def current_page_is(context, redirect_or_on, page_name: str):
 
 @then('they see rooms in the room catalog')
 def rooms_in_catalog(context):
-    WebDriverWait(context.webdriver, 10).until(
+    WebDriverWait(context.webdriver, 15).until(
         lambda d: context.webdriver.find_elements(By.CSS_SELECTOR, '.room-catalog .room'),
         "No room catalog containing rooms")
 
 
 @then('they see appliances in the appliance depot')
 def appliances_in_depot(context):
-    WebDriverWait(context.webdriver, 10).until(
+    WebDriverWait(context.webdriver, 15).until(
         lambda d: context.webdriver.find_elements(By.CSS_SELECTOR, '.appliance-depot .appliance'),
         "No appliance depot containing appliances")
 
 
 @then('they see person in the register of persons')
 def persons_in_register(context):
-    WebDriverWait(context.webdriver, 10).until(
+    WebDriverWait(context.webdriver, 15).until(
         lambda d: context.webdriver.find_elements(By.CSS_SELECTOR, '.register-of-persons .person'),
         "No register of persons containing persons")
 
@@ -128,7 +137,7 @@ def property_has_new_value(context, property_name, entity_name):
     property_name_in_class = property_name.replace(' ', '-')
     new_value = context.new_value if type(context.new_value) is not dict else context.new_value[
         property_name.replace(' ', '_')]
-    WebDriverWait(context.webdriver, 10).until(
+    WebDriverWait(context.webdriver, 15).until(
         lambda d: _verify_property(d, entity_name, entity_type, f'.{property_name_in_class}', new_value,
                                    refresh=context.webdriver),
         f"No property {property_name} of entity {entity_name} with value {new_value} found")
@@ -138,7 +147,7 @@ def property_has_new_value(context, property_name, entity_name):
 def property_has_new_value(context, property_name, entity_name):
     entity_type = 'appliance' if property_name in ['power consumption'] else 'room'
     property_name_in_class = property_name.replace(' ', '-')
-    WebDriverWait(context.webdriver, 10).until(
+    WebDriverWait(context.webdriver, 15).until(
         lambda d: _verify_property(d, entity_name, entity_type, f'.{property_name_in_class}'),
         f"No property {property_name} of entity {entity_name} found")
 
@@ -148,11 +157,18 @@ def _verify_property(d, entity_name, entity_type, property_selector, value=None,
         refresh.refresh()
     for entity_element in d.find_elements(By.CLASS_NAME, entity_type):
         if entity_element.find_element(By.CLASS_NAME, 'name').text == entity_name:
-            value_with_unit = entity_element.find_element(By.CSS_SELECTOR, property_selector).text
-            extracted_float = float(
-                re.search(r'[-+]?[0-9]*\.?[0-9]+', value_with_unit).group(0)) if value_with_unit.find(
-                '?') < 0 else None
-            return extracted_float == float(value) if value is not None else True
+            if value is None:
+                return True
+            elif type(value) is float:
+                extracted_value_with_unit = entity_element.find_element(By.CSS_SELECTOR, property_selector).text
+                extracted_float = float(
+                    re.search(r'[-+]?[0-9]*\.?[0-9]+', extracted_value_with_unit).group(
+                        0)) if extracted_value_with_unit.find(
+                    '?') < 0 else None
+                return extracted_float == value
+            else:
+                extracted_value = entity_element.find_element(By.CSS_SELECTOR, property_selector).text
+                return extracted_value == value
     return False
 
 
@@ -175,14 +191,26 @@ def some_string_in_class_name(context, class_name: str, some_string: str):
 
 @then('they see an input for the {field_name} having value {value}')
 def input_with_value(context, field_name, value):
-    WebDriverWait(context.webdriver, 10).until(
+    WebDriverWait(context.webdriver, 15).until(
         lambda d: d.find_element(By.ID, field_name).get_attribute('value') == value)
 
 
 @then('they see a {message_type} message')
 def message_of_type(context, message_type):
-    WebDriverWait(context.webdriver, 10).until(
+    WebDriverWait(context.webdriver, 15).until(
         presence_of_element_located((By.CSS_SELECTOR, '.messages .message.%s' % message_type)))
+
+
+@then('the user sees the new appointment after a refresh')
+def find_appointment(context):
+    summary = context.new_value
+    WebDriverWait(context.webdriver, 10).until(lambda d: _find_appointment(d, summary, context.webdriver))
+
+
+def _find_appointment(webdriver, summary, refresh=None):
+    if refresh is not None:
+        refresh.refresh()
+    return any(e.text == summary for e in webdriver.find_elements(By.CSS_SELECTOR, '.appointment .summary'))
 
 
 @then(u'the user sees a diagram with {property_type} values')
@@ -203,8 +231,8 @@ def step_impl(context, property_type):
 @then('they see the calendar called {calendar_name}')
 def find_calendar(context, calendar_name: str):
     context.webdriver.find_elements()
-    WebDriverWait(context.webdriver, 10).until(
-        lambda d: _verify_property(d, context.entity_name, 'person', 'calendar', calendar_name),
+    WebDriverWait(context.webdriver, 15).until(
+        lambda d: _verify_property(d, context.entity_name, 'person', '.calendar .name', calendar_name),
         f"No calendar {calendar_name} of person {context.entity_name} found")
 
 

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}<title>{{ _('Person %(name)s', name=person.name) }}</title>{% endblock %}
+{% block breadcrumb %}
+    <aside class="container">
+        <div class="row mt-4">
+            <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '〉';">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('ve_list') }}">{{ _('Virtual Entities') }}</a></li>
+                    <li class="breadcrumb-item">{{ _('Register of persons') }}</li>
+                    <li aria-current="page" class="breadcrumb-item active">{{ person.name }}</li>
+                </ol>
+            </nav>
+        </div>
+    </aside>
+{% endblock %}
+{% block content %}
+    <main class="container person g-2">
+        <div class="row mt-4">
+            <div class="col-10 col-sm-11">
+                <div class="row">
+                    <h1 class="col-10 col-sm-auto mb-0">
+                        <span class="name">{{ person.name }}</span>
+                    </h1>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        {% with time_delta=person.last_seen_time_delta() %}
+                            {% include "snippets/last_seen_at_subtitle.html" %}
+                        {% endwith %}
+                        {% with online_status=person.online_status(),style='font-size: 0.9em' %}
+                            <span class="ml-2">
+                        {% include "snippets/online_status_badge.html" %}
+                        </span>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <h2>{{ _('Calendars') }}</h2>
+        </div>
+        <div class="row mt-2">
+            <ol class="list-group calendars">
+                {% for calendar in person.calendars %}
+                    <li class="calendar list-group-item p-4 d-flex justify-content-start align-items-center">
+                        <div>
+                            <svg height="20" width="20" xmlns="http://www.w3.org/2000/svg"
+                                 data-bs-title="#{{ calendar.color }}"
+                                 data-bs-toggle="tooltip">
+                                <circle r="8" cx="10" cy="10" stroke-width="2" fill="#{{ calendar.color }}"
+                                        stroke="black"></circle>
+                            </svg>
+                        </div>
+                        <div class="ms-2">
+                            <h3 class="name m-0">{{ calendar.name }}</h3>
+                        </div>
+                        <div class="ms-4">
+                            {{ ngettext('%(num)d Appointment', '%(num)d Appointments', calendar.appointments|length) }}
+                        </div>
+                        <div class="ms-4 text-truncate">
+                            <small>
+                                <span class="url">{{ calendar.url|replace('http://','')|replace('https://','')|truncate(calendar.url|length - 28) }}</span>
+                            </small>
+                        </div>
+                        <div class="ms-auto">
+                            {% with online_status=calendar.online_status(), time_delta=calendar.last_seen_time_delta() %}
+                                {% include "snippets/online_status_badge.html" %}
+                            {% endwith %}
+                        </div>
+                    </li>
+                {% endfor %}
+            </ol>
+        </div>
+        <div class="row mt-4">
+            <h2>{{ _('7 days preview') }}</h2>
+        </div>
+        <div class="overflow-x-scroll">
+            <div class="d-flex gap-4" style="width:max-content">
+                {% for day, appointments, start_of_day, end_of_day in days_to_appointments %}
+                    <div style="width: 320px; max-width: 90vw; aspect-ratio: 1;">
+                        <div class="card w-100 h-100">
+                            <div class="card-body day">
+                                <div class="my-3 text-center">
+                                    <img style="height: 50px" alt="{{ _('Day') }}" class="icon day-icon"
+                                         src="{{ url_for('static', filename='img/flaticon/calendar.png') }}"/>
+                                </div>
+                                <h3 class="card-title text-center mb-4">{{ day|dateformat('short') }}</h3>
+                                <div class="card-text d-flex flex-column overflow-y-scroll">
+                                    {% for appointment in appointments %}
+                                        <p class="border-bottom appointment appointment-look">
+                                            {% if appointment.start_at > start_of_day %}
+                                                <span class="start-at">{{ appointment.start_at|timeformat('short') }}</span>
+                                            {% else %}
+                                                <span class="start-at"
+                                                      data-bs-title="{{ appointment.start_at|datetimeformat('short') }}"
+                                                      data-bs-toggle="tooltip">...</span>
+                                            {% endif %}
+
+                                            <span class="spacer"> - </span>
+
+                                            {% if appointment.end_at < end_of_day %}
+                                                <span class="end-at">{{ appointment.end_at|timeformat('short') }}</span>
+                                            {% else %}
+                                                <span class="end-at"
+                                                      data-bs-title="{{ appointment.end_at|datetimeformat('short') }}"
+                                                      data-bs-toggle="tooltip">...</span>
+                                            {% endif %}
+
+                                            <strong class="summary overflow-hidden text-truncate"
+                                                    data-bs-title="{{ appointment.summary }}"
+                                                    data-bs-toggle="tooltip">{{ appointment.summary }}</strong>
+                                        </p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="my-4">
+            {% if debug %}{{ person.to_dict() }}{% endif %}
+        </div>
+    </main>
+    <style>
+        .appointment-look {
+            display: grid;
+            grid-template-columns: 14% 5% 14% 67%;
+            grid-template-areas:
+                "start spacer end summary";
+        }
+
+        .appointment-look .start-at {
+            grid-area: start;
+        }
+
+        .appointment-look .spacer {
+            grid-area: spacer;
+        }
+
+        .appointment-look .end-at {
+            grid-area: end;
+        }
+
+        .appointment-look .summary {
+            grid-area: summary;
+        }
+    </style>
+{% endblock %}

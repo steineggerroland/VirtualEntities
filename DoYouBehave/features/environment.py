@@ -1,26 +1,34 @@
 import json
 import logging
 import os.path
+import random
 import re
+import shutil
 import sys
+import uuid
+from datetime import datetime, time, timedelta
+from pathlib import Path
 
 import paho.mqtt.client as paho_mqtt
 from behave import fixture, use_fixture
 from behave.model_core import Status
-from selenium import webdriver
 from testcontainers.core.docker_client import DockerClient
 
+from features.clients.CaldavTestClient import CaldavTestClient
 from features.container.BehaveAppContainer import BehaveAppContainer
 from features.container.InfluxDbContainer import InfluxDbContainerWrapper
 from features.container.MosquittoContainer import MosquittoContainer
+from features.container.RadicaleCalendarContainer import RadicaleCalendarContainer
+from features.container.SeleniumContainer import SeleniumContainer
 from features.pages.base import BasePage, VirtualEntityPage, AppliancePage, ApplianceConfigurationPage, RoomPage, \
-    RoomConfigurationPage
+    RoomConfigurationPage, PersonPage
 
 save_screenshot_of_failed_steps = True
 global_logging = False
 app_logging = False
 influxdb_logging = False
 mqtt_logging = False
+calendar_logging = False
 BUCKET_NAME = "time_series"
 app_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 stdout_handler = logging.StreamHandler(sys.stdout)
@@ -28,7 +36,8 @@ stdout_handler = logging.StreamHandler(sys.stdout)
 
 @fixture
 def influxdb_container_setup(context, timeout=20, **kwargs):
-    influxdb_container = InfluxDbContainerWrapper(image='influxdb:1.8', app_dir=app_dir, log_container_logs=influxdb_logging,
+    influxdb_container = InfluxDbContainerWrapper(image='influxdb:1.8', test_dir=context.influxdb_test_dir,
+                                                  log_container_logs=influxdb_logging,
                                                   host_port=8884, username="influxdb", password="influxdb",
                                                   bucket=BUCKET_NAME, org_name='behave', init_mode='setup')
     context.influxdb_container = influxdb_container
@@ -43,13 +52,27 @@ def influxdb_container_setup(context, timeout=20, **kwargs):
 
 @fixture
 def mqtt_container_setup(context, timeout=20, **kwargs):
-    mqtt_container = MosquittoContainer(log_container_logs=mqtt_logging, port=8883)
+    mqtt_container = MosquittoContainer(test_dir=context.mqtt_test_dir, log_container_logs=mqtt_logging, port=8883)
     context.mqtt_container = mqtt_container
     try:
         mqtt_container.start()
         yield mqtt_container
     finally:
         mqtt_container.stop()
+
+
+@fixture
+def radicale_container_setup(context, timeout=20, **kwargs):
+    radicale_container = RadicaleCalendarContainer(context.calendar_test_dir,
+                                                   log_container_logs=calendar_logging,
+                                                   port=9086)
+    context.mqtt_container = radicale_container
+    try:
+        radicale_container.start()
+        context.caldav_client = CaldavTestClient(host='localhost', port=9086, user="billy", password="secret12112")
+        yield radicale_container
+    finally:
+        radicale_container.stop()
 
 
 class Appliance:
@@ -76,6 +99,17 @@ class Room:
         self.mqtt_client.publish(self.room_climate_topic, json.dumps(new_values))
 
 
+class Person:
+    def __init__(self, caldav_client: CaldavTestClient, name: str):
+        self.caldav_client = caldav_client
+        self.name = name
+
+    def create_new_appointment(self, person_name, calendar_name, appointment_summary: str):
+        start = datetime.combine(datetime.today(), time(hour=random.randint(5, 21)))
+        self.caldav_client.create_event(person_name, calendar_name, appointment_summary, start,
+                                        start + timedelta(hours=1, minutes=30), 'test event')
+
+
 @fixture
 def appliances_setup(context, timeout=10, **kwargs):
     client = DockerClient()
@@ -100,16 +134,28 @@ def appliances_setup(context, timeout=10, **kwargs):
         'Hallway': Room(mqtt_client, 'Hallway', 'zigbee/home/hallway/sensor01'),
         'Parents bedroom': Room(mqtt_client, 'Parents bedroom', 'zigbee/home/parents-bedroom/sensor01')
     }
+    context.persons = {
+        'Ash': Person(context.caldav_client, 'Ash'),
+        'Robin': Person(context.caldav_client, 'Robin'),
+        'Billy': Person(context.caldav_client, 'Billy')
+    }
+    for person_name in context.persons.keys():
+        context.caldav_client.create_calendar(person_name, f'{person_name.capitalize()} Private')
+        context.caldav_client.create_event(person_name, f'{person_name.capitalize()} Private',
+                                           'Skating', datetime.combine(datetime.today(), time(hour=8)),
+                                           datetime.combine(datetime.today(), time(hour=9)), 'Have fun and skate 😍')
 
 
 @fixture
 def app_container_setup(context, timeout=30, **kwargs):
     influxdb_container = use_fixture(influxdb_container_setup, context)
     mqtt_container = use_fixture(mqtt_container_setup, context)
+    calendar_container = use_fixture(radicale_container_setup, context)
     client = DockerClient()
-    behave_app_container = BehaveAppContainer(app_dir, app_logging, port=8090)
+    behave_app_container = BehaveAppContainer(app_dir, context.behave_test_dir, app_logging, port=8090)
     behave_app_container.configure_influxdb(client.gateway_ip(influxdb_container.get_wrapped_container().id))
     behave_app_container.configure_mqtt(client.gateway_ip(mqtt_container.get_wrapped_container().id))
+    behave_app_container.configure_caldav(client.gateway_ip(calendar_container.get_wrapped_container().id))
     try:
         behave_app_container.start()
         yield behave_app_container
@@ -121,8 +167,9 @@ def app_container_setup(context, timeout=30, **kwargs):
 
 @fixture
 def browser_setup_and_teardown(context, timeout=30, **kwargs):
-    use_selenoid = False  # set to True to run tests with Selenoid
-    browser = webdriver.Chrome()
+    context.webdriver_container = SeleniumContainer('firefox')
+    context.webdriver_container.start()
+    browser = context.webdriver_container.get_driver()
     browser.maximize_window()
     browser.get(context.base_url)
     context.webdriver = browser
@@ -132,13 +179,14 @@ def browser_setup_and_teardown(context, timeout=30, **kwargs):
              AppliancePage(browser, context.base_url),
              ApplianceConfigurationPage(browser, context.base_url),
              RoomPage(browser, context.base_url),
-             RoomConfigurationPage(browser, context.base_url)]
+             RoomConfigurationPage(browser, context.base_url),
+             PersonPage(browser, context.base_url)]
     context.pages = dict([(page.page_name, page) for page in pages])
 
     yield
 
     browser.close()
-    browser.quit()
+    context.webdriver_container.stop()
 
 
 def before_all(context):
@@ -150,15 +198,58 @@ def before_all(context):
     logging.getLogger('BehaveAppContainer').setLevel(logging.DEBUG)
     logging.getLogger('InfluxDBContainer').setLevel(logging.DEBUG)
     logging.getLogger('MosquittoContainer').setLevel(logging.DEBUG)
+    logging.getLogger('RadicaleContainer').setLevel(logging.DEBUG)
+    logging.getLogger('testcontainers.core.container').setLevel(logging.ERROR)
+    logging.getLogger('testcontainers.core.waiting_utils').setLevel(logging.ERROR)
     if global_logging:
         _enable_debug_logging()
-    app_container = use_fixture(app_container_setup, context)
-    context.base_url = app_container.get_behave_url()
-    use_fixture(appliances_setup, context)
 
     screenshots_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'screenshots'))
     if not os.path.exists(screenshots_path):
         os.makedirs(screenshots_path)
+
+    context.run_path = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'runs', str(uuid.uuid4()))))
+    applications = {
+        'behave': 'container/app',
+        'mqtt': 'container/mqtt',
+        'influxdb': 'container/influxdb',
+        'calendar': 'container/calendar'
+    }
+
+    for app_name, app_base in applications.items():
+        test_dir = create_test_directory(context.run_path, app_name)
+        setattr(context, f'{app_name}_test_dir', test_dir)
+        setup_application_data(os.path.join(os.path.dirname(__file__), '..', app_base), test_dir)
+        logging.debug(f'Data setup complete for {app_name} in {test_dir}')
+
+    app_container = use_fixture(app_container_setup, context)
+    context.base_url = app_container.get_behave_url()
+    use_fixture(appliances_setup, context)
+
+
+def create_test_directory(base_path, app_name):
+    test_dir = base_path / app_name
+    test_dir.mkdir(parents=True, exist_ok=True)
+    return test_dir
+
+
+def setup_application_data(source_path, test_dir):
+    for item in os.listdir(source_path):
+        s = os.path.join(source_path, item)
+        d = os.path.join(test_dir, item)
+        if os.path.isdir(s):
+            shutil.copytree(s, d)
+        else:
+            shutil.copy2(s, d)
+
+
+def after_all(context):
+    run_path = context.run_path
+    if run_path is not None and run_path.exists() and run_path.is_dir():
+        shutil.rmtree(run_path)
+        logging.debug(f"Cleaned up test data at {run_path}")
+    else:
+        logging.debug(f"No cleanup needed for {run_path}")
 
 
 def before_scenario(context, scenario):
@@ -172,15 +263,15 @@ def setup_debug_logging(context, timeout=5, **kwargs):
 
 def teardown_debug_logging(context, timeout=5, **kwargs):
     if not global_logging:
-        _enable_info_logging()
+        _enable_error_logging()
 
 
 def _enable_debug_logging():
     stdout_handler.setLevel(logging.DEBUG)
 
 
-def _enable_info_logging():
-    stdout_handler.setLevel(logging.INFO)
+def _enable_error_logging():
+    stdout_handler.setLevel(logging.ERROR)
 
 
 def before_tag(context, tag):
@@ -197,6 +288,6 @@ def after_step(context, step):
     """Save screenshots of failed steps"""
     if save_screenshot_of_failed_steps and step.status is Status.failed:
         file_name = "fail.%s_%s_%s.png" % (
-            step.filename[step.filename.find('/') + 1:], step.line, re.sub('\W', '', step.name))
+            step.filename[step.filename.find('/') + 1:], step.line, re.sub('\\W', '', step.name))
         path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'screenshots', file_name))
         context.webdriver.save_screenshot(path)
