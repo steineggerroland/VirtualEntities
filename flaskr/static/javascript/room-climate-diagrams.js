@@ -73,7 +73,7 @@
         const thingName = container.dataset.thingName
         const attribute = container.dataset.attribute
         const xAxisLabel = container.dataset.xAxisLabel
-        if (!container.id) container.id = attribute + "-diagram-container-" + thingName
+        if (!container.id) container.id = attribute + "-diagram-container-" + makeSafeForCSS(thingName)
         const measurements = []
         const fetchAndDrawDiagram = () => fetch(`/api/rooms/${thingName}/${attribute}`)
             .then(data => data.json())
@@ -86,4 +86,15 @@
             }).then(() => window.setTimeout(fetchAndDrawDiagram, 30 * 1000))
         fetchAndDrawDiagram().then(() => window.addEventListener('resize', () => drawChart(measurements, container.id, xAxisLabel)))
     })
+
+    // Thanks to PleaseStand at StackOverflow: https://stackoverflow.com/a/7627603
+    function makeSafeForCSS(name) {
+        return name.replace(/[^a-z0-9]/g, function (s) {
+            let c = s.charCodeAt(0);
+            if (c == 32) return '-';
+            if (c >= 65 && c <= 90) return '_' + s.toLowerCase();
+            return '__' + ('000' + c.toString(16)).slice(-4);
+        });
+    }
+
 })()
