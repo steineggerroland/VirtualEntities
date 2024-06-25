@@ -225,6 +225,7 @@ def before_all(context):
     app_container = use_fixture(app_container_setup, context)
     context.base_url = app_container.get_behave_url()
     use_fixture(appliances_setup, context)
+    use_fixture(browser_setup_and_teardown, context, timeout=90)
 
 
 def create_test_directory(base_path, app_name):
@@ -250,10 +251,6 @@ def after_all(context):
         logging.debug(f"Cleaned up test data at {run_path}")
     else:
         logging.debug(f"No cleanup needed for {run_path}")
-
-
-def before_scenario(context, scenario):
-    use_fixture(browser_setup_and_teardown, context, timeout=90)
 
 
 def setup_debug_logging(context, timeout=5, **kwargs):
