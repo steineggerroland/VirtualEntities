@@ -1,23 +1,23 @@
-<div class="card appliance {{appliance.thing_type}}">
+<div class="card appliance {{ appliance.thing_type }}">
     <div class="card-header">
         <h4 class="card-title mb-0">
-            {% with type=appliance.thing_type %}
-            <span class="mr-2">
-            {% include "snippets/appliance_icon.html" %}
+            {%- with type=appliance.thing_type %}
+                <span class="mr-2">
+            {%- include "snippets/appliance_icon.html" %}
             </span>
-            {% endwith %}
-            <a class="name" href="{{url_for('appliance', name=appliance.name)}}">{{ appliance.name }}</a>
+            {%- endwith %}
+            <a class="name" href="{{ url_for('appliance', name=appliance.name) }}">{{ appliance.name }}</a>
             {%- with online_status=appliance.online_status(),time_delta=appliance.last_seen_time_delta() %}
-            {% include "snippets/online_status_icon.html" %}
-            {% endwith %}
+                {%- include "snippets/online_status_icon.html" %}
+            {%- endwith %}
         </h4>
     </div>
     <div class="card-body">
         <div class="card-text">
-            {% with power_consumption=appliance.watt %}
-            {% include "snippets/power_consumption_badge.html" %}
-            {% endwith %}
+            {%- with power_consumption=appliance.watt %}
+                {%- include "snippets/power_consumption_badge.html" %}
+            {%- endwith %}
         </div>
     </div>
-    {% if debug %}{{appliance.to_dict()}}{% endif %}
+    {%- if debug %}{{ appliance.to_dict() }}{% endif %}
 </div>

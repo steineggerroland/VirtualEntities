@@ -1,16 +1,16 @@
 {%- if online_status=='online' %}
-    {% set color = '#02f103' %}
-    {% set text = _('Online') %}
-{% elif online_status=='offline' %}
-    {% set color = '#fd0411' %}
-    {% set text = _('Offline') %}
-{% else %}
-    {% set color = '#e4dfe1' %}
-    {% set text = _('Online status not known') %}
-{% endif %}
-{% if time_delta %}
-    {% set text = text + (' - ') + (_('Last seen %(xTimeAgo)s', xTimeAgo=time_delta|timedeltaformat(add_direction=True))) %}
-{% endif %}
+    {%- set color = '#02f103' %}
+    {%- set text = _('Online') %}
+{%- elif online_status=='offline' %}
+    {%- set color = '#fd0411' %}
+    {%- set text = _('Offline') %}
+{%- else %}
+    {%- set color = '#e4dfe1' %}
+    {%- set text = _('Online status not known') %}
+{%- endif -%}
+{%- if time_delta %}
+    {%- set text = text + (' - ') + (_('Last seen %(xTimeAgo)s', xTimeAgo=time_delta|timedeltaformat(add_direction=True))) %}
+{%- endif %}
 <svg height="20" width="20" xmlns="http://www.w3.org/2000/svg" style="{{ style }}" data-bs-title="{{ text }}"
      data-bs-toggle="tooltip">
     <circle r="8" cx="10" cy="10" stroke-width="1" fill="{{ color }}" stroke="lightgray"></circle>
