@@ -5,7 +5,7 @@ DoYouBehave/container/app/config/config.yaml
 DoYouBehave/container/app/data/**
 
 #python specific parts
-venv
+**.venv
 
 #IDE settings
 .idea
