@@ -12,12 +12,22 @@
             {%- endwith %}
         </h4>
     </div>
-    <div class="card-body">
-        <div class="card-text">
+    <div class="row p-0 m-0 position-relative">
+        <div class="col-4 p-0 m-0 position-relative" style="aspect-ratio: 1">
+            <div class="power-consumption diagram position-absolute top-0 start-0 w-100 h-100 z-2"
+                 data-thing-name="{{ appliance.name }}" data-fullscreen="true" data-x-axis-label="{{ _('Watt') }}"></div>
+            <div class="position-absolute top-0 start-0 w-100 h-100 z-1 fs-4">
             {%- with power_consumption=appliance.watt %}
-                {%- include "snippets/power_consumption_badge.html" %}
+                {%- include "snippets/power_consumption.html" %}
             {%- endwith %}
+            </div>
         </div>
     </div>
     {%- if debug %}{{ appliance.to_dict() }}{% endif %}
 </div>
+{% block additional_scripts %}
+    <script language="JavaScript" src="{{ url_for('static', filename='javascript/d3.v7.min.js') }}"
+            type="text/javascript"></script>
+    <script language="JavaScript" src="{{ url_for('static', filename='javascript/power-consumption-diagram.js') }}"
+            type="text/javascript"></script>
+{% endblock %}
