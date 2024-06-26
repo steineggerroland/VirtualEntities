@@ -96,12 +96,13 @@
                 <div class="d-flex align-items-center mb-2">
                     <h3 class="mb-0">{{ _('Power consumption (Watt)') }}</h3>
                     <div class="ms-2">
-                        {% with power_consumption=appliance.watt %}
-                            {% include "snippets/power_consumption_badge.html" %}
-                        {% endwith %}
+                        {%- with power_consumption=appliance.watt,as_badge=True %}
+                            {%- include "snippets/power_consumption.html" %}
+                        {%- endwith %}
                     </div>
                 </div>
-                <div class="power-consumption diagram" data-thing-name="{{ appliance.name }}"></div>
+                <div class="power-consumption diagram" data-thing-name="{{ appliance.name }}"
+                     data-x-axis-label="{{ _('Watt') }}"></div>
             </div>
         </div>
         {% if debug %}{{ appliance.to_dict() }}{% endif %}
