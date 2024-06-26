@@ -2,6 +2,9 @@
     <div class="card-header">
         <h4 class="card-title mb-0">
             <a class="name" href="{{url_for('room', name=room.name)}}">{{ room.name }}</a>
+        {%- with online_status=room.online_status(), time_delta=room.last_seen_time_delta() %}
+        {% include "snippets/online_status_icon.html" %}
+        {% endwith %}
         </h4>
     </div>
     <div class="card-body">
@@ -11,10 +14,6 @@
 
         {% with humidity=room.humidity,rating=room.rate_humidity() %}
         {% include "snippets/humidity_badge.html" %}
-        {% endwith %}
-
-        {% with online_status=room.online_status(), time_delta=room.last_seen_time_delta() %}
-        {% include "snippets/online_status_badge.html" %}
         {% endwith %}
     </div>
     {% if debug %}{{room.to_dict()}}{% endif %}

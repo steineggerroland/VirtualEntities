@@ -29,7 +29,7 @@
                         {% endwith %}
                         {% with online_status=person.online_status(),style='font-size: 0.9em' %}
                             <span class="ml-2">
-                        {% include "snippets/online_status_badge.html" %}
+                        {% include "snippets/online_status_icon.html" %}
                         </span>
                         {% endwith %}
                     </div>
@@ -64,7 +64,7 @@
                         </div>
                         <div class="ms-auto">
                             {% with online_status=calendar.online_status(), time_delta=calendar.last_seen_time_delta() %}
-                                {% include "snippets/online_status_badge.html" %}
+                                {% include "snippets/online_status_icon.html" %}
                             {% endwith %}
                         </div>
                     </li>
