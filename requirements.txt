@@ -1,6 +1,6 @@
 croniter==2.0.5
 yamlenv==0.7.1
-paho-mqtt~=1.6.1
+paho-mqtt~=2.1.0
 waiting~=1.4.1
 influxdb~=5.3.1
 jsonpath-python~=1.0.6

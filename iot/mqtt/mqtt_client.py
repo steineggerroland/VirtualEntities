@@ -1,9 +1,10 @@
 import json
 import logging
 from threading import Thread
-from typing import Callable, List
+from typing import Callable
 
 import paho.mqtt.client as paho_mqtt
+from paho.mqtt.enums import CallbackAPIVersion
 
 from iot.core.configuration import MqttConfiguration
 from iot.infrastructure.machine.machine_service import DatabaseException
@@ -42,7 +43,7 @@ class MqttClient:
         self.logger = logging.getLogger(self.__class__.__qualname__)
         self.mqtt_config = mqtt_config
 
-        self.mqtt_client = paho_mqtt.Client(client_id=self.mqtt_config.client_id)
+        self.mqtt_client = paho_mqtt.Client(CallbackAPIVersion.VERSION1, client_id=self.mqtt_config.client_id)
         if self.mqtt_config.has_credentials:
             self.mqtt_client.username_pw_set(self.mqtt_config.username, self.mqtt_config.password)
             self.logger.debug(
@@ -68,8 +69,8 @@ class MqttClient:
         finally:
             self.mqtt_client.disconnect()
 
-    def on_connect(self, client, userdata, flags, rc):
-        self.logger.debug("Connected with result code %s", str(rc))
+    def on_connect(self, client, userdata, flags, reason_code):
+        self.logger.debug("Connected with result code %s", str(reason_code))
         for subscribed_topic in self.subscriptions.get_topics():
             client.subscribe(subscribed_topic)
 
