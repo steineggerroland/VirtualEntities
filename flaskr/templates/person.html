@@ -78,16 +78,16 @@
             <div class="d-flex gap-4" style="width:max-content">
                 {% for day, appointments, start_of_day, end_of_day in days_to_appointments %}
                     <div style="width: 320px; max-width: 90vw; aspect-ratio: 1;">
-                        <div class="card w-100 h-100">
-                            <div class="card-body day">
-                                <div class="my-3 text-center">
-                                    <img style="height: 50px" alt="{{ _('Day') }}" class="icon day-icon"
-                                         src="{{ url_for('static', filename='img/flaticon/calendar.png') }}"/>
-                                </div>
-                                <h3 class="card-title text-center mb-4">{{ day|dateformat('short') }}</h3>
-                                <div class="card-text d-flex flex-column overflow-y-scroll">
+                        <div class="card days-agenda w-100 h-100 overflow-hidden">
+                            <div class="month d-flex justify-content-center align-items-center fs-5">{{ day|dateformat('MMMM') }}</div>
+                            <div class="day d-flex flex-column justify-content-center align-items-center">
+                                <h3 class="text-center text-primary fs-1 m-0">{{ day|dateformat('d') }}</h3>
+                                <div class="text-center test-muted small m-0">{{ day|dateformat('EEEE') }}</div>
+                            </div>
+                            <div class="appointments overflow-y-scroll">
+                                <div class="d-flex flex-column m-0">
                                     {% for appointment in appointments %}
-                                        <p class="border-bottom appointment appointment-look">
+                                        <div class="appointment appointment-look p-2">
                                             {% if appointment.start_at > start_of_day %}
                                                 <span class="start-at">{{ appointment.start_at|timeformat('short') }}</span>
                                             {% else %}
@@ -95,9 +95,7 @@
                                                       data-bs-title="{{ appointment.start_at|datetimeformat('short') }}"
                                                       data-bs-toggle="tooltip">...</span>
                                             {% endif %}
-
                                             <span class="spacer"> - </span>
-
                                             {% if appointment.end_at < end_of_day %}
                                                 <span class="end-at">{{ appointment.end_at|timeformat('short') }}</span>
                                             {% else %}
@@ -109,7 +107,7 @@
                                             <strong class="summary overflow-hidden text-truncate"
                                                     data-bs-title="{{ appointment.summary }}"
                                                     data-bs-toggle="tooltip">{{ appointment.summary }}</strong>
-                                        </p>
+                                        </div>
                                     {% endfor %}
                                 </div>
                             </div>
@@ -144,6 +142,33 @@
 
         .appointment-look .summary {
             grid-area: summary;
+        }
+
+        .card.days-agenda {
+            border-radius: 3rem;
+            border: 3px solid gray;
+        }
+
+        .card.days-agenda .month {
+            margin: 0;
+            padding: 0;
+            height: calc(20% - 3px);
+            border-bottom: 3px gray solid;
+        }
+
+        .card.days-agenda .day {
+            margin: 0;
+            padding: 0;
+            height: 28%;
+        }
+
+        .card.days-agenda .appointments {
+            height: 52%;
+        }
+
+        .card.days-agenda .appointments .appointment:nth-child(odd) {
+
+            background-color: whitesmoke;
         }
     </style>
 {% endblock %}
