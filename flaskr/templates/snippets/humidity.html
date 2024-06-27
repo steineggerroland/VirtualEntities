@@ -1,0 +1,31 @@
+{%- if humidity != None and rating=='unknown' %}
+    {%- set text = '%s%%' % humidity %}
+    {%- set tooltip = _('Humidity') %}
+    {%- set color_type = 'secondary' %}
+{%- elif humidity != None and rating=='optimal' %}
+    {%- set text = '%s%%' % humidity %}
+    {%- set tooltip = _('Humidity optimal') %}
+    {%- set color_type = 'success' %}
+{%- elif humidity != None and (rating=='dry' or rating=='wet') %}
+    {%- set text = '%s%%' % humidity %}
+    {%- set tooltip = _('Humidity slightly out of range') %}
+    {%- set color_type = 'warning' %}
+{%- elif humidity != None %}
+    {%- set text = '%s%%' % humidity %}
+    {%- set tooltip = _('Humidity out of range') %}
+    {%- set color_type = 'danger' %}
+{%- else %}
+    {%- set text = _('?%%') %}
+    {%- set tooltip = _('Humidity unknown') %}
+    {%- set color_type = 'secondary' %}
+{%- endif %}
+{%- if as_badge==True %}
+    <span class="humidity badge text-bg-light border border-{{ color_type }}"
+          data-bs-title="{{ tooltip }}"
+          data-bs-toggle="tooltip">{{ text }}</span>
+{%- else %}
+    <div class="humidity h-100 w-100 d-flex justify-content-center align-items-center text-bg-{{ color_type }} bg-{{ border_color }}"
+         data-bs-title="{{ tooltip }}" data-bs-toggle="tooltip">
+        {{ text }}
+    </div>
+{%- endif %}

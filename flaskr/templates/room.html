@@ -50,14 +50,14 @@
         <div class="row mt-4">
             <div class="col-auto align-items-center d-flex gap-1">
                 {{ _('Temperature') }}
-                {% with temperature=room.temperature,rating=room.rate_temperature() %}
-                    {% include "snippets/temperature_badge.html" %}
+                {% with temperature=room.temperature,rating=room.rate_temperature(),as_badge=True %}
+                    {% include "snippets/temperature.html" %}
                 {% endwith %}
             </div>
             <div class="col-auto align-items-center d-flex gap-1">
                 {{ _('Humidity') }}
-                {% with humidity=room.humidity,rating=room.rate_humidity() %}
-                    {% include "snippets/humidity_badge.html" %}
+                {% with humidity=room.humidity,rating=room.rate_humidity(),as_badge=True %}
+                    {% include "snippets/humidity.html" %}
                 {% endwith %}
             </div>
         </div>
