@@ -55,9 +55,9 @@ class MqttClient:
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
 
-        self.mqtt_client.connect(self.mqtt_config.url, self.mqtt_config.port)
         self.loop_thread: Thread = Thread(target=self._loop_forever, daemon=True)
         self.subscriptions = Subscriptions()
+        self.mqtt_client.connect(self.mqtt_config.url, self.mqtt_config.port)
 
     def start(self):
         if not self.loop_thread.is_alive():
