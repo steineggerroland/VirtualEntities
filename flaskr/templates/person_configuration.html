@@ -35,6 +35,24 @@
                 </div>
             </div>
         </div>
+        <form class="row g-4 mt-0" method="POST"
+              action="{{ url_for('person_configuration', name=person.name ) }}">
+            {{ form.csrf_token }}
+            <div class="col-12 col-sm-auto">
+                {{ form.name.label(class='form-label') }}
+                {{ form.name(class='form-control',style='width: fit-content') }}
+                {% if form.name.errors %}
+                    <div class="invalid-feedback">{% for error in form.name.errors %}{{ error }}{% endfor %}</div>
+                {% endif %}
+            </div>
+            <div class="col-12 col-sm-auto align-content-end">
+                <a href="{{ url_for('person', name=person.name) }}">
+                    <button type="button" class="btn btn-outline-secondary"
+                            value="{{ _('Cancel') }}">{{ _('Cancel') }}</button>
+                </a>
+                <button type="submit" class="btn btn-primary ms-2" value="{{ _('Save') }}">{{ _('Save') }}</button>
+            </div>
+        </form>
         <div class="my-4">
             {% if debug %}{{ person.to_dict() }}{% endif %}
         </div>

@@ -12,6 +12,13 @@ class Person(Thing):
         super().__init__(name, "person", last_updated_at, last_seen_at, online_delta_in_seconds=60 * 10)
         self.calendars = calendars
 
+    def set_calendars(self, calendars) -> 'Person':
+        now = datetime.now()
+        return Person(self.name, calendars, now, now)
+
+    def change_name(self, name) -> 'Person':
+        return Person(name, self.calendars, datetime.now(), self.last_seen_at)
+
     def get_appointments_for(self, start: datetime, delta: timedelta) -> List[Appointment]:
         return list(reduce(lambda a, b: a + b, map(lambda c: c.find_appointments(start, delta), self.calendars), []))
 
@@ -26,7 +33,3 @@ class Person(Thing):
                 "online_status": self.online_status(),
                 "last_updated_at": self.last_updated_at.isoformat() if self.last_updated_at is not None else None,
                 "last_seen_at": self.last_seen_at.isoformat() if self.last_seen_at is not None else None}
-
-    def set_calendars(self, calendars):
-        now = datetime.now()
-        return Person(self.name, calendars, now, now)
