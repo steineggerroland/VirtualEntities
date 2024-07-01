@@ -78,3 +78,9 @@ class RoomConfigurationPage(EntityPage):
 class PersonPage(EntityPage):
     def __init__(self, driver, base_url):
         super().__init__(driver, base_url, 'person details', path_prefix='person')
+
+
+class PersonConfigurationPage(EntityPage):
+    def __init__(self, driver, base_url):
+        super().__init__(driver, base_url, 'person configuration', path_prefix='person',
+                         path_suffix='configuration')

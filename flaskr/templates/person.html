@@ -21,6 +21,17 @@
                     <h1 class="col-10 col-sm-auto mb-0">
                         <span class="name">{{ person.name }}</span>
                     </h1>
+                    <div class="col-2 col-sm-auto p-0" style="max-width: 40px">
+                        <a href="{{ url_for('person_configuration', name=person.name) }}"
+                           data-bs-title="{{ _('Edit %(person_name)s', person_name=person.name) }}"
+                           data-bs-toggle="tooltip">
+                            <button type="button" class="person-configuration btn btn-light p-1">
+                                <img alt="{{ _('Configure %(person_name)s', person_name=person.name) }}"
+                                     class="icon icon-primary"
+                                     src="{{ url_for('static', filename='img/flaticon/controls_control.png') }}"/>
+                            </button>
+                        </a>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col">
@@ -121,6 +132,11 @@
         </div>
     </main>
     <style>
+        .person .icon {
+            height: auto;
+            width: 100%;
+        }
+
         .appointment-look {
             display: grid;
             grid-template-columns: 14% 5% 14% 67%;
