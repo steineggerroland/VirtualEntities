@@ -250,7 +250,7 @@ def step_impl(context, property_type: str):
     setattr(context, f'prop_{property_type}', value)
 
 
-@then(u'the user sess the diagram with updated {property_type} values')
+@then(u'the user sees the diagram with updated {property_type} values')
 def step_impl(context, property_type):
     old_value = getattr(context, f'prop_{property_type}')
     WebDriverWait(context.webdriver, 10, 1).until(lambda d: _get_diagram_path_for_property(d,
