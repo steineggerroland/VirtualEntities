@@ -62,6 +62,10 @@ def create_app(default_config_file_name: str, machine_service: MachineService, a
         "/person/<name>",
         view_func=Person.Details.as_view('person', register_of_persons)
     )
+    app.add_url_rule(
+        "/person/<name>/configuration",
+        view_func=Person.Configuration.as_view('person_configuration', register_of_persons, configuration_manager)
+    )
 
     def locale_selector():
         return request.accept_languages.best_match(app.config['LANGUAGES'].keys())
