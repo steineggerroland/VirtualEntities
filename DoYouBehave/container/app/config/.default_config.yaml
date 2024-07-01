@@ -202,8 +202,34 @@ things:
           cron_expression: '* * * * *'
   - name: Ash
     type: person
+    sources:
+      - application: calendar
+        name: Ash Private
+        url: http://$CALDAV_HOST$:9086/billy/billy--ash-private
+        username: billy
+        password: secret12112
+        update_cron: "* * * * * 0/5"
+        color_hex: f439c4
+    destinations:
+      planned_notifications:
+        - mqtt_topic: persons/ash/appointments
+          subject: daily-appointments
+          cron_expression: "* * * * * 0/30"
   - name: Robin
     type: person
+    sources:
+      - application: calendar
+        name: Robin Private
+        url: http://$CALDAV_HOST$:9086/billy/billy--robin-private
+        username: billy
+        password: secret12112
+        update_cron: "* * * * * 0/5"
+        color_hex: f439c4
+    destinations:
+      planned_notifications:
+        - mqtt_topic: persons/billy/appointments
+          subject: daily-appointments
+          cron_expression: "* * * * * 0/30"
   - name: Billy
     type: person
     sources:
