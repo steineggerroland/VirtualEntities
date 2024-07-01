@@ -1,5 +1,7 @@
 from typing import List
 
+from python_event_bus import EventBus
+
 from iot.core.configuration import IotThingConfig, CaldavConfig
 from iot.infrastructure.person import Person
 from iot.infrastructure.register_of_persons import RegisterOfPersons
@@ -17,6 +19,7 @@ class PersonService:
                                                                 calendar_conf.color_hex),
                                  calendar_sources)))
         self.register_of_persons.enlist(person)
+        EventBus.subscribe("person/changed_config_name", self.change_name, priority=0)
 
     def update_calendars(self, calendars: List[Calendar]):
         person = self.register_of_persons.locate(self.person_name)
@@ -28,9 +31,16 @@ class PersonService:
         person = person.set_calendars(calendars + unchanged_calendars)
         self.register_of_persons.enlist(person)
 
+    def change_name(self, name: str, old_name: str):
+        if self.person_name == old_name:
+            person: Person = self.register_of_persons.locate(old_name)
+            person = person.change_name(name)
+            self.register_of_persons.dismiss(old_name)
+            self.register_of_persons.enlist(person)
+            self.person_name = name
+
     def get_person(self):
         return self.register_of_persons.locate(self.person_name)
-
 
 def supports_thing_type(thing_type) -> bool:
     return thing_type in ['person']
