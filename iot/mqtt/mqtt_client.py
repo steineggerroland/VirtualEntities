@@ -37,7 +37,6 @@ class Subscriptions:
         return list(map(lambda subscription: subscription.callback,
                         filter(lambda subscription: subscription.topic == topic, self.subscriptions)))
 
-
 class MqttClient:
     def __init__(self, mqtt_config: MqttConfiguration):
         self.logger = logging.getLogger(self.__class__.__qualname__)
@@ -54,10 +53,17 @@ class MqttClient:
                 'Connecting to mqtt server "%s:%s"' % (mqtt_config.url, mqtt_config.port))
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
+        self.mqtt_client.on_socket_close = self._on_socket_error
+        self.mqtt_client.on_connect_fail = self._on_connect_fail
 
         self.loop_thread: Thread = Thread(target=self._loop_forever, daemon=True)
         self.subscriptions = Subscriptions()
         self.mqtt_client.connect(self.mqtt_config.url, self.mqtt_config.port)
+
+    def _on_socket_error(self, *args):
+        self.logger.error('MQTT Socket closed unexpectedly')
+    def _on_connect_fail(self, *args):
+        self.logger.error('Connection failed')
 
     def start(self):
         if not self.loop_thread.is_alive():
@@ -70,9 +76,22 @@ class MqttClient:
             self.mqtt_client.disconnect()
 
     def on_connect(self, client, userdata, flags, reason_code):
-        self.logger.debug("Connected with result code %s", str(reason_code))
-        for subscribed_topic in self.subscriptions.get_topics():
-            client.subscribe(subscribed_topic)
+        if reason_code == 0:
+            self.logger.debug("Connected with result code %s", str(reason_code))
+            for subscribed_topic in self.subscriptions.get_topics():
+                client.subscribe(subscribed_topic)
+        elif reason_code == 1:
+            self.logger.debug("Connection refused - unacceptable protocol version")
+        elif reason_code == 2:
+            self.logger.debug("Connection refused - identifier rejected")
+        elif reason_code == 3:
+            self.logger.debug("Connection refused - server unavailable")
+        elif reason_code == 4:
+            self.logger.debug("Connection refused - bad user name or password")
+        elif reason_code == 5:
+            self.logger.debug("Connection refused - not authorised")
+        else:
+            self.logger.debug("Connection failed - reason code %d" % (reason_code))
 
     def on_message(self, client, userdata, msg):
         self.logger.debug("Received message topic '%s' payload '%s'", msg.topic, msg.payload)
