@@ -44,7 +44,7 @@ class MqttClientTest(unittest.TestCase):
         mqtt_client.subscribe("some thing", topic, lambda: "callback")
         paho_mqtt_client_mock.subscribe = Mock()
         # when
-        mqtt_client.on_connect(paho_mqtt_client_mock, None, None, rc=0)
+        mqtt_client.on_connect(paho_mqtt_client_mock, None, None, reason_code=0)
         # then
         paho_mqtt_client_mock.subscribe.assert_called()
 
