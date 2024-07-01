@@ -49,7 +49,7 @@ def run():
     mqtt_mediators.append(mqtt_machine_mediator)
     for thing_config in machine_configs:
         mqtt_machine_mediator.add_thing_by_config(thing_config.name, thing_config.sources, thing_config.destinations)
-    logger.debug("Mqtt machine mediator for loaded")
+    logger.debug("Mqtt machine mediator loaded")
     for thing_config in config.things:
         if room_service_supports_thing_type(thing_type=thing_config.type):
             room_service = RoomService(room_catalog, time_series_storage, thing_config)
