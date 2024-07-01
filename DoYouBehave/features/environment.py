@@ -21,7 +21,7 @@ from features.container.MosquittoContainer import MosquittoContainer
 from features.container.RadicaleCalendarContainer import RadicaleCalendarContainer
 from features.container.SeleniumContainer import SeleniumContainer
 from features.pages.base import BasePage, VirtualEntityPage, AppliancePage, ApplianceConfigurationPage, RoomPage, \
-    RoomConfigurationPage, PersonPage
+    RoomConfigurationPage, PersonPage, PersonConfigurationPage
 
 BROWSER = 'chrome'
 save_screenshot_of_failed_steps = True
@@ -181,7 +181,8 @@ def browser_setup_and_teardown(context, timeout=30, **kwargs):
              ApplianceConfigurationPage(browser, context.base_url),
              RoomPage(browser, context.base_url),
              RoomConfigurationPage(browser, context.base_url),
-             PersonPage(browser, context.base_url)]
+             PersonPage(browser, context.base_url),
+             PersonConfigurationPage(browser, context.base_url)]
     context.pages = dict([(page.page_name, page) for page in pages])
 
     yield
