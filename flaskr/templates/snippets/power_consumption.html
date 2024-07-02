@@ -1,0 +1,16 @@
+{%- if power_consumption != None %}
+    {%- set text = "%sW" % power_consumption %}
+    {%- set tooltip = _('Power consumption') %}
+{%- else %}
+    {%- set text = _('?W') %}
+    {%- set tooltip = _('Power consumption unknown') %}
+{%- endif %}
+{%- if as_badge == True %}
+    <span class="badge power-consumption text-bg-light border border-secondary" data-bs-title="{{ tooltip }}"
+          data-bs-toggle="tooltip">{{ text }}</span>
+{%- else %}
+    <div class="h-100 w-100 d-flex justify-content-center align-items-center power-consumption text-bg-secondary bg-secondary"
+         data-bs-title="{{ tooltip }}" data-bs-toggle="tooltip">
+        {{ text }}
+    </div>
+{%- endif %}

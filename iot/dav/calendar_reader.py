@@ -1,3 +1,5 @@
+import logging
+from datetime import datetime
 from typing import List
 
 from caldav import CalendarObjectResource
@@ -18,30 +20,35 @@ class GlobalCalendarConfig:
     def get_color_for(self, category_name: str) -> str | None:
         for category in self.categories:
             if category.name.lower() == category_name.lower():
-                return category.color
+                return category.color_hex
         return None
 
 
 class CalendarLoader:
     def __init__(self, config: CalendarsConfig):
         self.config = GlobalCalendarConfig(config.calendars, config.categories)
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def from_caldav_events(self, name: str, url: str, default_color: str,
                            caldav_events: List[CalendarObjectResource]) -> Calendar:
         appointments = []
         for event in caldav_events:
             ical_component = event.icalendar_component
-            summary = str(ical_component["SUMMARY"])
-            start_at = ical_component["DTSTART"].dt
-            end_at = ical_component["DTEND"].dt
+            summary = str(ical_component['SUMMARY'])
+            description = str(ical_component['DESCRIPTION']) if 'DESCRIPTION' in ical_component else ''
+            start_at = ical_component['DTSTART'].dt
+            end_at = ical_component['DTEND'].dt
             color = self.search_color_for_category(default_color, ical_component)
-            appointments.append(Appointment(summary, start_at, end_at, color))
-        return Calendar(name, url, default_color, appointments)
+            appointments.append(Appointment(summary, start_at, end_at, color, description))
+        return Calendar(name, url, default_color, appointments, last_seen_at=datetime.now())
 
     def search_color_for_category(self, default_color: str, ical_component) -> str:
-        if "CATEGORIES" in ical_component and ical_component["CATEGORIES"] and ical_component["CATEGORIES"].cats:
-            categories: vCategory = ical_component["CATEGORIES"]
-            for category in categories.cats:
-                if self.config.has_color_for(category):
-                    return self.config.get_color_for(category)
+        try:
+            if 'CATEGORIES' in ical_component and ical_component['CATEGORIES'] and ical_component['CATEGORIES'].cats:
+                categories: vCategory = ical_component['CATEGORIES']
+                for category in categories.cats:
+                    if self.config.has_color_for(category):
+                        return self.config.get_color_for(category)
+        except AttributeError as e:
+            self.logger.debug('Event had no categories to search color for')
         return default_color

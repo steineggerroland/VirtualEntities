@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block title %}<title>{{ _('Person %(name)s', name=person.name) }}</title>{% endblock %}
+{% block breadcrumb %}
+    <aside class="container">
+        <div class="row mt-4">
+            <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '〉';">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('ve_list') }}">{{ _('Virtual Entities') }}</a></li>
+                    <li class="breadcrumb-item">{{ _('Register of persons') }}</li>
+                    <li aria-current="page" class="breadcrumb-item active">{{ person.name }}</li>
+                </ol>
+            </nav>
+        </div>
+    </aside>
+{% endblock %}
+{% block content %}
+    <main class="container person g-2">
+        <div class="row mt-4">
+            <div class="col-10 col-sm-11">
+                <div class="row">
+                    <h1 class="col-10 col-sm-auto mb-0">
+                        <span class="name">{{ person.name }}</span>
+                    </h1>
+                    <div class="col-2 col-sm-auto p-0" style="max-width: 40px">
+                        <a href="{{ url_for('person_configuration', name=person.name) }}"
+                           data-bs-title="{{ _('Edit %(person_name)s', person_name=person.name) }}"
+                           data-bs-toggle="tooltip">
+                            <button type="button" class="person-configuration btn btn-light p-1">
+                                <img alt="{{ _('Configure %(person_name)s', person_name=person.name) }}"
+                                     class="icon icon-primary"
+                                     src="{{ url_for('static', filename='img/flaticon/controls_control.png') }}"/>
+                            </button>
+                        </a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        {% with time_delta=person.last_seen_time_delta() %}
+                            {% include "snippets/last_seen_at_subtitle.html" %}
+                        {% endwith %}
+                        {% with online_status=person.online_status(),style='font-size: 0.9em' %}
+                            <span class="ml-2">
+                        {% include "snippets/online_status_icon.html" %}
+                        </span>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <h2>{{ _('Calendars') }}</h2>
+        </div>
+        <div class="row mt-2">
+            <ol class="list-group calendars">
+                {% for calendar in person.calendars %}
+                    <li class="calendar list-group-item p-4 d-flex justify-content-start align-items-center">
+                        <div>
+                            <svg height="20" width="20" xmlns="http://www.w3.org/2000/svg"
+                                 data-bs-title="#{{ calendar.color }}"
+                                 data-bs-toggle="tooltip">
+                                <circle r="8" cx="10" cy="10" stroke-width="2" fill="#{{ calendar.color }}"
+                                        stroke="black"></circle>
+                            </svg>
+                        </div>
+                        <div class="ms-2">
+                            <h3 class="name m-0">{{ calendar.name }}</h3>
+                        </div>
+                        <div class="ms-4">
+                            {{ ngettext('%(num)d Appointment', '%(num)d Appointments', calendar.appointments|length) }}
+                        </div>
+                        <div class="ms-4 text-truncate">
+                            <small>
+                                <span class="url">{{ calendar.url|replace('http://','')|replace('https://','')|truncate(calendar.url|length - 28) }}</span>
+                            </small>
+                        </div>
+                        <div class="ms-auto">
+                            {% with online_status=calendar.online_status(), time_delta=calendar.last_seen_time_delta() %}
+                                {% include "snippets/online_status_icon.html" %}
+                            {% endwith %}
+                        </div>
+                    </li>
+                {% endfor %}
+            </ol>
+        </div>
+        <div class="row mt-4">
+            <h2>{{ _('7 days preview') }}</h2>
+        </div>
+        <div class="overflow-x-scroll">
+            <div class="d-flex gap-4" style="width:max-content">
+                {% for day, appointments, start_of_day, end_of_day in days_to_appointments %}
+                    <div style="width: 320px; max-width: 90vw; aspect-ratio: 1;">
+                        <div class="card days-agenda w-100 h-100 overflow-hidden">
+                            <div class="month d-flex justify-content-center align-items-center fs-5">{{ day|dateformat('MMMM') }}</div>
+                            <div class="day d-flex flex-column justify-content-center align-items-center">
+                                <h3 class="text-center text-primary fs-1 m-0">{{ day|dateformat('d') }}</h3>
+                                <div class="text-center test-muted small m-0">{{ day|dateformat('EEEE') }}</div>
+                            </div>
+                            <div class="appointments overflow-y-scroll">
+                                <div class="d-flex flex-column m-0">
+                                    {% for appointment in appointments %}
+                                        <div class="appointment appointment-look p-2">
+                                            {% if appointment.start_at > start_of_day %}
+                                                <span class="start-at">{{ appointment.start_at|timeformat('short') }}</span>
+                                            {% else %}
+                                                <span class="start-at"
+                                                      data-bs-title="{{ appointment.start_at|datetimeformat('short') }}"
+                                                      data-bs-toggle="tooltip">...</span>
+                                            {% endif %}
+                                            <span class="spacer"> - </span>
+                                            {% if appointment.end_at < end_of_day %}
+                                                <span class="end-at">{{ appointment.end_at|timeformat('short') }}</span>
+                                            {% else %}
+                                                <span class="end-at"
+                                                      data-bs-title="{{ appointment.end_at|datetimeformat('short') }}"
+                                                      data-bs-toggle="tooltip">...</span>
+                                            {% endif %}
+
+                                            <strong class="summary overflow-hidden text-truncate"
+                                                    data-bs-title="{{ appointment.summary }}"
+                                                    data-bs-toggle="tooltip">{{ appointment.summary }}</strong>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="my-4">
+            {% if debug %}{{ person.to_dict() }}{% endif %}
+        </div>
+    </main>
+    <style>
+        .person .icon {
+            height: auto;
+            width: 100%;
+        }
+
+        .appointment-look {
+            display: grid;
+            grid-template-columns: 14% 5% 14% 67%;
+            grid-template-areas:
+                "start spacer end summary";
+        }
+
+        .appointment-look .start-at {
+            grid-area: start;
+        }
+
+        .appointment-look .spacer {
+            grid-area: spacer;
+        }
+
+        .appointment-look .end-at {
+            grid-area: end;
+        }
+
+        .appointment-look .summary {
+            grid-area: summary;
+        }
+
+        .card.days-agenda {
+            border-radius: 3rem;
+            border: 3px solid gray;
+        }
+
+        .card.days-agenda .month {
+            margin: 0;
+            padding: 0;
+            height: calc(20% - 3px);
+            border-bottom: 3px gray solid;
+        }
+
+        .card.days-agenda .day {
+            margin: 0;
+            padding: 0;
+            height: 28%;
+        }
+
+        .card.days-agenda .appointments {
+            height: 52%;
+        }
+
+        .card.days-agenda .appointments .appointment:nth-child(odd) {
+
+            background-color: whitesmoke;
+        }
+    </style>
+{% endblock %}

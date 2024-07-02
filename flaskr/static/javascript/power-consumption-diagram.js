@@ -1,10 +1,12 @@
-(function() {
-    var margin = {top: 10, right: 30, bottom: 30, left: 60}
+(function () {
 
-    let svg
-    function drawChart(powerConsumptionMeasures) {
-        const maxWidth = parseInt(window.innerWidth * 0.7)
-        const maxHeight = parseInt(window.innerHeight * 0.7)
+    function drawChart(measures, containerId, xAxisLabel, fullscreen) {
+        let diagramContainer = document.getElementById(containerId);
+        diagramContainer.childNodes.forEach(function (child) {
+            diagramContainer.removeChild(child)
+        })
+        const maxWidth = fullscreen ? diagramContainer.clientWidth : Math.min(parseInt(window.innerWidth * 0.7), diagramContainer.clientWidth)
+        const maxHeight = fullscreen ? diagramContainer.clientWidth : parseInt(window.innerHeight * 0.7)
         const useHeight = maxHeight / maxWidth < 1
         let width, height = 0
         if (useHeight) {
@@ -14,61 +16,86 @@
             height = maxWidth
             width = maxWidth
         }
-        container = document.getElementById("power-consumption")
-        container.childNodes.forEach(function(child) {
-            container.removeChild(child)
-        })
-        var margin = {top: 10, right: 30, bottom: 30, left: 60}
-        svg = d3.select("#power-consumption")
-          .append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-          .append("g")
+        const date_now = new Date();
+        const date_before_two_hours = new Date(date_now - 2 * 60 * 60 * 1000);
+        const margin = fullscreen ? {top: 0, right: 0, bottom: 0, left: 0} : {top: 10, right: 30, bottom: 30, left: 60}
+        const svg = d3.select(`#${containerId}`)
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+        diagram = svg.append("g")
             .attr("transform",
-                  "translate(" + margin.left + "," + margin.top + ")");
-
-          function addData(data) {
-            var x = d3.scaleTime()
-              .domain(d3.extent(data, function(d) { return d.date; }))
-              .range([ 0, width ]);
-            svg.append("g")
-              .attr("transform", "translate(0," + height + ")")
-              .call(d3.axisBottom(x));
-
-            var y = d3.scaleLinear()
-              .domain([0, d3.max(data, function(d) { return +d.value; })])
-              .range([ height, 15 ]);
-            svg.append("g")
-              .call(d3.axisLeft(y))
-              .call(g => g.append("text")
-                  .attr("x", -margin.left)
-                  .attr("y", 10)
-                  .attr("fill", "currentColor")
-                  .attr("class", "text-primary")
-                  .attr("text-anchor", "start")
-                  .text("Watt"));
-
-            svg.append("path")
-              .datum(data)
-              .attr("fill", "none")
-              .attr("stroke", "steelblue")
-              .attr("class", "stroke-primary")
-              .attr("stroke-width", 1.5)
-              .attr("d", d3.line()
-                .x(function(d) { return x(d.date) })
-                .y(function(d) { return y(d.value) })
-                )
+                "translate(" + margin.left + "," + margin.top + ")");
+        const x = d3.scaleTime()
+            // adds date now and date before two hours to set default range
+            .domain(d3.extent([...measures, {'date': date_now}, {'date': date_before_two_hours}], function (d) {
+                return d.date;
+            }))
+            .range([0, width - margin.left - margin.right]);
+        if (!fullscreen) {
+            diagram.append("g")
+                .attr("transform", "translate(0," + (height - margin.top - margin.bottom) + ")")
+                .call(d3.axisBottom(x));
         }
-        addData(powerConsumptionMeasures)
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(measures, function (d) {
+                return +d.value;
+            })])
+            .range([height - margin.top - margin.bottom, 15]);
+        if (!fullscreen) {
+            diagram.append("g")
+                .call(d3.axisLeft(y))
+                .call(g => g.append("text")
+                    .attr("x", -margin.left)
+                    .attr("y", 10)
+                    .attr("fill", "currentColor")
+                    .attr("class", "text-primary")
+                    .attr("text-anchor", "start")
+                    .text(xAxisLabel));
+        }
+
+        diagram.append("path")
+            .datum(measures)
+            .attr("fill", "none")
+            .attr("stroke", fullscreen ? "red" : "steelblue")
+            .attr("class", "stroke-primary")
+            .attr("stroke-width", 1.5)
+            .attr("d", d3.line()
+                .x(function (d) {
+                    return x(d.date)
+                })
+                .y(function (d) {
+                    return y(d.value)
+                })
+            )
     }
 
-    thing_name = document.getElementById('power-consumption').getAttribute('itemid')
-    const fetchAndDrawDiagram = () => {
-        return fetch(`/api/appliances/${thing_name}/power-consumptions`)
+    document.querySelectorAll('.power-consumption.diagram').forEach(container => {
+        const thingName = container.dataset.thingName
+        const xAxisLabel = container.dataset.xAxisLabel
+        const fullscreen = !!container.dataset.fullscreen
+        if (!container.id) container.id = "power-consumption-diagram-container-" + makeSafeForCSS(thingName)
+        const measurements = []
+        const fetchAndDrawDiagram = () => fetch(`/api/appliances/${thingName}/power-consumptions`)
             .then(data => data.json())
             .then(data => {
-                drawChart(data.map(d => {return {"date": new Date(d.time), "value": d.consumption}}))
-            }).then(() => window.setTimeout(() => fetchAndDrawDiagram(), 30 * 1000))
+                measurements.splice(0, measurements.length)
+                measurements.push(...data.map(d => {
+                    return {"date": new Date(d.time), "value": d.consumption}
+                }))
+                drawChart(measurements, container.id, xAxisLabel, fullscreen)
+            }).then(() => window.setTimeout(fetchAndDrawDiagram, 30 * 1000))
+        fetchAndDrawDiagram().then(() => window.addEventListener('resize', () => drawChart(measurements, container.id, xAxisLabel, fullscreen)))
+    })
+
+    // Thanks to PleaseStand at StackOverflow: https://stackoverflow.com/a/7627603
+    function makeSafeForCSS(name) {
+        return name.replace(/[^a-z0-9]/g, function (s) {
+            let c = s.charCodeAt(0);
+            if (c == 32) return '-';
+            if (c >= 65 && c <= 90) return '_' + s.toLowerCase();
+            return '__' + ('000' + c.toString(16)).slice(-4);
+        });
     }
-    fetchAndDrawDiagram().then(() => window.addEventListener('resize', drawChart ))
 })()

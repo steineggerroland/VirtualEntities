@@ -1,0 +1,30 @@
+{%- if temperature != None and rating=='unknown' %}
+    {%- set text = temperature %}
+    {%- set tooltip = _('Temperature') %}
+    {%- set color_type = 'secondary' %}
+{%- elif temperature != None and rating=='optimal' %}
+    {%- set text = temperature %}
+    {%- set tooltip = _('Temperature optimal') %}
+    {%- set color_type = 'success' %}
+{%- elif temperature != None and (rating=='cold' or rating=='hot') %}
+    {%- set text = temperature %}
+    {%- set tooltip = _('Temperature slightly out of range') %}
+    {%- set color_type = 'warning' %}
+{%- elif temperature != None %}
+    {%- set text = temperature %}
+    {%- set tooltip = _('Temperature out of range') %}
+    {%- set color_type = 'danger' %}
+{%- else %}
+    {%- set text = _('?°C') %}
+    {%- set tooltip = _('Temperature unknown') %}
+    {%- set color_type = 'secondary' %}
+{%- endif %}
+{%- if as_badge==True %}
+    <span class="badge temperature text-bg-light border border-{{ color_type }}" data-bs-title="{{ tooltip }}"
+          data-bs-toggle="tooltip">{{ text }}</span>
+{%- else %}
+    <div class="temperature h-100 w-100 d-flex justify-content-center align-items-center text-bg-{{ color_type }} bg-{{ color_type }}"
+         data-bs-title="{{ tooltip }}" data-bs-toggle="tooltip">
+        {{ text }}
+    </div>
+{%- endif %}

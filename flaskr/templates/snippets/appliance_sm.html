@@ -1,24 +1,33 @@
-<div class="card appliance {{appliance.thing_type}}">
+<div class="card appliance {{ appliance.thing_type }}">
     <div class="card-header">
         <h4 class="card-title mb-0">
-            {% with type=appliance.thing_type %}
-            <span class="mr-2">
-            {% include "snippets/appliance_icon.html" %}
+            {%- with type=appliance.thing_type %}
+                <span class="mr-2">
+            {%- include "snippets/appliance_icon.html" %}
             </span>
-            {% endwith %}
-            <a href="{{url_for('appliance', name=appliance.name)}}">{{ appliance.name }}</a>
+            {%- endwith %}
+            <a class="name" href="{{ url_for('appliance', name=appliance.name) }}">{{ appliance.name }}</a>
+            {%- with online_status=appliance.online_status(),time_delta=appliance.last_seen_time_delta() %}
+                {%- include "snippets/online_status_icon.html" %}
+            {%- endwith %}
         </h4>
     </div>
-    <div class="card-body">
-        <div class="card-text">
-            {% with power_consumption=appliance.watt %}
-            {% include "snippets/power_consumption_badge.html" %}
-            {% endwith %}
-
-            {% with online_status=appliance.online_status(),time_delta=appliance.last_seen_time_delta() %}
-            {% include "snippets/online_status_badge.html" %}
-            {% endwith %}
+    <div class="row p-0 m-0 position-relative">
+        <div class="col-4 p-0 m-0 position-relative" style="aspect-ratio: 1">
+            <div class="power-consumption diagram position-absolute top-0 start-0 w-100 h-100 z-2"
+                 data-thing-name="{{ appliance.name }}" data-fullscreen="true" data-x-axis-label="{{ _('Watt') }}"></div>
+            <div class="position-absolute top-0 start-0 w-100 h-100 z-1 fs-4">
+            {%- with power_consumption=appliance.watt %}
+                {%- include "snippets/power_consumption.html" %}
+            {%- endwith %}
+            </div>
         </div>
     </div>
-    {% if debug %}{{appliance.to_dict()}}{% endif %}
+    {%- if debug %}{{ appliance.to_dict() }}{% endif %}
 </div>
+{% block additional_scripts %}
+    <script language="JavaScript" src="{{ url_for('static', filename='javascript/d3.v7.min.js') }}"
+            type="text/javascript"></script>
+    <script language="JavaScript" src="{{ url_for('static', filename='javascript/power-consumption-diagram.js') }}"
+            type="text/javascript"></script>
+{% endblock %}

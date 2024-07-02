@@ -1,12 +1,20 @@
 #runtime data
 data/**
 
+DoYouBehave/container/app/config/config.yaml
+DoYouBehave/container/app/data/**
+
 #python specific parts
-venv
+**.venv
 
 #IDE settings
 .idea
+/DoYouBehave/.idea
+/DoYouBehave/*.iml
+/DoYouBehave/screenshots
 
 #build
 htmlcov
 .coverage
+/DoYouBehave/.idea/misc.xml
+/DoYouBehave/runs/**

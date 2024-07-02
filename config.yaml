@@ -13,14 +13,14 @@ things:
   - name: ${THING_NAME:-washing_machine}
     type: ${THING_TYPE:-washing_machine}
     sources:
-      - topic: ${MQTT_INPUT_CONSUMPTION:-measurements/thing/power}
+      - mqtt_topic: ${MQTT_INPUT_CONSUMPTION:-measurements/thing/power}
         type: consumption
-      - topic: ${MQTT_INPUT_LOADING:-things/washing_machine/load}
+      - mqtt_topic: ${MQTT_INPUT_LOADING:-things/washing_machine/load}
         type: loading
-      - topic: ${MQTT_INPUT_UNLOADING:-things/washing_machine/unload}
+      - mqtt_topic: ${MQTT_INPUT_UNLOADING:-things/washing_machine/unload}
         type: unloading
     destinations:
-      scheduled_updates:
-        - topic: ${MQTT_UPDATE_TOPIC:-things/washing_machine/state}
+      planned_notification:
+        - mqtt_topic: ${MQTT_UPDATE_TOPIC:-things/washing_machine/state}
           # use cron expression to schedule the notification. seconds are supported as well.
-          cron: "* * * * * */20"
+          cron_expression: "* * * * * */20"
