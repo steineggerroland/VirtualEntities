@@ -23,7 +23,7 @@ from features.container.SeleniumContainer import SeleniumContainer
 from features.pages.base import BasePage, VirtualEntityPage, AppliancePage, ApplianceConfigurationPage, RoomPage, \
     RoomConfigurationPage, PersonPage, PersonConfigurationPage
 
-BROWSER = 'chrome'
+BROWSER = 'chrome' # firefox produces errors because it uses scrolling not as expected by selenium
 save_screenshot_of_failed_steps = True
 global_logging = False
 app_logging = False
