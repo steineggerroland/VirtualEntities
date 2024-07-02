@@ -205,7 +205,7 @@ things:
     sources:
       - application: calendar
         name: Ash Private
-        url: http://$CALDAV_HOST$:9086/billy/billy--ash-private
+        url: http://$CALDAV_HOST$:9086/billy/ash--ash-private
         username: billy
         password: secret12112
         update_cron: "* * * * * 0/5"
@@ -220,7 +220,7 @@ things:
     sources:
       - application: calendar
         name: Robin Private
-        url: http://$CALDAV_HOST$:9086/billy/billy--robin-private
+        url: http://$CALDAV_HOST$:9086/billy/robin--robin-private
         username: billy
         password: secret12112
         update_cron: "* * * * * 0/5"
