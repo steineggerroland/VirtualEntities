@@ -5,6 +5,9 @@
 .icon {
     height: 1em;
 }
+.icon-primary {
+    filter: invert(24%) sepia(100%) saturate(2152%) hue-rotate(211deg) brightness(107%) contrast(98%);
+}
 
 body {
     min-height: 100vh;

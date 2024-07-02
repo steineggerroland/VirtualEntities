@@ -1,5 +1,8 @@
-from flask import Blueprint
+from http import HTTPStatus
 
+from flask import Blueprint, Response
+
+from iot.core.configuration import ConfigurationManager
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.machine.appliance_depot import ApplianceDepot
 

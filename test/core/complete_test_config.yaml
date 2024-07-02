@@ -3,12 +3,12 @@ mqtt:
   port: 1337
   username: user
   password: my-secret
-  clientId: my-client
+  client_id: my-client
 time_series:
   url: influxdb.url
+  port: 8712
   username: influxdb
   password: secret
-  org: my_org
   bucket_name: bucket_to_save_to
 things:
   - name: super_thing
@@ -21,11 +21,11 @@ things:
       - mqtt_topic: unloading/topic
         type: unloading
     destinations:
-      scheduled_updates:
-        - topic: update/every-second/topic
-          cron: "*/1 * * * * *"
-        - topic: update/every-15-minutes/topic
-          cron: "* */15 * * * *"
+      planned_notifications:
+        - mqtt_topic: update/every-second/topic
+          cron_expression: "*/1 * * * * *"
+        - mqtt_topic: update/every-15-minutes/topic
+          cron_expression: "* */15 * * * *"
   - name: Kitchen
     type: room
     sources:
@@ -65,10 +65,10 @@ things:
       - application: calendar
         reference_name: jane job
     destinations:
-      scheduled_updates:
-        - topic: persons/jane/appointments
-          cron: "*/15 * * * * 0"
+      planned_notifications:
+        - mqtt_topic: persons/jane/appointments
           subject: daily-appointments
+          cron_expression: "*/15 * * * * 0"
 calendars:
   categories:
     - name: Special
@@ -77,6 +77,7 @@ calendars:
       color_hex: ff0000
   caldav:
     - name: jane job
+      application: calendar # not necessary but created when updating the config
       url: calendar.job/jane
       username: jane
       password: secret

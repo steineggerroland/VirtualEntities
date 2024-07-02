@@ -7,12 +7,13 @@ from iot.infrastructure.room_catalog import RoomCatalog
 
 
 class ListView(View):
+    def __init__(self, appliance_depot: ApplianceDepot, room_catalog: RoomCatalog, register_of_persons: RegisterOfPersons):
+        self.appliance_depot: ApplianceDepot = appliance_depot
+        self.room_catalog: RoomCatalog = room_catalog
+        self.register_of_persons: RegisterOfPersons = register_of_persons
     def dispatch_request(self):
-        appliance_depot: ApplianceDepot = current_app.appliance_depot
-        room_catalog: RoomCatalog = current_app.room_catalog
-        register_of_persons: RegisterOfPersons = current_app.register_of_persons
-        appliances = appliance_depot.inventory()
-        rooms = room_catalog.list_all_rooms()
-        persons = register_of_persons.catalog_all()
+        appliances = self.appliance_depot.inventory()
+        rooms = self.room_catalog.list_all_rooms()
+        persons = self.register_of_persons.catalog_all()
         return render_template("virtual_entities.html", entities={'appliance_depot': appliances, 'room_catalog': rooms,
                                                                   'register_of_persons': persons})

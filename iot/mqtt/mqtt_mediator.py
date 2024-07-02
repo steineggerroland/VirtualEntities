@@ -9,13 +9,14 @@ from croniter import croniter
 from jsonpath import JSONPath
 
 from iot.core.configuration import PlannedNotification
+from iot.mqtt.mqtt_client import MqttClient
 
 
 class MqttMediator:
     def __init__(self, mqtt_client):
-        self.mqtt_client = mqtt_client
+        self.mqtt_client: MqttClient = mqtt_client
         self.logger = logging.getLogger(self.__class__.__qualname__)
-        self.scheduled_update_threads: [Thread] = []
+        self.scheduled_update_threads: List[Thread] = []
 
     def start(self):
         for thread in self.scheduled_update_threads:

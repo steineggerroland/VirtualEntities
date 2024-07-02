@@ -19,18 +19,12 @@ class CalendarTest(unittest.TestCase):
         self.assertEqual(1, len(calendar.find_appointments(start, timedelta(hours=1))))
 
     def test_to_dict(self):
-        appointments = [Appointment("Free time just for me",
-                                    datetime.fromisoformat("2020-01-24T13:00:00"),
-                                    datetime.fromisoformat("2020-01-24T15:00:00"),
-                                    "FF0000"),
-                        Appointment("Meeting",
-                                    datetime.fromisoformat("2020-02-01T10:00:00"),
-                                    datetime.fromisoformat("2020-02-01T10:30:00"),
-                                    "00ff00"),
-                        Appointment("Holidays",
-                                    datetime.fromisoformat("2020-05-10T00:00:00"),
-                                    datetime.fromisoformat("2020-05-15T00:00:00"),
-                                    "0000ff")]
+        appointments = [Appointment("Free time just for me", datetime.fromisoformat("2020-01-24T13:00:00"),
+                                    datetime.fromisoformat("2020-01-24T15:00:00"), "FF0000"),
+                        Appointment("Meeting", datetime.fromisoformat("2020-02-01T10:00:00"),
+                                    datetime.fromisoformat("2020-02-01T10:30:00"), "00ff00"),
+                        Appointment("Holidays", datetime.fromisoformat("2020-05-10T00:00:00"),
+                                    datetime.fromisoformat("2020-05-15T00:00:00"), "0000ff")]
         name = "nextcloud"
         url = "url"
         color = "ff0000"
@@ -50,12 +44,9 @@ class CalendarTest(unittest.TestCase):
 
 class AppointmentTest(unittest.TestCase):
     def test_constructor(self):
-        appointment = Appointment("Free time just for me",
-                                  datetime.fromisoformat("2020-01-24T13:00:00").astimezone(
-                                      pytz.timezone("Europe/Berlin")),
-                                  datetime.fromisoformat("2020-01-24T15:00:00").astimezone(
-                                      pytz.timezone("Europe/Berlin")),
-                                  "123123")
+        appointment = Appointment("Free time just for me", datetime.fromisoformat("2020-01-24T13:00:00").astimezone(
+            pytz.timezone("Europe/Berlin")), datetime.fromisoformat("2020-01-24T15:00:00").astimezone(
+            pytz.timezone("Europe/Berlin")), "123123")
         self.assertEqual(appointment.summary, "Free time just for me")
         self.assertEqual(appointment.start_at, datetime.fromisoformat("2020-01-24T13:00:00").astimezone(
             pytz.timezone("Europe/Berlin")))

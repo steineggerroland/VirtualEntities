@@ -1,19 +1,18 @@
 <div class="card person">
     <div class="card-header">
         <h4 class="card-title mb-0">
-            {{ person.name }}
+            <a class="name" href="{{ url_for('person', name=person.name) }}">{{ person.name }}</a>
+            {%- with online_status=person.online_status(), time_delta=person.last_seen_time_delta() %}
+                {%- include "snippets/online_status_icon.html" %}
+            {%- endwith %}
         </h4>
     </div>
-    {% with online_status=person.online_status(), time_delta=person.last_seen_time_delta() %}
-    {% include "snippets/online_status_badge.html" %}
-    {% endwith %}
-
-    {% for calendar in person.calendars %}
-    {% if person.calendars|length > 2 %}
-    {% include "snippets/calendar_card_body_sm.html" %}
-    {% else %}
-    {% include "snippets/calendar_card_body_lg.html" %}
-    {% endif %}
-    {% endfor %}
-    {% if debug %}{{person.to_dict()}}{% endif %}
+    {%- for calendar in person.calendars %}
+        {%- if person.calendars|length > 2 %}
+            {%- include "snippets/calendar_card_body_sm.html" %}
+        {%- else %}
+            {%- include "snippets/calendar_card_body_lg.html" %}
+        {%- endif %}
+    {%- endfor %}
+    {%- if debug %}{{ person.to_dict() }}{% endif %}
 </div>
