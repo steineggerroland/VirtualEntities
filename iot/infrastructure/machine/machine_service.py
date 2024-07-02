@@ -6,7 +6,6 @@ from typing import List
 from python_event_bus import EventBus
 
 from iot.core.configuration import IotThingConfig, ConfigurationManager
-from iot.core.storage import Storage
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.machine.appliance_depot import ApplianceDepot
@@ -28,7 +27,7 @@ class ManagedMachine:
 
     def change_name(self, new_name: str, new_check_if_run_completed_thread: Thread | None = None):
         if self._check_if_run_completed_thread:
-            self._check_if_run_completed_thread.join()
+            self._check_if_run_completed_thread.join(0)
         self._check_if_run_completed_thread = new_check_if_run_completed_thread
         if self._check_if_run_completed_thread:
             self._check_if_run_completed_thread.start()
@@ -51,11 +50,10 @@ class ManagedMachines:
 
 
 class MachineService:
-    def __init__(self, appliance_depot: ApplianceDepot, storage: Storage, time_series_storage: TimeSeriesStorage,
+    def __init__(self, appliance_depot: ApplianceDepot, time_series_storage: TimeSeriesStorage,
                  config_manager: ConfigurationManager):
         self.logger = logging.getLogger(self.__class__.__qualname__)
         self.appliance_depot = appliance_depot
-        self.storage = storage
         self.time_series_storage = time_series_storage
         self.config_manager = config_manager
         self.managed_machines = ManagedMachines()
@@ -99,7 +97,7 @@ class MachineService:
         except ValueError as e:
             raise DatabaseException('Failed to save started run because of database error.', e) from e
 
-    def _create_thread_for_is_running_check(self,  managed_machine):
+    def _create_thread_for_is_running_check(self, managed_machine):
         return Thread(target=self._scheduled_check, daemon=True,
                       args=[managed_machine])
 
@@ -140,7 +138,7 @@ class MachineService:
     def change_name(self, name: str, old_name: str):
         managed_machine = self.managed_machines.find(old_name)
         if managed_machine.has_running_check():
-            managed_machine.change_name(name,self._create_thread_for_is_running_check(managed_machine))
+            managed_machine.change_name(name, self._create_thread_for_is_running_check(managed_machine))
         else:
             managed_machine.change_name(name)
 
