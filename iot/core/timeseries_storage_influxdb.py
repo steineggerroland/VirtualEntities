@@ -11,6 +11,8 @@ from iot.core.timeseries_types import ConsumptionMeasurement, TemperatureHumidit
 from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.units import Temperature
 
+MAX_COUNT_TO_UPDATE = 100
+
 CONSUMPTION_FIELD = "consumption"
 THING_NAME_TAG = "thing"
 POWER_CONSUMPTION_SERIES = "power_consumption"
@@ -84,8 +86,11 @@ class InfluxDbTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
             rs = self.influxdb.query(f"SELECT * FROM {time_series_name}")
             old_points = rs.get_points(measurement=time_series_name, tags={THING_NAME_TAG: old_name})
             if old_points:
-                reassigned_points = list(map(lambda p: self._change_thing_name_of_point(p, new_name), old_points))
-                self.influxdb.write_points(reassigned_points)
+                chunks = [old_points[i:i + MAX_COUNT_TO_UPDATE] for i in
+                          range(0, len(list(old_points)), MAX_COUNT_TO_UPDATE)]
+                for chunk in chunks:
+                    reassigned_points = list(map(lambda p: self._change_thing_name_of_point(p, new_name), chunk))
+                    self.influxdb.write_points(reassigned_points)
                 self.influxdb.delete_series(measurement=time_series_name, tags={THING_NAME_TAG: old_name})
         except InfluxDBClientError:  # Exception is raised on query when no data exists (404 by db)
             self.logger.debug(f'No climate data to rename for entity {old_name}')
