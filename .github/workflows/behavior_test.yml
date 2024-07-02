@@ -1,0 +1,39 @@
+name: BehaviorTest
+
+on:
+  push:
+    branches: [ "main", "feature/**" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.11" ]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        working-directory: ./DoYouBehave
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run behave
+        working-directory: ./DoYouBehave
+        run: |
+          behave
+      - name: Upload failure screenshots
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: failure-screenshots
+          path: |
+            ./DoYouBehave/screenshots
