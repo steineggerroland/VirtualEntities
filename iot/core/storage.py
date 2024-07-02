@@ -32,8 +32,6 @@ class Storage:
             if db_file:
                 db_file.close()
         self._scheduled_snapshots_thread: Thread = Thread(target=self._scheduled_snapshots, daemon=True)
-        EventBus.subscribe("appliance/changed_config_name", self.rename)
-        EventBus.subscribe("room/changed_config_name", self.rename)
 
     def start(self):
         self._scheduled_snapshots_thread.start()

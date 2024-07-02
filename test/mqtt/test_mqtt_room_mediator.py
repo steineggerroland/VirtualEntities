@@ -157,7 +157,7 @@ class TemperatureTest(unittest.TestCase):
         self.room_service_mock.update_room_climate = Mock(side_effect=DatabaseException)
         mqtt_mediator.update_room_climate(
             Mock(mqtt_topic="climat/topic", payload='{"temperature": 12.1, "humidity": 44}'),
-                                          "$.temperature", "$.humidity")
+            "$.temperature", "$.humidity")
 
 
 if __name__ == '__main__':

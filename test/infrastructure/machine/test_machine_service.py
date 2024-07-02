@@ -18,7 +18,7 @@ class InitTest(unittest.TestCase):
         storage_mock.load_thing = Mock(return_value=WashingMachine('washing_machine', 'washing_machine'))
         time_series_storage_mock = TimeSeriesStorage()
         configuration_manager_mock = ConfigurationManager()
-        machine_service = MachineService(ApplianceDepot(storage_mock, time_series_storage_mock),storage_mock,
+        machine_service = MachineService(ApplianceDepot(storage_mock, time_series_storage_mock),
                                          time_series_storage_mock, configuration_manager_mock)
         machine_service.add_machines_by_config([configuration_mock])
         self.assertIsNotNone(machine_service.time_series_storage)
@@ -35,8 +35,8 @@ class InitTest(unittest.TestCase):
         time_series_storage_mock = TimeSeriesStorage()
         configuration_manager_mock = ConfigurationManager()
         # when
-        service = MachineService(ApplianceDepot(storage_mock, time_series_storage_mock), storage_mock,time_series_storage_mock,
-                       configuration_manager_mock)
+        service = MachineService(ApplianceDepot(storage_mock, time_series_storage_mock), time_series_storage_mock,
+                                 configuration_manager_mock)
         service.add_machines_by_config([configuration_mock])
         # then
         dryer_mock.start_run.assert_called()
@@ -53,8 +53,7 @@ class MachinePowerTest(unittest.TestCase):
         self.configuration_manager_mock = Mock()
         self.time_series_storage_mock = Mock()
         self.machine_service = MachineService(ApplianceDepot(self.storage_mock, self.time_series_storage_mock),
-                                              self.storage_mock, self.time_series_storage_mock,
-                                              self.configuration_manager_mock)
+                                              self.time_series_storage_mock, self.configuration_manager_mock)
         self.machine_service.add_machines_by_config([self.configuration_mock])
 
     def test_update_power_consumption(self):
@@ -159,7 +158,7 @@ class DatabaseExceptionTranslationTests(unittest.TestCase):
         self.storage_mock.load_iot_machine = Mock(return_value=WashingMachine('washing_machine', 'washing_machine'))
         self.time_series_storage = MagicMock()
         self.configuration_manager = MagicMock()
-        self.machine_service = MachineService(ApplianceDepot(self.storage_mock, self.time_series_storage),self.storage_mock,
+        self.machine_service = MachineService(ApplianceDepot(self.storage_mock, self.time_series_storage),
                                               self.time_series_storage, self.configuration_manager)
         self.machine_service.add_machines_by_config([self.configuration_mock])
         self.storage_mock.update.side_effect = [ValueError()]

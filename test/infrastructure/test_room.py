@@ -51,11 +51,11 @@ class RoomTest(unittest.TestCase):
         self.room.temperature = Temperature(12, TemperatureUnit.DEGREE_CELSIUS)
         new_temperature = Temperature(22.34, TemperatureUnit.DEGREE_CELSIUS)
         # when
-        self.room.update_temperature(new_temperature)
+        room = self.room.update_temperature(new_temperature)
         # then
-        self.assertEqual(self.room.temperature, new_temperature)
-        self.assertAlmostEqual(self.room.last_updated_at, datetime.now(), delta=timedelta(seconds=1))
-        self.assertAlmostEqual(self.room.last_seen_at, datetime.now(), delta=timedelta(seconds=1))
+        self.assertEqual(room.temperature, new_temperature)
+        self.assertAlmostEqual(room.last_updated_at, datetime.now(), delta=timedelta(seconds=1))
+        self.assertAlmostEqual(room.last_seen_at, datetime.now(), delta=timedelta(seconds=1))
 
     def test_rate_temperature(self):
         temperature_thresholds = TemperatureThresholds(Range(20, 23), 15, 30)
@@ -79,11 +79,11 @@ class RoomTest(unittest.TestCase):
         self.room.humidity = 88.2
         new_humidity = 66.42
         # when
-        self.room.update_humidity(new_humidity)
+        room = self.room.update_humidity(new_humidity)
         # then
-        self.assertEqual(self.room.humidity, new_humidity)
-        self.assertAlmostEqual(self.room.last_updated_at, datetime.now(), delta=timedelta(seconds=1))
-        self.assertAlmostEqual(self.room.last_seen_at, datetime.now(), delta=timedelta(seconds=1))
+        self.assertEqual(room.humidity, new_humidity)
+        self.assertAlmostEqual(room.last_updated_at, datetime.now(), delta=timedelta(seconds=1))
+        self.assertAlmostEqual(room.last_seen_at, datetime.now(), delta=timedelta(seconds=1))
 
     def test_rate_humidity(self):
         humidity_thresholds = HumidityThresholds(Range(60, 70), 45, 85)
@@ -112,19 +112,19 @@ class RoomTest(unittest.TestCase):
         # then
         self.assertEqual(room.to_dict(),
                          {"name": name, "type": "room", "temperature": {"value": temperature, "unit": "degree_celsius"},
-                                          "humidity": humidity, 'temperature_thresholds': {'frostiness_threshold': 15,
-                                                                                           'heat_threshold': 30,
-                                                                                           'optimal_lower': 20,
-                                                                                           'optimal_upper': 23},
-                                          "temperature_rating": TemperatureRating.CRITICAL_HOT,
-                                          'humidity_thresholds': {'drought_threshold': 45,
-                                                                  'optimal_lower': 60,
-                                                                  'optimal_upper': 70,
-                                                                  'wetness_threshold': 85},
-                                          "humidity_rating": HumidityRating.OPTIMAL,
-                                          "online_status": OnlineStatus.ONLINE,
-                                          "last_updated_at": last_updated_at.isoformat(),
-                                          "last_seen_at": last_seen_at.isoformat()})
+                          "humidity": humidity, 'temperature_thresholds': {'frostiness_threshold': 15,
+                                                                           'heat_threshold': 30,
+                                                                           'optimal_lower': 20,
+                                                                           'optimal_upper': 23},
+                          "temperature_rating": TemperatureRating.CRITICAL_HOT,
+                          'humidity_thresholds': {'drought_threshold': 45,
+                                                  'optimal_lower': 60,
+                                                  'optimal_upper': 70,
+                                                  'wetness_threshold': 85},
+                          "humidity_rating": HumidityRating.OPTIMAL,
+                          "online_status": OnlineStatus.ONLINE,
+                          "last_updated_at": last_updated_at.isoformat(),
+                          "last_seen_at": last_seen_at.isoformat()})
 
     def test_contains_all_info_when_creating_from_dict(self):
         name = 'Hallway 42'
