@@ -41,7 +41,7 @@ def run():
     register_of_persons = RegisterOfPersons()
     logger.debug("Storage loaded")
     machine_configs = list(filter(lambda t: machine_service_supports_thing_type(thing_type=t.type), config.things))
-    machine_service = MachineService(appliance_depot, storage, time_series_storage, config_manager)
+    machine_service = MachineService(appliance_depot, time_series_storage, config_manager)
     machine_service.add_machines_by_config(machine_configs)
     mqtt_mediators = []
     logger.debug("Machine service for loaded")

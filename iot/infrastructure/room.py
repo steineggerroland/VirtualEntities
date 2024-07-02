@@ -16,13 +16,19 @@ class Room(Thing):
         self.temperature_thresholds = temperature_thresholds
         self.humidity_thresholds = humidity_thresholds
 
-    def update_temperature(self, new_temperature: Temperature):
-        self.temperature = new_temperature
-        self.last_updated_at = self.last_seen_at = datetime.now()
+    def update_temperature(self, new_temperature: Temperature) -> 'Room':
+        now = datetime.now()
+        return Room(self.name, new_temperature, self.humidity, self.temperature_thresholds, self.humidity_thresholds,
+                    now, now)
 
-    def update_humidity(self, humidity):
-        self.humidity = humidity
-        self.last_updated_at = self.last_seen_at = datetime.now()
+    def update_humidity(self, humidity) -> 'Room':
+        now = datetime.now()
+        return Room(self.name, self.temperature, humidity, self.temperature_thresholds, self.humidity_thresholds,
+                    now, now)
+
+    def change_name(self, name) -> 'Room':
+        return Room(name, self.temperature, self.humidity, self.temperature_thresholds, self.humidity_thresholds,
+                    datetime.now(), self.last_seen_at)
 
     def rate_temperature(self) -> TemperatureRating:
         if not self.temperature or not self.temperature_thresholds:

@@ -141,6 +141,11 @@ class MachineService:
             managed_machine.change_name(name, self._create_thread_for_is_running_check(managed_machine))
         else:
             managed_machine.change_name(name)
+        appliance = self.appliance_depot.retrieve(old_name)
+        appliance.rename(name)
+        self.appliance_depot.deplete(old_name)
+        self.appliance_depot.stock(appliance)
+        self.time_series_storage.rename(name, old_name)
 
     def get_machine(self, machine_name: str) -> MachineThatCanBeLoaded:
         return self.appliance_depot.retrieve(machine_name)

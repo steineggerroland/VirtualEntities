@@ -32,6 +32,11 @@ class IotMachine(Thing):
         self.finished_last_run_at = now
         self.last_updated_at = now
 
+    def rename(self, name: str):
+        self.name = name
+        now = datetime.now()
+        self.last_updated_at = now
+
     def running_for_time_period(self) -> timedelta:
         if self.started_run_at is not None:
             return self.started_run_at - datetime.now()
