@@ -96,7 +96,7 @@ class InfluxDbTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
 
     def _change_thing_name_of_point(self, point: dict, new_name: str) -> dict:
         try:
-            point['tags'][THING_NAME_TAG] = new_name
+            point[THING_NAME_TAG] = new_name
         except KeyError as e:
             self.logger.error("Could not set entity name to point: (%s)", point)
             raise DatabaseException("Failed to change entity name.", e) from e
