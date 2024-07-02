@@ -151,7 +151,7 @@ def property_has_new_value(context, property_name, entity_name):
 def property_has_new_value(context, property_name, entity_name):
     entity_type = 'appliance' if property_name in ['power consumption'] else 'room'
     property_name_in_class = property_name.replace(' ', '-')
-    WebDriverWait(context.webdriver, 30).until(
+    WebDriverWait(context.webdriver, 30, ignored_exceptions=[ValueError]).until(
         lambda d: _verify_property(d, entity_name, entity_type, f'.{property_name_in_class}'),
         f"No property {property_name} of entity {entity_name} found")
 
@@ -165,34 +165,33 @@ def _verify_property(d, entity_name, entity_type, property_selector, value=None,
     for entity_element in elements_matching_entity_type:
         if entity_element.find_element(By.CLASS_NAME, 'name').text == entity_name:
             matching_names += 1
-            if value is None:
+            match_found = _find_property_and_match_with(value, entity_element, property_selector, values_not_matching)
+            if match_found:
                 return True
-            elif type(value) is float:
-                matching_elements = list(map(lambda e: e.text,
-                                             entity_element.find_elements(By.CSS_SELECTOR, property_selector)))
-                match_found = any(
-                    _extracted_value_matches(extracted_value_with_unit, value) for extracted_value_with_unit in
-                    matching_elements)
-                if not match_found:
-                    values_not_matching = values_not_matching + matching_elements
-                else:
-                    return True
-            else:
-                matching_elements = list(map(lambda e: e.text,
-                                             entity_element.find_elements(By.CSS_SELECTOR, property_selector)))
-                match_found = any(extracted_value == value for extracted_value in matching_elements)
-                if not match_found:
-                    values_not_matching = values_not_matching + matching_elements
-                else:
-                    return True
-    if len(values_not_matching) > 0:
-        raise ValueError(f'None of the found values ({values_not_matching})'
-                         f' matches expected float value "{value}"')
-    elif len(elements_matching_entity_type) <= 0:
-        raise ValueError(f'Could not find any entity of type {entity_type}')
+    _handle_property_of_entity_not_found(elements_matching_entity_type, entity_name, entity_type, matching_names, value,
+                                         values_not_matching)
+
+
+def _find_property_and_match_with(value, entity_element, property_selector, values_not_matching):
+    if value is None:
+        return True
+    elif type(value) is float:
+        return _find_and_compare_float_property(value, entity_element, property_selector,
+                                                values_not_matching)
     else:
-        raise ValueError(f'Found {matching_names} entities of type {entity_type}'
-                         f' with name {entity_name} but no expected value {value}')
+        return _find_and_compare_property(value, entity_element, property_selector, values_not_matching)
+
+
+def _find_and_compare_float_property(value, entity_element, property_selector, values_not_matching):
+    property_values = list(map(lambda e: e.text,
+                               entity_element.find_elements(By.CSS_SELECTOR, property_selector)))
+    if not any(
+            _extracted_value_matches(extracted_value_with_unit, value) for extracted_value_with_unit in
+            property_values):
+        values_not_matching.extend(property_values)
+        return False
+    else:
+        return True
 
 
 def _extracted_value_matches(extracted_value_with_unit, value):
@@ -201,6 +200,27 @@ def _extracted_value_matches(extracted_value_with_unit, value):
         return False
     extracted_float = float(regex_match.group(0)) if extracted_value_with_unit.find('?') < 0 else None
     return extracted_float == value
+
+
+def _find_and_compare_property(value, entity_element, property_selector, values_not_matching):
+    property_values = list(map(lambda e: e.text,
+                               entity_element.find_elements(By.CSS_SELECTOR, property_selector)))
+    if not any(extracted_value == value for extracted_value in property_values):
+        values_not_matching.extend(property_values)
+        return False
+    else:
+        return True
+
+
+def _handle_property_of_entity_not_found(elements_matching_entity_type, entity_name, entity_type, matching_names, value,
+                                         values_not_matching):
+    if len(values_not_matching) > 0:
+        raise ValueError(f'None of the found values ({values_not_matching}) matches expected float value "{value}"')
+    elif len(elements_matching_entity_type) <= 0:
+        raise ValueError(f'Could not find any entity of type {entity_type}')
+    else:
+        raise ValueError(f'Found {matching_names} entities of type {entity_type} with name {entity_name}'
+                         f' but no expected value {value}')
 
 
 @then('the main headline contains {some_string}')
@@ -229,19 +249,26 @@ def input_with_value(context, field_name, value):
 @then('they see a {message_type} message')
 def message_of_type(context, message_type):
     WebDriverWait(context.webdriver, 30).until(
-        presence_of_element_located((By.CSS_SELECTOR, '.messages .message.%s' % message_type)))
+        presence_of_element_located((By.CSS_SELECTOR, '.messages .message.%s' % message_type)),
+        'No message of type "%s" found' % message_type)
 
 
 @then('the user sees the new appointment after a refresh')
 def find_appointment(context):
     summary = context.new_value
-    WebDriverWait(context.webdriver, 10).until(lambda d: _find_appointment(d, summary, context.webdriver))
+    WebDriverWait(context.webdriver, 30, ignored_exceptions=[ValueError]).until(
+        lambda d: _find_appointment(d, summary, d))
 
 
-def _find_appointment(webdriver, summary, refresh=None):
+def _find_appointment(webdriver: WebDriver, summary, refresh=None):
     if refresh is not None:
         refresh.refresh()
-    return any(e.text == summary for e in webdriver.find_elements(By.CSS_SELECTOR, '.appointment .summary'))
+    summary_elements = webdriver.find_elements(By.CSS_SELECTOR, '.appointment .summary')
+    found_summaries = list(map(lambda e: e.text, summary_elements))
+    if not any(s == summary for s in found_summaries):
+        raise ValueError(
+            'No appointment with summary "%s" in appointments "%s" found' % (summary, str.join(', ', found_summaries)))
+    return True
 
 
 @then(u'the user sees a diagram with {property_type} values')
