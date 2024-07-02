@@ -90,7 +90,10 @@ class InfluxDbTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
         except InfluxDBClientError:  # Exception is raised on query when no data exists (404 by db)
             self.logger.debug(f'No climate data to rename for entity {old_name}')
 
-    @staticmethod
-    def _change_thing_name_of_point(point: dict, new_name: str) -> dict:
-        point['tags'][THING_NAME_TAG] = new_name
+    def _change_thing_name_of_point(self, point: dict, new_name: str) -> dict:
+        try:
+            point['tags'][THING_NAME_TAG] = new_name
+        except KeyError as e:
+            self.logger.error("Could not set entity name to point: (%s)", point)
+            raise DatabaseException("Failed to change entity name.", e) from e
         return point
