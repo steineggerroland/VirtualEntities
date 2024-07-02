@@ -15,7 +15,7 @@ class IncompleteConfiguration(Exception):
 class TimeSeriesConfig:
     def __init__(self, url: str, port: Optional[int], username: str, password: str, bucket_name: str):
         self.url = url
-        self.port = port if port is None else int(port)
+        self.port = 8086 if port is None else int(port)
         self.username = username
         self.password = password
         self.bucket_name = bucket_name
