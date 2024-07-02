@@ -250,8 +250,11 @@ def setup_application_data(source_path, test_dir):
 def after_all(context):
     run_path = context.run_path
     if run_path is not None and run_path.exists() and run_path.is_dir():
-        shutil.rmtree(run_path)
-        logging.debug(f"Cleaned up test data at {run_path}")
+        try:
+            shutil.rmtree(run_path)
+            logging.debug(f"Cleaned up test data at {run_path}")
+        except PermissionError as e:
+            print('Run path is not deleted due to permission error: %s' % e)
     else:
         logging.debug(f"No cleanup needed for {run_path}")
 
