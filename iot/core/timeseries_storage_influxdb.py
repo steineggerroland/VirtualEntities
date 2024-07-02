@@ -84,10 +84,9 @@ class InfluxDbTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
     def _rename_thing_in_time_series(self, time_series_name: str, old_name: str, new_name: str):
         try:
             rs = self.influxdb.query(f"SELECT * FROM {time_series_name}")
-            old_points = rs.get_points(measurement=time_series_name, tags={THING_NAME_TAG: old_name})
+            old_points = list(rs.get_points(measurement=time_series_name, tags={THING_NAME_TAG: old_name}))
             if old_points:
-                chunks = [old_points[i:i + MAX_COUNT_TO_UPDATE] for i in
-                          range(0, len(list(old_points)), MAX_COUNT_TO_UPDATE)]
+                chunks = [old_points[i:i + MAX_COUNT_TO_UPDATE] for i in range(0, len(old_points), MAX_COUNT_TO_UPDATE)]
                 for chunk in chunks:
                     reassigned_points = list(map(lambda p: self._change_thing_name_of_point(p, new_name), chunk))
                     self.influxdb.write_points(reassigned_points)
