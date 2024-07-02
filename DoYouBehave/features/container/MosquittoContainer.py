@@ -23,6 +23,7 @@ class MosquittoContainer(DockerContainer):
             self.logger_thread.start()
         super().start()
         wait_for_logs(self, predicate='.*running.*')
+        self.exec("chmod -R o+rw /mosquitto") # change access rights to enable deletion after run
         return self
 
     def _poll_log(self):
