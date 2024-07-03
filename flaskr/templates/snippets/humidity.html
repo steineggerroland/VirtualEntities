@@ -1,31 +1,61 @@
-{%- if humidity != None and rating=='unknown' %}
-    {%- set text = '%s%%' % humidity %}
-    {%- set tooltip = _('Humidity') %}
-    {%- set color_type = 'secondary' %}
-{%- elif humidity != None and rating=='optimal' %}
-    {%- set text = '%s%%' % humidity %}
-    {%- set tooltip = _('Humidity optimal') %}
-    {%- set color_type = 'success' %}
-{%- elif humidity != None and (rating=='dry' or rating=='wet') %}
-    {%- set text = '%s%%' % humidity %}
-    {%- set tooltip = _('Humidity slightly out of range') %}
-    {%- set color_type = 'warning' %}
-{%- elif humidity != None %}
-    {%- set text = '%s%%' % humidity %}
-    {%- set tooltip = _('Humidity out of range') %}
-    {%- set color_type = 'danger' %}
+{%- if humidity != None %}
+    {%- if rating=='unknown' %}
+        {%- set text = '%s%%' % humidity %}
+        {%- set tooltip = _('Humidity') %}
+        {%- set color_type = 'secondary' %}
+        {%- set icon='img/flaticon/humidity.png' %}
+    {%- elif rating=='optimal' %}
+        {%- set text = '%s%%' % humidity %}
+        {%- set tooltip = _('Humidity optimal') %}
+        {%- set color_type = 'success' %}
+        {%- set icon='img/flaticon/humidity.png' %}
+    {%- elif rating=='dry' %}
+        {%- set text = '%s%%' % humidity %}
+        {%- set tooltip = _('Humidity slightly out of range') %}
+        {%- set color_type = 'warning' %}
+        {%- set icon='img/flaticon/dryness.gif' %}
+    {%- elif rating=='critical_dry' %}
+        {%- set text = '%s%%' % humidity %}
+        {%- set tooltip = _('Humidity out of range') %}
+        {%- set color_type = 'danger' %}
+        {%- set icon='img/flaticon/dryness.gif' %}
+    {%- elif rating=='wet' %}
+        {%- set text = '%s%%' % humidity %}
+        {%- set tooltip = _('Humidity slightly out of range') %}
+        {%- set color_type = 'warning' %}
+        {%- set icon='img/flaticon/humidity.gif' %}
+    {%- else %}
+        {%- set text = '%s%%' % humidity %}
+        {%- set tooltip = _('Humidity out of range') %}
+        {%- set color_type = 'danger' %}
+        {%- set icon='img/flaticon/humidity.gif' %}
+    {%- endif %}
 {%- else %}
     {%- set text = _('?%%') %}
     {%- set tooltip = _('Humidity unknown') %}
     {%- set color_type = 'secondary' %}
+    {%- set icon='img/flaticon/humidity.png' %}
 {%- endif %}
 {%- if as_badge==True %}
     <span class="humidity badge text-bg-light border border-{{ color_type }}"
           data-bs-title="{{ tooltip }}"
           data-bs-toggle="tooltip">{{ text }}</span>
 {%- else %}
-    <div class="humidity h-100 w-100 d-flex justify-content-center align-items-center text-bg-{{ color_type }} bg-{{ border_color }}"
+    <div class="humidity h-100 w-100 text-center align-content-center text-bg-{{ color_type }} bg-{{ border_color }}"
          data-bs-title="{{ tooltip }}" data-bs-toggle="tooltip">
-        {{ text }}
+        <img class="icon" src="{{ url_for('static', filename=icon) }}" alt="{{ text }}"/>
+        <div>{{ text }}</div>
+        <div class="visually-hidden humidity-rating-{{ rating.value }}" role="status">{{ _(rating) }}</div>
     </div>
 {%- endif %}
+<style>
+    .humidity .icon {
+        height: 50%;
+        mix-blend-mode: multiply;
+    }
+
+    .humidity:has(.humidity-rating-unknown) .icon {
+        filter: invert();
+        mix-blend-mode: unset;
+    }
+</style>
