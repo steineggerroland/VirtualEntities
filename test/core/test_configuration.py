@@ -4,8 +4,8 @@ from pathlib import Path
 
 import yamlenv
 
-from iot.core.configuration import PlannedNotification, IncompleteConfiguration, MqttMeasureSource, Measure, \
-    ConfigurationManager
+from iot.core.configuration import PlannedNotification, IncompleteConfiguration, MqttMeasureSource, Measure
+from iot.core.configuration_manager import ConfigurationManager
 
 DIR = Path(__file__).parent
 
@@ -28,6 +28,8 @@ class ConfigurationTest(unittest.TestCase):
 
         self.assertEqual("super_thing", config.things[0].name)
         self.assertEqual("dryer", config.things[0].type)
+        self.assertEqual(5, config.things[0].run_complete_when.below_threshold_for)
+        self.assertEqual(10, config.things[0].run_complete_when.threshold)
         self.assertIn(MqttMeasureSource('consumption/topic', [Measure(source_type='consumption')]),
                       config.things[0].sources.list)
         self.assertIn(MqttMeasureSource('loading/topic', [Measure(source_type='loading')]),

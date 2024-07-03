@@ -5,7 +5,8 @@ from typing import List
 
 from python_event_bus import EventBus
 
-from iot.core.configuration import IotThingConfig, ConfigurationManager
+from iot.core.configuration import IotThingConfig
+from iot.core.configuration_manager import ConfigurationManager
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.machine.appliance_depot import ApplianceDepot
@@ -63,7 +64,9 @@ class MachineService:
         for thing_config in thing_configs:
             machine = self.appliance_depot.retrieve(thing_config.name)
             self.managed_machines.add(
-                ManagedMachine(thing_config.name, SimpleHistoryRunCompleteStrategy(self.time_series_storage)))
+                ManagedMachine(thing_config.name, SimpleHistoryRunCompleteStrategy(self.time_series_storage,
+                                                                                   thing_config.run_complete_when.below_threshold_for,
+                                                                                   thing_config.run_complete_when.threshold)))
             if machine is None:
                 machine = MachineBuilder.from_dict(thing_config.__dict__)
                 self.appliance_depot.stock(machine)

@@ -6,8 +6,8 @@ from iot.infrastructure.machine.power_state_decorator import PowerState
 
 
 class SimpleHistoryRunCompleteStrategy:
-    def __init__(self, time_series_storage: TimeSeriesStorage, duration_to_be_below_threshold=300,
-                 power_consumption_threshold=10):
+    def __init__(self, time_series_storage: TimeSeriesStorage, duration_to_be_below_threshold: int,
+                 power_consumption_threshold: int):
         self.logger = logging.getLogger(self.__class__.__qualname__)
         self.time_series_storage = time_series_storage
         self.duration_to_be_below_threshold = duration_to_be_below_threshold
