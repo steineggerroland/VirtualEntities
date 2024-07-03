@@ -131,7 +131,10 @@ def appliances_setup(context, timeout=10, **kwargs):
                                 'measurements/home/indoor/dishwasher/power', 'home/things/dishwasher/load',
                                 'home/things/dishwasher/unload'),
         'Dryer': Appliance(mqtt_client, 'Dryer',
-                           'zigbee/home/indoor/dryer', 'home/things/dryer/load', 'home/things/dryer/unload')
+                           'zigbee/home/indoor/dryer', 'home/things/dryer/load', 'home/things/dryer/unload'),
+        'Washer Kai': Appliance(mqtt_client, 'Washer Kai',
+                                'measurements/home/indoor/washing_machine_kai/power/power',
+                                'home/things/washing_machine_kai/load', 'home/things/washing_machine_kai/unload')
     }
     context.rooms = {
         'Kitchen': Room(mqtt_client, 'Kitchen', 'zigbee/home/kitchen/sensor01'),
