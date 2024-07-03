@@ -1,30 +1,59 @@
-{%- if temperature != None and rating=='unknown' %}
-    {%- set text = temperature %}
-    {%- set tooltip = _('Temperature') %}
-    {%- set color_type = 'secondary' %}
-{%- elif temperature != None and rating=='optimal' %}
-    {%- set text = temperature %}
-    {%- set tooltip = _('Temperature optimal') %}
-    {%- set color_type = 'success' %}
-{%- elif temperature != None and (rating=='cold' or rating=='hot') %}
-    {%- set text = temperature %}
-    {%- set tooltip = _('Temperature slightly out of range') %}
-    {%- set color_type = 'warning' %}
-{%- elif temperature != None %}
-    {%- set text = temperature %}
-    {%- set tooltip = _('Temperature out of range') %}
-    {%- set color_type = 'danger' %}
+{% if temperature != None %}
+    {%- if rating=='unknown' %}
+        {%- set text = temperature %}
+        {%- set tooltip = _('Temperature') %}
+        {%- set color_type = 'secondary' %}
+        {%- set icon='img/flaticon/temperature.gif' %}
+    {%- elif rating=='optimal' %}
+        {%- set text = temperature %}
+        {%- set tooltip = _('Temperature optimal') %}
+        {%- set color_type = 'success' %}
+        {%- set icon='img/flaticon/temperature.gif' %}
+    {%- elif rating=='hot' %}
+        {%- set text = temperature %}
+        {%- set tooltip = _('Temperature slightly out of range') %}
+        {%- set color_type = 'warning' %}
+        {%- set icon='img/flaticon/hot.gif' %}
+    {%- elif rating=='critical_hot' %}
+        {%- set text = temperature %}
+        {%- set tooltip = _('Temperature out of range') %}
+        {%- set color_type = 'danger' %}
+        {%- set icon='img/flaticon/hot.gif' %}
+    {%- elif rating=='cold' %}
+        {%- set text = temperature %}
+        {%- set tooltip = _('Temperature slightly out of range') %}
+        {%- set color_type = 'warning' %}
+        {%- set icon='img/flaticon/cold.gif' %}
+    {%- else %}
+        {%- set text = temperature %}
+        {%- set tooltip = _('Temperature out of range') %}
+        {%- set color_type = 'danger' %}
+        {%- set icon='img/flaticon/cold.gif' %}
+    {%- endif %}
 {%- else %}
     {%- set text = _('?°C') %}
     {%- set tooltip = _('Temperature unknown') %}
     {%- set color_type = 'secondary' %}
+    {%- set icon='img/flaticon/thermometer.png' %}
 {%- endif %}
 {%- if as_badge==True %}
     <span class="badge temperature text-bg-light border border-{{ color_type }}" data-bs-title="{{ tooltip }}"
           data-bs-toggle="tooltip">{{ text }}</span>
 {%- else %}
-    <div class="temperature h-100 w-100 d-flex justify-content-center align-items-center text-bg-{{ color_type }} bg-{{ color_type }}"
+    <div class="temperature h-100 w-100 text-center align-content-center text-bg-{{ color_type }} bg-{{ color_type }}"
          data-bs-title="{{ tooltip }}" data-bs-toggle="tooltip">
-        {{ text }}
+        <img class="icon" src="{{ url_for('static', filename=icon) }}" alt="{{ text }}"/>
+        <div>{{ text }}</div>
+    <div class="visually-hidden temperature-rating-{{ rating.value }}" role="status">{{ _(rating) }}</div>
     </div>
 {%- endif %}
+<style>
+    .temperature .icon {
+        height: 50%;
+        mix-blend-mode: multiply;
+    }
+    .temperature:has(.temperature-rating-unknown) .icon {
+        filter: invert();
+        mix-blend-mode: unset;
+    }
+</style>
