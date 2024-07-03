@@ -79,7 +79,7 @@ def create_app(default_config_file_name: str, machine_service: MachineService, a
                   locale_selector=locale_selector)
 
     app.config['BOOTSTRAP_SERVE_LOCAL'] = True
-    app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = 'sketchy'
+    app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = 'united'
     bootstrap = Bootstrap5(app)
 
     # ensure the instance folder exists
