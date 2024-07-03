@@ -28,10 +28,16 @@ def load_page(context, page_name: str, entity_name: str):
     context.pages[page_name].is_current_page()
 
 
-@When('the power consumption of the {appliance_name} is updated')
-def send_power_consumption(context, appliance_name: str):
-    context.new_value = round(random.random() * 2400, 2)
+use_step_matcher('re')
+
+
+@When(r'the power consumption of the (?P<appliance_name>\w+(?> \w+)*?) is updated(?> to (?P<value>\d+))?')
+def send_power_consumption(context, appliance_name: str = None, value: int = None):
+    context.new_value = round(random.random() * 2400, 2) if value is None else float(value)
     context.appliances[appliance_name].send_power_consumption_update(context.new_value)
+
+
+use_step_matcher('parse')
 
 
 @When('the room climate of the {room_name} is updated')
@@ -135,25 +141,32 @@ def appliance_is_shown(context, person_names: str):
                    context.pages['virtual entities'].persons())
 
 
-@then('the user sees the new {property_name} for the {entity_name} after a refresh')
-def property_has_new_value(context, property_name, entity_name):
-    entity_type = 'appliance' if property_name in ['power consumption'] else 'room'
+use_step_matcher('re')
+
+
+@then(
+    r'the user sees the(?> (?P<new>new))? ?(?P<property_name>\w+(?> \w+)*?) of the (?P<entity_name>\w+(?> \w+)*?)(?> (?>being (?P<value>(?>\d|\w)+(?> (?>\d|\w)+)*?) )?after a refresh)?')
+def property_has_new_value(context, property_name=None, entity_name=None, value=None, new=None):
+    if new is None:
+        return property_has_value(context, property_name, entity_name)
+    entity_type = 'appliance' if property_name in ['power consumption', 'running state'] else 'room'
     property_name_in_class = property_name.replace(' ', '-')
-    new_value = context.new_value if type(context.new_value) is not dict else context.new_value[
-        property_name.replace(' ', '_')]
+    value = value if value is not None else (
+        context.new_value if type(context.new_value) is not dict else context.new_value[
+            property_name.replace(' ', '_')])
     WebDriverWait(context.webdriver, 30).until(
-        lambda d: _verify_property(d, entity_name, entity_type, f'.{property_name_in_class}', new_value,
-                                   refresh=context.webdriver),
-        f"No property {property_name} of entity {entity_name} with value {new_value} found")
+        lambda d: _verify_property(d, entity_name, entity_type, f'.{property_name_in_class}', value,
+                                   refresh=d))
 
 
-@then('the user sees the {property_name} for the {entity_name}')
-def property_has_new_value(context, property_name, entity_name):
+use_step_matcher('parse')
+
+
+def property_has_value(context, property_name, entity_name):
     entity_type = 'appliance' if property_name in ['power consumption'] else 'room'
     property_name_in_class = property_name.replace(' ', '-')
-    WebDriverWait(context.webdriver, 30, ignored_exceptions=[ValueError]).until(
-        lambda d: _verify_property(d, entity_name, entity_type, f'.{property_name_in_class}'),
-        f"No property {property_name} of entity {entity_name} found")
+    WebDriverWait(context.webdriver, 30).until(
+        lambda d: _verify_property(d, entity_name, entity_type, f'.{property_name_in_class}'))
 
 
 def _verify_property(d, entity_name, entity_type, property_selector, value=None, refresh=None):
@@ -170,6 +183,7 @@ def _verify_property(d, entity_name, entity_type, property_selector, value=None,
                 return True
     _handle_property_of_entity_not_found(elements_matching_entity_type, entity_name, entity_type, matching_names, value,
                                          values_not_matching)
+    return False
 
 
 def _find_property_and_match_with(value, entity_element, property_selector, values_not_matching):
@@ -205,22 +219,29 @@ def _extracted_value_matches(extracted_value_with_unit, value):
 def _find_and_compare_property(value, entity_element, property_selector, values_not_matching):
     property_values = list(map(lambda e: e.text,
                                entity_element.find_elements(By.CSS_SELECTOR, property_selector)))
-    if not any(extracted_value == value for extracted_value in property_values):
-        values_not_matching.extend(property_values)
-        return False
+    if type(value) is str:
+        if any(extracted_value.lower().find(value.lower()) >= 0 for extracted_value in property_values):
+            return True
+        else:
+            values_not_matching.extend(property_values)
+            return False
     else:
-        return True
+        if any(extracted_value == value for extracted_value in property_values):
+            return True
+        else:
+            values_not_matching.extend(property_values)
+            return False
 
 
 def _handle_property_of_entity_not_found(elements_matching_entity_type, entity_name, entity_type, matching_names, value,
                                          values_not_matching):
     if len(values_not_matching) > 0:
-        raise ValueError(f'None of the found values ({values_not_matching}) matches expected float value "{value}"')
+        print(f'None of the found values ({values_not_matching}) matches expected value "{value}" for '
+              f'entity {entity_name} ({entity_type})')
     elif len(elements_matching_entity_type) <= 0:
-        raise ValueError(f'Could not find any entity of type {entity_type}')
+        print(f'Could not find any entity of type {entity_type} with name {entity_name}')
     else:
-        raise ValueError(f'Found {matching_names} entities of type {entity_type} with name {entity_name}'
-                         f' but no expected value {value}')
+        print(f'Found {matching_names} entities for {entity_name} ({entity_type}) but no expected value {value}')
 
 
 @then('the main headline contains {some_string}')
@@ -256,7 +277,7 @@ def message_of_type(context, message_type):
 @then('the user sees the new appointment after a refresh')
 def find_appointment(context):
     summary = context.new_value
-    WebDriverWait(context.webdriver, 30, ignored_exceptions=[ValueError]).until(
+    WebDriverWait(context.webdriver, 30).until(
         lambda d: _find_appointment(d, summary, d))
 
 
@@ -266,8 +287,9 @@ def _find_appointment(webdriver: WebDriver, summary, refresh=None):
     summary_elements = webdriver.find_elements(By.CSS_SELECTOR, '.appointment .summary')
     found_summaries = list(map(lambda e: e.text, summary_elements))
     if not any(s == summary for s in found_summaries):
-        raise ValueError(
-            'No appointment with summary "%s" in appointments "%s" found' % (summary, str.join(', ', found_summaries)))
+        print('No appointment with summary "%s" in appointments "%s" found' %
+              (summary, str.join(', ', found_summaries)))
+        return False
     return True
 
 
@@ -280,18 +302,14 @@ def step_impl(context, property_type: str):
 @then(u'the user sees the diagram with updated {property_type} values')
 def step_impl(context, property_type):
     old_value = getattr(context, f'prop_{property_type}')
-    WebDriverWait(context.webdriver, 10, 1).until(lambda d: _get_diagram_path_for_property(d,
-                                                                                           property_type) is not None and old_value != _get_diagram_path_for_property(
-        d, property_type))
+    WebDriverWait(context.webdriver, 10, 1).until(
+        lambda d: _compare_diagram_path_for_property(d, property_type, old_value))
     setattr(context, f'prop_{property_type}', _get_diagram_path_for_property(context.webdriver, property_type))
 
 
-@then('they see the calendar called {calendar_name}')
-def find_calendar(context, calendar_name: str):
-    context.webdriver.find_elements()
-    WebDriverWait(context.webdriver, 30).until(
-        lambda d: _verify_property(d, context.entity_name, 'person', '.calendar .name', calendar_name),
-        f"No calendar {calendar_name} of person {context.entity_name} found")
+def _compare_diagram_path_for_property(webdriver, property_type, old_value) -> Optional[str]:
+    value = _get_diagram_path_for_property(webdriver, property_type)
+    return value is not None and old_value != value
 
 
 def _get_diagram_path_for_property(webdriver, property_type) -> Optional[str]:
@@ -302,6 +320,14 @@ def _get_diagram_path_for_property(webdriver, property_type) -> Optional[str]:
         return new_value
     except:
         return None
+
+
+@then('they see the calendar called {calendar_name}')
+def find_calendar(context, calendar_name: str):
+    context.webdriver.find_elements()
+    WebDriverWait(context.webdriver, 30).until(
+        lambda d: _verify_property(d, context.entity_name, 'person', '.calendar .name', calendar_name),
+        f"No calendar {calendar_name} of person {context.entity_name} found")
 
 
 def _scroll_and_click_on_element(webdriver, element):

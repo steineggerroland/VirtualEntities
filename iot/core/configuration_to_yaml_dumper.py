@@ -3,6 +3,8 @@ from typing import List
 
 from yaml import Dumper, Node
 
+from iot.core.configuration import RunCompleteWhen
+
 
 class ConfigDumpers:
 
@@ -10,7 +12,8 @@ class ConfigDumpers:
         to_dict = {'mqtt': c.mqtt,
                    'things': [thing for thing in c.things]}
         if c.time_series: to_dict['time_series'] = c.time_series
-        if c.calendars_config and (c.calendars_config.categories or c.calendars_config.calendars): to_dict['calendars'] = c.calendars_config
+        if c.calendars_config and (c.calendars_config.categories or c.calendars_config.calendars): to_dict[
+            'calendars'] = c.calendars_config
         if c.flaskr: to_dict['flaskr'] = c.flaskr
         return dumper.represent_dict(
             _sort_keys(OrderedDict(to_dict), ['mqtt', 'time_series', 'things', 'calendars', 'flaskr']).items())
@@ -106,6 +109,10 @@ class ConfigDumpers:
 
     def iot_thing_dumper(dumper: Dumper, o) -> Node:
         to_dict = OrderedDict({'name': o.name, 'type': o.type})
+        default_run_complete_when = RunCompleteWhen()
+        if o.run_complete_when.below_threshold_for != default_run_complete_when.below_threshold_for or \
+                o.run_complete_when.threshold != default_run_complete_when.threshold:
+            to_dict['run_complete_when'] = o.run_complete_when
         if o.sources and o.sources.list:
             to_dict['sources'] = o.sources
         if o.destinations and o.destinations.planned_notifications:
@@ -115,8 +122,11 @@ class ConfigDumpers:
         if o.temperature_thresholds:
             to_dict['temperature_thresholds'] = o.temperature_thresholds
         return dumper.represent_dict(_sort_keys(to_dict,
-                                                ['name', 'type', 'temperature_thresholds', 'humidity_thresholds',
-                                                 'sources', 'destinations']).items())
+                                                ['name', 'type', 'run_complete_when', 'temperature_thresholds',
+                                                 'humidity_thresholds', 'sources', 'destinations']).items())
+
+    def run_complete_when_dumper(dumper: Dumper, o: RunCompleteWhen) -> Node:
+        return dumper.represent_dict({'below_threshold_for': o.below_threshold_for, 'threshold': o.threshold})
 
 
 def _sort_keys(d: OrderedDict, a: List[str]) -> OrderedDict:

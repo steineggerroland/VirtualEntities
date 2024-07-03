@@ -13,6 +13,9 @@ time_series:
 things:
   - name: super_thing
     type: dryer
+    run_complete_when:
+      below_threshold_for: 5
+      threshold: 10
     sources:
       - mqtt_topic: consumption/topic
         type: consumption

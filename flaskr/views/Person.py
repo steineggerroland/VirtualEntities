@@ -8,7 +8,7 @@ from flask.views import View, MethodView
 from flask_babel import gettext
 
 from flaskr.forms.PersonForm import PersonNameForm
-from iot.core.configuration import ConfigurationManager
+from iot.core.configuration_manager import ConfigurationManager
 from iot.infrastructure.person import Person
 from iot.infrastructure.register_of_persons import RegisterOfPersons
 

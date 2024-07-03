@@ -1,5 +1,6 @@
 import json
 import logging
+import random
 from threading import Thread
 from typing import Callable
 
@@ -37,12 +38,14 @@ class Subscriptions:
         return list(map(lambda subscription: subscription.callback,
                         filter(lambda subscription: subscription.topic == topic, self.subscriptions)))
 
+
 class MqttClient:
     def __init__(self, mqtt_config: MqttConfiguration):
         self.logger = logging.getLogger(self.__class__.__qualname__)
         self.mqtt_config = mqtt_config
 
-        self.mqtt_client = paho_mqtt.Client(CallbackAPIVersion.VERSION1, client_id=self.mqtt_config.client_id)
+        self.mqtt_client = paho_mqtt.Client(CallbackAPIVersion.VERSION1,
+                                            client_id=f'{self.mqtt_config.client_id}-{random.randint(0, 99999)}')
         if self.mqtt_config.has_credentials:
             self.mqtt_client.username_pw_set(self.mqtt_config.username, self.mqtt_config.password)
             self.logger.debug(
@@ -62,6 +65,7 @@ class MqttClient:
 
     def _on_socket_error(self, *args):
         self.logger.error('MQTT Socket closed unexpectedly')
+
     def _on_connect_fail(self, *args):
         self.logger.error('Connection failed')
 

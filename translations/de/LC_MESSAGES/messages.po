@@ -5,9 +5,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: 0.1\n"
+"Project-Id-Version:  0.1\n"
 "Report-Msgid-Bugs-To: roland@steinegger.one\n"
-"POT-Creation-Date: 2024-07-02 09:32+0200\n"
+"POT-Creation-Date: 2024-07-02 17:50+0200\n"
 "PO-Revision-Date: 2024-05-24 21:54+0200\n"
 "Last-Translator: Roland Steinegger <roland@steinegger.one>\n"
 "Language: de\n"
@@ -89,9 +89,10 @@ msgid "Unknown thing"
 msgstr "Unbekanntes Ding"
 
 #: flaskr/templates/appliance.html:76
+#: flaskr/templates/snippets/appliance_sm.html:62
 #, fuzzy, python-format
 msgid "Running since %(xMinutes)s"
-msgstr "Läuft seit "
+msgstr "Läuft seit %(xMinutes)s"
 
 #: flaskr/templates/appliance.html:78
 msgid "Needs to be unloaded"
@@ -102,9 +103,10 @@ msgid "Currently idling"
 msgstr "Derzeit im Ruhezustand"
 
 #: flaskr/templates/appliance.html:88
+#: flaskr/templates/snippets/appliance_sm.html:65
 #, fuzzy, python-format
 msgid "Finished last run %(xMinutesAgo)s"
-msgstr "Letzter Lauf beendet "
+msgstr "Letzter Lauf beendet %(xMinutesAgo)s"
 
 #: flaskr/templates/appliance.html:97
 #, fuzzy
@@ -112,7 +114,7 @@ msgid "Power consumption (Watt)"
 msgstr "Stromverbrauch (Watt)"
 
 #: flaskr/templates/appliance.html:105
-#: flaskr/templates/snippets/appliance_sm.html:18
+#: flaskr/templates/snippets/appliance_sm.html:20
 msgid "Watt"
 msgstr "Watt"
 
@@ -158,7 +160,7 @@ msgstr "Personenverzeichnis"
 
 #: flaskr/templates/person.html:26
 #, fuzzy, python-format
-msgid "Edit %(person_name)"
+msgid "Edit %(person_name)s"
 msgstr "%(person_name) bearbeiten"
 
 #: flaskr/templates/person.html:29
@@ -232,9 +234,7 @@ msgstr "Temperatur optimal"
 #: flaskr/templates/room_configuration.html:59
 #, python-format
 msgid "Optimum from %(lower_bound_degree)s°C to %(upper_bound_degree)s°C"
-msgstr ""
-"Optimale Temperatur zwischen %(lower_bound_degree)s°C und "
-"%(upper_bound_degree)s°C"
+msgstr "Optimale Temperatur zwischen %(lower_bound_degree)s°C und %(upper_bound_degree)s°C"
 
 #: flaskr/templates/room_configuration.html:62
 #, python-format
@@ -253,9 +253,7 @@ msgstr "Luftfeuchte optimal"
 #: flaskr/templates/room_configuration.html:68
 #, python-format
 msgid "Optimum from %(lower_bound_percentage)s%% to %(upper_bound_percentage)s%%"
-msgstr ""
-"Optimale Luftfeuchte zwischen %(lower_bound_percentage)s%% und "
-"%(upper_bound_percentage)s%%"
+msgstr "Optimale Luftfeuchte zwischen %(lower_bound_percentage)s%% und %(upper_bound_percentage)s%%"
 
 #: flaskr/templates/room_configuration.html:71
 #, python-format
@@ -282,10 +280,23 @@ msgstr "Personenverzeichnis"
 msgid "Register is empty"
 msgstr "Das Verzeichnis ist leer"
 
+#: flaskr/templates/snippets/appliance_sm.html:30
+#, fuzzy
+msgid "Running"
+msgstr "Läuft"
+
+#: flaskr/templates/snippets/appliance_sm.html:42
+msgid "Loaded"
+msgstr "Beladen"
+
+#: flaskr/templates/snippets/appliance_sm.html:54
+msgid "Idling"
+msgstr "Untätig"
+
 #: flaskr/templates/snippets/attribution_footer.html:3
 #: flaskr/templates/snippets/attribution_footer.html:7
 #: flaskr/templates/snippets/attribution_footer.html:12
-#: flaskr/templates/snippets/attribution_footer.html:20
+#: flaskr/templates/snippets/attribution_footer.html:31
 #, fuzzy, python-format
 msgid "Icons made by %(author)s from %(url)s"
 msgstr "Icons erstellt von %(author)s von %(url)s"

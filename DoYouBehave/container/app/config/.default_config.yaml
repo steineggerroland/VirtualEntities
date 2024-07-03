@@ -26,6 +26,9 @@ things:
           cron_expression: '* * * * *'
   - name: Dishwasher
     type: dishwasher
+    run_complete_when:
+      below_threshold_for: 1
+      threshold: 10
     sources:
       - mqtt_topic: measurements/home/indoor/dishwasher/power
         type: consumption

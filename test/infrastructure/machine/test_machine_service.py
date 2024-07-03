@@ -2,7 +2,8 @@ import unittest
 from datetime import datetime, timedelta
 from unittest.mock import Mock, MagicMock
 
-from iot.core.configuration import ConfigurationManager, IotThingConfig
+from iot.core.configuration import IotThingConfig
+from iot.core.configuration_manager import ConfigurationManager
 from iot.core.storage import Storage
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.machine.appliance_depot import ApplianceDepot
