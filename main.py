@@ -4,7 +4,7 @@ from pathlib import Path
 from time import sleep
 
 from flaskr import create_app
-from iot.core.configuration import ConfigurationManager
+from iot.core.configuration_manager import ConfigurationManager
 from iot.core.storage import Storage
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.dav.calendar_reader import CalendarLoader

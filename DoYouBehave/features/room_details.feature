@@ -8,11 +8,11 @@ Feature: The user can see the static configuration of the Kitchen room and chang
 
   Scenario: The user sees the Kitchens room climate and updates.
     Given the user goes to the room details page of the Kitchen
-    Then the user sees the temperature for the Kitchen
-    And the user sees the humidity for the Kitchen
+    Then the user sees the temperature of the Kitchen
+    And the user sees the humidity of the Kitchen
     When the room climate of the Kitchen is updated
-    Then the user sees the new temperature for the Kitchen after a refresh
-    And the user sees the new humidity for the Kitchen after a refresh
+    Then the user sees the new temperature of the Kitchen after a refresh
+    And the user sees the new humidity of the Kitchen after a refresh
 
   Scenario: the user sees a diagram with the room climate, i.e., temperature and humidity.
     Given the user goes to the room details page of the Kitchen
