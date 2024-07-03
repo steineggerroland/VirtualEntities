@@ -75,13 +75,25 @@ def submit_form(context):
     context.webdriver.find_element(By.CSS_SELECTOR, 'form *[type=submit]').click()
 
 
-@When('they click the {class_name} button')
-def click_on_button(context, class_name: str):
-    clicked = False
-    button_matching_class = context.webdriver.find_element(By.CSS_SELECTOR,
-                                                           'button.%s' % class_name.lower().replace(' ', '-'))
+use_step_matcher('re')
+
+
+@When(r'they click the (?P<class_name>\w+(?> \w+)*) button(?> of (?P<entity_type>appliance|room|person) (?P<entity_name>\w+(?> \w+)*))?')
+def click_on_button(context, class_name: str, entity_type=None, entity_name=None):
+    if entity_type is None:
+        parent = context.webdriver.find_element(By.TAG_NAME, 'body')
+    else:
+        elements_of_entity_type = context.webdriver.find_elements(By.CLASS_NAME, to_class(entity_type))
+        parent = (list(filter(lambda entity_element:
+                              entity_element.find_element(By.CLASS_NAME, 'name').text == entity_name,
+                              elements_of_entity_type))
+                  .pop())
+    button_matching_class = parent.find_element(By.CSS_SELECTOR, 'button.%s' % to_class(class_name))
     assert button_matching_class is not None
-    context.webdriver.find_element(By.CSS_SELECTOR, 'button.%s' % class_name.lower().replace(' ', '-')).click()
+    button_matching_class.click()
+
+
+use_step_matcher('parse')
 
 
 @when('a new appointment for calendar {calendar_name} is created')
@@ -144,8 +156,8 @@ def appliance_is_shown(context, person_names: str):
 use_step_matcher('re')
 
 
-@then(
-    r'the user sees the(?> (?P<new>new))? ?(?P<property_name>\w+(?> \w+)*?) of the (?P<entity_name>\w+(?> \w+)*?)(?> (?>being (?P<value>(?>\d|\w)+(?> (?>\d|\w)+)*?) )?after a refresh)?')
+@then(r'(?>the user sees|they see) the(?> (?P<new>new))? ?(?P<property_name>\w+(?> \w+)*?) of the '
+      r'(?P<entity_name>\w+(?> \w+)*?)(?> (?>being (?P<value>(?>\d|\w)+(?> (?>\d|\w)+)*?) )?after a refresh)?')
 def property_has_new_value(context, property_name=None, entity_name=None, value=None, new=None):
     if new is None:
         return property_has_value(context, property_name, entity_name)
@@ -334,3 +346,7 @@ def _scroll_and_click_on_element(webdriver, element):
     actions = ActionChains(webdriver)
     actions.click(element)
     actions.perform()
+
+
+def to_class(name: str) -> str:
+    return name.lower().replace(' ', '-')

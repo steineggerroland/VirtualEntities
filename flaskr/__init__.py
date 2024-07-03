@@ -46,7 +46,8 @@ def create_app(default_config_file_name: str, machine_service: MachineService, a
         "/appliance/<name>/configuration",
         view_func=Appliance.Configuration.as_view('appliance_configuration', machine_service, configuration_manager)
     )
-    app.register_blueprint(appliance_depot_api(appliance_depot, time_series_storage), url_prefix='/api/')
+    app.register_blueprint(appliance_depot_api(machine_service, appliance_depot, time_series_storage),
+                           url_prefix='/api/')
 
     app.add_url_rule(
         "/room/<name>",
