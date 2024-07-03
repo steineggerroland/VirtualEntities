@@ -10,7 +10,7 @@ from flaskr.api.ApplianceDepot import appliance_depot_api
 from flaskr.api.RoomCatalog import room_catalog_api
 from flaskr.views import VirtualEntities, Room, Appliance, Person
 from flaskr.views.Homepage import Homepage
-from iot.core.configuration import ConfigurationManager
+from iot.core.configuration_manager import ConfigurationManager
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.machine.appliance_depot import ApplianceDepot
 from iot.infrastructure.machine.machine_service import MachineService

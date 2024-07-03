@@ -12,6 +12,7 @@ from pathlib import Path
 import paho.mqtt.client as paho_mqtt
 from behave import fixture, use_fixture
 from behave.model_core import Status
+from paho.mqtt.enums import CallbackAPIVersion
 from testcontainers.core.docker_client import DockerClient
 
 from features.clients.CaldavTestClient import CaldavTestClient
@@ -23,13 +24,14 @@ from features.container.SeleniumContainer import SeleniumContainer
 from features.pages.base import BasePage, VirtualEntityPage, AppliancePage, ApplianceConfigurationPage, RoomPage, \
     RoomConfigurationPage, PersonPage, PersonConfigurationPage
 
-BROWSER = 'chrome' # firefox produces errors because it uses scrolling not as expected by selenium
+BROWSER = 'chrome'  # firefox produces errors because it uses scrolling not as expected by selenium
 save_screenshot_of_failed_steps = True
 global_logging = False
 app_logging = False
 influxdb_logging = False
 mqtt_logging = False
 calendar_logging = False
+keep_run_folder = True
 BUCKET_NAME = "time_series"
 app_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 stdout_handler = logging.StreamHandler(sys.stdout)
@@ -111,12 +113,16 @@ class Person:
                                         start + timedelta(hours=1, minutes=30), 'test event')
 
 
+mqtt_client = paho_mqtt.Client(CallbackAPIVersion.VERSION1,
+                               client_id=f'selenium-test-client-{random.randint(0, 999999)}')
+
+
 @fixture
 def appliances_setup(context, timeout=10, **kwargs):
     client = DockerClient()
-    mqtt_client = paho_mqtt.Client(client_id='selenium-test-client')
-    mqtt_client.username_pw_set('mqtt', 'mqtt')
-    mqtt_client.connect(client.gateway_ip(context.mqtt_container.get_wrapped_container().id), 8883)
+    if not mqtt_client.is_connected():
+        mqtt_client.username_pw_set('mqtt', 'mqtt')
+        mqtt_client.connect(client.gateway_ip(context.mqtt_container.get_wrapped_container().id), 8883)
     context.appliances = {
         'Washing machine': Appliance(mqtt_client, 'Washing machine',
                                      'measurements/home/indoor/washing_machine/power/power',
@@ -249,7 +255,7 @@ def setup_application_data(source_path, test_dir):
 
 def after_all(context):
     run_path = context.run_path
-    if run_path is not None and run_path.exists() and run_path.is_dir():
+    if not keep_run_folder and run_path is not None and run_path.exists() and run_path.is_dir():
         try:
             shutil.rmtree(run_path)
             logging.debug(f"Cleaned up test data at {run_path}")

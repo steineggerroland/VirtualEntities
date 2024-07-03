@@ -14,7 +14,7 @@ Feature: The user can see details of the Dryer appliance.
   Scenario: The user sees the power consumption and it updates on new messages
     Given the user goes to the appliance page of the Dryer
     When the power consumption of the Dryer is updated
-    Then the user sees the new power consumption for the Dryer after a refresh
+    Then the user sees the new power consumption of the Dryer after a refresh
 
   Scenario: The user navigates to the configuration page of the appliance
     Given the user goes to the appliance page of the Dryer

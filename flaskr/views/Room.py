@@ -5,7 +5,7 @@ from flask.views import View, MethodView
 from flask_babel import gettext
 
 from flaskr.forms.RoomForm import RoomForm
-from iot.core.configuration import ConfigurationManager
+from iot.core.configuration_manager import ConfigurationManager
 from iot.infrastructure.room_catalog import RoomCatalog
 
 
