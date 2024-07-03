@@ -1,14 +1,15 @@
 <div class="card appliance {{ appliance.thing_type }}">
     <div class="card-header">
-        <h4 class="card-title mb-0">
+        <h4 class="card-title mb-0 d-flex flex-nowrap">
             {%- with type=appliance.thing_type %}
-                <span class="mr-2">
-            {%- include "snippets/appliance_icon.html" %}
-            </span>
+                <div class="me-2">
+                    {%- include "snippets/appliance_icon.html" %}
+                </div>
             {%- endwith %}
-            <a class="name" href="{{ url_for('appliance', name=appliance.name) }}">{{ appliance.name }}</a>
+            <a class="name me-1 overflow-hidden text-truncate" href="{{ url_for('appliance', name=appliance.name) }}"
+               data-bs-title="{{ appliance.name }}" data-bs-toggle="tooltip">{{ appliance.name }}</a>
             {%- with online_status=appliance.online_status(),time_delta=appliance.last_seen_time_delta() %}
-                {%- include "snippets/online_status_icon.html" %}
+                <div class="ms-auto">{%- include "snippets/online_status_icon.html" %}</div>
             {%- endwith %}
         </h4>
     </div>
