@@ -7,25 +7,29 @@
             {%- endwith %}
         </h4>
     </div>
-    <div class="row g-0 gap-1">
-        <div class="col-4 position-relative" style="aspect-ratio: 1">
-            <div class="temperature room-climate diagram position-absolute top-0 start-0 w-100 h-100 z-2"
-                 data-thing-name="{{ room.name }}" data-fullscreen="true"
-                 data-x-axis-label="{{ _('Temperature [°C]') }}" data-attribute="temperature"></div>
-            <div class="position-absolute top-0 start-0 w-100 h-100 z-1 fs-4">
-                {%- with temperature=room.temperature,rating=room.rate_temperature() %}
-                    {%- include "snippets/temperature.html" %}
-                {%- endwith %}
+    <div class="row g-1">
+        <div class="col-4">
+            <div class="w-100 position-relative" style="aspect-ratio: 1">
+                <div class="temperature room-climate diagram position-absolute top-0 start-0 w-100 h-100 z-2"
+                     data-thing-name="{{ room.name }}" data-fullscreen="true"
+                     data-x-axis-label="{{ _('Temperature [°C]') }}" data-attribute="temperature"></div>
+                <div class="position-absolute top-0 start-0 w-100 h-100 z-1 fs-4">
+                    {%- with temperature=room.temperature,rating=room.rate_temperature() %}
+                        {%- include "snippets/temperature.html" %}
+                    {%- endwith %}
+                </div>
             </div>
         </div>
-        <div class="col-4 p-0 m-0 position-relative" style="aspect-ratio: 1">
-            <div class="humidity room-climate diagram position-absolute top-0 start-0 w-100 h-100 z-2"
-                 data-x-axis-label="{{ _('Humidity [%%]') }}" data-attribute="humidity"
-                 data-thing-name="{{ room.name }}" data-fullscreen="true"></div>
-            <div class="position-absolute top-0 start-0 w-100 h-100 z-1 fs-4">
-                {%- with humidity=room.humidity,rating=room.rate_humidity() %}
-                    {%- include "snippets/humidity.html" %}
-                {%- endwith %}
+        <div class="col-4">
+            <div class="w-100 position-relative" style="aspect-ratio: 1">
+                <div class="humidity room-climate diagram position-absolute top-0 start-0 w-100 h-100 z-2"
+                     data-x-axis-label="{{ _('Humidity [%%]') }}" data-attribute="humidity"
+                     data-thing-name="{{ room.name }}" data-fullscreen="true"></div>
+                <div class="position-absolute top-0 start-0 w-100 h-100 z-1 fs-4">
+                    {%- with humidity=room.humidity,rating=room.rate_humidity() %}
+                        {%- include "snippets/humidity.html" %}
+                    {%- endwith %}
+                </div>
             </div>
         </div>
     </div>
