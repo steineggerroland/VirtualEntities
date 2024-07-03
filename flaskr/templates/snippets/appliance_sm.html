@@ -12,7 +12,7 @@
             {%- endwith %}
         </h4>
     </div>
-    <div class="row gap-1 g-0">
+    <div class="row g-1">
         <div class="col-4">
             <div class="w-100 position-relative" style="aspect-ratio: 1">
                 <div class="power-consumption diagram position-absolute top-0 start-0 w-100 h-100 z-2"
@@ -70,6 +70,23 @@
                 {%- endif %}
             </div>
         </div>
+        {%- if appliance.needs_unloading %}
+            <div class="col-4 d-flex flex-column align-items-center justify-content-center">
+                <form class="w-75" style="aspect-ratio: 1" method="get"
+                      action="#" data-api-url="{{ url_for('appliance-depot_api.unload', name=appliance.name ) }}">
+                    <button class="unload btn btn-outline-success p-0 w-100 h-100" disabled="disabled"
+                            type="submit" value="{{ _('Unload') }}">{{ _('Unload') }}</button>
+                </form>
+            </div>
+        {%- elif appliance.running_state!='running' %}
+            <div class="col-4 d-flex flex-column align-items-center justify-content-center">
+                <form class="w-75" style="aspect-ratio: 1" method="get"
+                      action="#" data-api-url="{{ url_for('appliance-depot_api.load', name=appliance.name ) }}">
+                    <button class="needs-unloading btn btn-outline-primary p-0 w-100 h-100" disabled="disabled"
+                            type="submit" value="{{ _('Needs unloading') }}">{{ _('Needs unloading') }}</button>
+                </form>
+            </div>
+        {%- endif %}
     </div>
     {%- if debug %}{{ appliance.to_dict() }}{% endif %}
 </div>

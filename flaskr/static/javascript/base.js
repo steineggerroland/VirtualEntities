@@ -35,4 +35,18 @@ const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstra
         // Set the interval to update the time every second
         setInterval(updateElapsedTime, 60 * 1000);
     })
+
+    document.querySelectorAll('form').forEach(form => {
+        if (!form.dataset.apiUrl) return
+        form.onsubmit = event => {
+            if (event.preventDefault) event.preventDefault();
+            fetch(form.dataset.apiUrl, {method: "POST"}).then(() => {
+                window.location.reload()
+            })
+            return false;
+        }
+        form.querySelectorAll('[type="submit"]').forEach(submitElement => {
+            submitElement.removeAttribute('disabled')
+        })
+    })
 })()
