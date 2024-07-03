@@ -53,6 +53,19 @@ things:
       planned_notifications:
         - mqtt_topic: home/things/robot-cleaner
           cron_expression: '* * * * * */30'
+  - name: Washer Kai
+    type: washing_machine
+    sources:
+      - mqtt_topic: measurements/home/indoor/washing_machine_kai/power
+        type: consumption
+      - mqtt_topic: home/things/washing_machine_kai/load
+        type: loading
+      - mqtt_topic: home/things/washing_machine_kai/unload
+        type: unloading
+    destinations:
+      planned_notifications:
+        - mqtt_topic: home/things/washing_machine_kai
+          cron_expression: '* * * * *'
   - name: Parents bedroom
     type: room
     temperature_thresholds:
