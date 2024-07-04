@@ -78,7 +78,8 @@ def submit_form(context):
 use_step_matcher('re')
 
 
-@When(r'they click the (?P<class_name>\w+(?> \w+)*) button(?> of (?P<entity_type>appliance|room|person) (?P<entity_name>\w+(?> \w+)*))?')
+@When(
+    r'they click the (?P<class_name>\w+(?> \w+)*) button(?> of (?P<entity_type>appliance|room|person) (?P<entity_name>\w+(?> \w+)*))?')
 def click_on_button(context, class_name: str, entity_type=None, entity_name=None):
     if entity_type is None:
         parent = context.webdriver.find_element(By.TAG_NAME, 'body')
@@ -103,9 +104,18 @@ def step_impl(context, calendar_name: str):
     context.persons[person_name].create_new_appointment(context.entity_name, calendar_name, context.new_value)
 
 
-@then('they are {redirect_or_on} the {page_name} page')
-def current_page_is(context, redirect_or_on, page_name: str):
-    context.pages[page_name].is_current_page()
+use_step_matcher('re')
+
+
+@then(r'they are (?>redirected to|on) the (?P<page_name>\w+(?> \w+)*) page(?> of (?P<entity_name>\w+(?> \w+)*))?')
+def current_page_is(context, page_name: str, entity_name: str = None):
+    if entity_name:
+        context.pages[page_name].is_current_page_for_entity(entity_name)
+    else:
+        context.pages[page_name].is_current_page()
+
+
+use_step_matcher('parse')
 
 
 @then('they see rooms in the room catalog')
@@ -159,9 +169,10 @@ use_step_matcher('re')
 @then(r'(?>the user sees|they see) the(?> (?P<new>new))? ?(?P<property_name>\w+(?> \w+)*?) of the '
       r'(?P<entity_name>\w+(?> \w+)*?)(?> (?>being (?P<value>(?>\d|\w)+(?> (?>\d|\w)+)*?) )?after a refresh)?')
 def property_has_new_value(context, property_name=None, entity_name=None, value=None, new=None):
+    entity_type = 'appliance' if any(a == entity_name for a in context.appliances) else \
+        'room' if any(r == entity_name for r in context.rooms) else 'person'
     if new is None:
-        return property_has_value(context, property_name, entity_name)
-    entity_type = 'appliance' if property_name in ['power consumption', 'running state'] else 'room'
+        return property_has_value(context, property_name, entity_name, entity_type)
     property_name_in_class = property_name.replace(' ', '-')
     value = value if value is not None else (
         context.new_value if type(context.new_value) is not dict else context.new_value[
@@ -174,8 +185,7 @@ def property_has_new_value(context, property_name=None, entity_name=None, value=
 use_step_matcher('parse')
 
 
-def property_has_value(context, property_name, entity_name):
-    entity_type = 'appliance' if property_name in ['power consumption'] else 'room'
+def property_has_value(context, property_name, entity_name, entity_type):
     property_name_in_class = property_name.replace(' ', '-')
     WebDriverWait(context.webdriver, 30).until(
         lambda d: _verify_property(d, entity_name, entity_type, f'.{property_name_in_class}'))
@@ -289,8 +299,7 @@ def message_of_type(context, message_type):
 @then('the user sees the new appointment after a refresh')
 def find_appointment(context):
     summary = context.new_value
-    WebDriverWait(context.webdriver, 30).until(
-        lambda d: _find_appointment(d, summary, d))
+    WebDriverWait(context.webdriver, 30).until(lambda d: _find_appointment(d, summary, d))
 
 
 def _find_appointment(webdriver: WebDriver, summary, refresh=None):
