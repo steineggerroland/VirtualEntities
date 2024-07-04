@@ -23,3 +23,10 @@ class SimpleHistoryRunCompleteStrategy:
             return False
         self.logger.debug("Run of thing '%s' is complete based on history: %s", thing.name, measures)
         return True
+
+    def to_dict(self) -> dict:
+        return {
+            'name': 'simple_history_run_complete_strategy',
+            'duration_to_be_below_threshold': self.duration_to_be_below_threshold,
+            'power_consumption_threshold': self.power_consumption_threshold
+        }
