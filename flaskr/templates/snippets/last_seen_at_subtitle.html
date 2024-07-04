@@ -1,5 +1,5 @@
 {% if time_delta %}
-<small class="text-body-secondary">{{_('Last seen %(xTimeAgo)s', xTimeAgo=time_delta|timedeltaformat(add_direction=True))}}</small>
+<small class="last-seen-at text-body-secondary">{{_('Last seen %(xTimeAgo)s', xTimeAgo=time_delta|timedeltaformat(add_direction=True))}}</small>
 {% else %}
-<small class="text-body-secondary">{{_('Never seen')}}</small>
+<small class="last-seen-at text-body-secondary">{{_('Never seen')}}</small>
 {% endif %}
