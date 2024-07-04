@@ -1,22 +1,32 @@
 (function () {
 
-    function drawChart(measures, containerId, xAxisLabel, fullscreen) {
+    function drawChart(measures, containerId, strategy, xAxisLabel, fullscreen) {
         let diagramContainer = document.getElementById(containerId);
         diagramContainer.childNodes.forEach(function (child) {
             diagramContainer.removeChild(child)
         })
-        diagramContainer.append(Plot.plot({
+        const marks = []
+        if (strategy && strategy.name === 'simple_history_run_complete_strategy') {
+            marks.push(Plot.areaY(measures, {
+                x: 'time',
+                y: strategy.power_consumption_threshold,
+                fill: '#CCCCCC',
+                fillOpacity: 0.25
+            }))
+        }
+        let plot = Plot.plot({
             y: {
                 domain: [0, Math.min(2400, Math.max(...measures.map(m => m.consumption + 10)))],
                 label: xAxisLabel
             },
             style: "overflow: visible;",
             marks: [
-                Plot.lineY(measures, {x: "time", y: "consumption", curve: "catmull-rom"}),
-                Plot.dotY(measures, {x: "time", y: "consumption", stroke: "currentColor", symbol: 'times'}),
+                ...marks,
+                Plot.lineY(measures, {x: "time", y: "consumption", curve: "catmull-rom", marker: 'dot'}),
                 Plot.crosshairX(measures, {x: "time", y: "consumption"})
             ]
-        }))
+        });
+        diagramContainer.append(plot)
     }
 
     document.querySelectorAll('.power-consumption.diagram').forEach(container => {
@@ -24,16 +34,28 @@
         const xAxisLabel = container.dataset.xAxisLabel
         const fullscreen = !!container.dataset.fullscreen
         if (!container.id) container.id = "power-consumption-diagram-container-" + makeSafeForCSS(thingName)
-        const measurements = []
+        const measures = []
+        let strategy
         const fetchAndDrawDiagram = () => fetch(`/api/appliances/${thingName}/power-consumptions`)
             .then(data => data.json())
             .then(data => {
-                measurements.splice(0, measurements.length) // delete all data on updates
-                data.forEach(d => {d.time = new Date(d.time)}) // convert isoformat to date
-                measurements.push(...data)
-                drawChart(measurements, container.id, xAxisLabel, fullscreen)
-            }).then(() => window.setTimeout(fetchAndDrawDiagram, 30 * 1000))
-        fetchAndDrawDiagram().then(() => window.addEventListener('resize', () => drawChart(measurements, container.id, xAxisLabel, fullscreen)))
+                measures.pop()
+                data.forEach(d => {
+                    d.time = new Date(d.time)
+                }) // convert isoformat to date
+                data = data.filter(d => !(measures.map(m => m.time.toISOString()).includes(d.time.toISOString())))
+                measures.push(...data)
+                return measures
+            })
+            .then(measurements => drawChart(measurements, container.id, strategy, xAxisLabel, fullscreen))
+            .then(() => window.setTimeout(fetchAndDrawDiagram, 30 * 1000))
+        fetch(`/api/appliances/${thingName}/run-complete-strategy`)
+            .then(data => data.json())
+            .then(data => {
+                strategy = data
+            })
+            .then(() => fetchAndDrawDiagram())
+            .then(() => window.addEventListener('resize', () => drawChart(measures, container.id, marks, xAxisLabel, fullscreen)))
     })
 
     // Thanks to PleaseStand at StackOverflow: https://stackoverflow.com/a/7627603
