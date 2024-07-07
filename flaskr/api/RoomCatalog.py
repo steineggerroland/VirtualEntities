@@ -20,13 +20,13 @@ def room_catalog_api(room_catalog: RoomCatalog, time_series_storage: TimeSeriesS
     def single(name: str):
         return room_catalog.find_room(name).to_dict()
 
-    @api.get('/rooms/<name>/temperature')
+    @api.get('/rooms/<name>/temperatures')
     def temperature_time_line(name: str):
         time_series = _get_time_series(name)
         logger.debug(f'{name}s` temperature: {time_series}')
         return list(map(lambda c: c.to_dict(), time_series))
 
-    @api.get('/rooms/<name>/humidity')
+    @api.get('/rooms/<name>/humiditys')
     def humidity_time_line(name: str):
         time_series = _get_time_series(name)
         logger.debug(f'{name}s` humidity: {time_series}')

@@ -103,7 +103,7 @@
         const measures = []
         let thresholds
         let strategy
-        const fetchAndDrawDiagram = () => fetch(`/api/${entityType}s/${thingName}/${attribute}`)
+        const fetchAndDrawDiagram = () => fetch(`/api/${entityType}s/${thingName}/${attribute}s`)
             .then(data => data.json())
             .then(data => {
                 measures.pop()
