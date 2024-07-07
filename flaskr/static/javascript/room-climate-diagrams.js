@@ -80,7 +80,7 @@
         const fullscreen = !!container.dataset.fullscreen
         if (!container.id) container.id = attribute + "-diagram-container-" + makeSafeForCSS(thingName)
         const measurements = []
-        const fetchAndDrawDiagram = () => fetch(`/api/rooms/${thingName}/${attribute}`)
+        const fetchAndDrawDiagram = () => fetch(`/api/rooms/${thingName}/${attribute}s`)
             .then(data => data.json())
             .then(data => {
                 measurements.splice(0, measurements.length)
