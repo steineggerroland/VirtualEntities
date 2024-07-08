@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}<title>{{ _('Virtual Entities') }}</title>{% endblock %}
+{% block content %}
+    <main id="main" class="px-2">
+        <h1 class="mt-4 mb-0 visually-hidden">{{ _('Dashboard') }}</h1>
+        <section class="appliance-depot row mt-0 mb-4 g-3">
+            <h2 class="visually-hidden">{{ _('Appliance depot') }}</h2>
+            {% if entities.appliance_depot %}
+                {% for appliance in entities.appliance_depot %}
+                    <div class="col-6 col-md-4 col-xl-3">{% include "snippets/appliance_sm.html" %}</div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-secondary" role="alert">
+                    {{ _('The depot is empty') }}
+                </div>
+            {% endif %}
+        </section>
+        <section class="room-catalog row my-4 g-3">
+            <h2 class="visually-hidden">{{ _('Room catalog') }}</h2>
+            {% if entities.room_catalog %}
+                {% for room in entities.room_catalog %}
+                    <div class="col-6 col-md-4 col-xl-3">{% include "snippets/room_sm.html" %}</div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-secondary" role="alert">
+                    {{ _('No rooms in catalog') }}
+                </div>
+            {% endif %}
+        </section>
+    </main>
+    <aside class="container text-center">
+        <p class="d-inline-flex gap-1">
+            <button class="btn btn-secondary" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#dashboard-options"
+                    aria-expanded="false" aria-controls="dashboard-options">
+                {{ _('Options') }}
+            </button>
+        </p>
+        <div class="collapse" id="dashboard-options">
+            <div class="card card-body">
+                <a href="{{ url_for('ve_dashboard', _anchor='main', refresh_interval=30) }}">
+                    {{ _('Refresh every 30 seconds') }}
+                </a>
+            </div>
+        </div>
+    </aside>
+{% endblock %}
+{% block additional_scripts %}
+    <script>
+        (function () {
+            const params = new URLSearchParams(window.location.search)
+            if (params.has('refresh_interval')) {
+                setTimeout(() => {
+                    window.location.reload()
+                }, params.get('refresh_interval') * 1000)
+            }
+        })()
+    </script>
+{% endblock %}

@@ -37,6 +37,10 @@ def create_app(default_config_file_name: str, machine_service: MachineService, a
         "/virtual-entities/",
         view_func=VirtualEntities.ListView.as_view("ve_list", appliance_depot, room_catalog, register_of_persons)
     )
+    app.add_url_rule(
+        "/dashboard",
+        view_func=VirtualEntities.Dashboard.as_view("ve_dashboard", appliance_depot, room_catalog)
+    )
 
     app.add_url_rule(
         "/appliance/<name>",
