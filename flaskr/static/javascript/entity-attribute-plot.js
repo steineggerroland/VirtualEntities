@@ -90,7 +90,7 @@
                 Plot.lineY(measures, {
                     x: "time",
                     y: attribute,
-                    curve: "catmull-rom",
+                    curve: "monotone-x",
                     marker: 'dot',
                     className: `data-${attribute}`
                 }),
