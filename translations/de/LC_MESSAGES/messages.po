@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  0.1\n"
 "Report-Msgid-Bugs-To: roland@steinegger.one\n"
-"POT-Creation-Date: 2024-07-02 17:50+0200\n"
+"POT-Creation-Date: 2024-07-08 21:06+0200\n"
 "PO-Revision-Date: 2024-05-24 21:54+0200\n"
 "Last-Translator: Roland Steinegger <roland@steinegger.one>\n"
 "Language: de\n"
@@ -89,7 +89,7 @@ msgid "Unknown thing"
 msgstr "Unbekanntes Ding"
 
 #: flaskr/templates/appliance.html:76
-#: flaskr/templates/snippets/appliance_sm.html:62
+#: flaskr/templates/snippets/appliance_sm.html:64
 #, fuzzy, python-format
 msgid "Running since %(xMinutes)s"
 msgstr "Läuft seit %(xMinutes)s"
@@ -103,7 +103,7 @@ msgid "Currently idling"
 msgstr "Derzeit im Ruhezustand"
 
 #: flaskr/templates/appliance.html:88
-#: flaskr/templates/snippets/appliance_sm.html:65
+#: flaskr/templates/snippets/appliance_sm.html:67
 #, fuzzy, python-format
 msgid "Finished last run %(xMinutesAgo)s"
 msgstr "Letzter Lauf beendet %(xMinutesAgo)s"
@@ -113,8 +113,8 @@ msgstr "Letzter Lauf beendet %(xMinutesAgo)s"
 msgid "Power consumption (Watt)"
 msgstr "Stromverbrauch (Watt)"
 
-#: flaskr/templates/appliance.html:105
-#: flaskr/templates/snippets/appliance_sm.html:20
+#: flaskr/templates/appliance.html:106
+#: flaskr/templates/snippets/appliance_sm.html:21
 msgid "Watt"
 msgstr "Watt"
 
@@ -207,21 +207,21 @@ msgid "Configure %(room_name)s"
 msgstr "Konfiguration von %(room_name)s"
 
 #: flaskr/templates/room.html:52 flaskr/templates/room.html:66
-#: flaskr/templates/snippets/temperature.html:3
+#: flaskr/templates/snippets/temperature.html:4
 msgid "Temperature"
 msgstr "Temperatur"
 
-#: flaskr/templates/room.html:58 flaskr/templates/room.html:71
-#: flaskr/templates/snippets/humidity.html:3
+#: flaskr/templates/room.html:58 flaskr/templates/room.html:72
+#: flaskr/templates/snippets/humidity.html:4
 msgid "Humidity"
 msgstr "Luftfeuchte"
 
-#: flaskr/templates/room.html:67 flaskr/templates/snippets/room_sm.html:14
+#: flaskr/templates/room.html:67 flaskr/templates/snippets/room_sm.html:16
 #, fuzzy
 msgid "Temperature [°C]"
 msgstr "Temperatur [°C]"
 
-#: flaskr/templates/room.html:72 flaskr/templates/snippets/room_sm.html:23
+#: flaskr/templates/room.html:73 flaskr/templates/snippets/room_sm.html:27
 #, fuzzy, python-format
 msgid "Humidity [%%]"
 msgstr "Luftfeuchte [%%]"
@@ -234,7 +234,8 @@ msgstr "Temperatur optimal"
 #: flaskr/templates/room_configuration.html:59
 #, python-format
 msgid "Optimum from %(lower_bound_degree)s°C to %(upper_bound_degree)s°C"
-msgstr "Optimale Temperatur zwischen %(lower_bound_degree)s°C und %(upper_bound_degree)s°C"
+msgstr "Optimale Temperatur zwischen %(lower_bound_degree)s°C und "
+"%(upper_bound_degree)s°C"
 
 #: flaskr/templates/room_configuration.html:62
 #, python-format
@@ -253,7 +254,8 @@ msgstr "Luftfeuchte optimal"
 #: flaskr/templates/room_configuration.html:68
 #, python-format
 msgid "Optimum from %(lower_bound_percentage)s%% to %(upper_bound_percentage)s%%"
-msgstr "Optimale Luftfeuchte zwischen %(lower_bound_percentage)s%% und %(upper_bound_percentage)s%%"
+msgstr "Optimale Luftfeuchte zwischen %(lower_bound_percentage)s%% und "
+"%(upper_bound_percentage)s%%"
 
 #: flaskr/templates/room_configuration.html:71
 #, python-format
@@ -280,23 +282,33 @@ msgstr "Personenverzeichnis"
 msgid "Register is empty"
 msgstr "Das Verzeichnis ist leer"
 
-#: flaskr/templates/snippets/appliance_sm.html:30
+#: flaskr/templates/snippets/appliance_sm.html:31
 #, fuzzy
 msgid "Running"
 msgstr "Läuft"
 
-#: flaskr/templates/snippets/appliance_sm.html:42
+#: flaskr/templates/snippets/appliance_sm.html:43
 msgid "Loaded"
 msgstr "Beladen"
 
-#: flaskr/templates/snippets/appliance_sm.html:54
+#: flaskr/templates/snippets/appliance_sm.html:55
 msgid "Idling"
 msgstr "Untätig"
+
+#: flaskr/templates/snippets/appliance_sm.html:79
+#, fuzzy
+msgid "Unload"
+msgstr "Beladen"
+
+#: flaskr/templates/snippets/appliance_sm.html:87
+#, fuzzy
+msgid "Needs unloading"
+msgstr "Muss entladen werden"
 
 #: flaskr/templates/snippets/attribution_footer.html:3
 #: flaskr/templates/snippets/attribution_footer.html:7
 #: flaskr/templates/snippets/attribution_footer.html:12
-#: flaskr/templates/snippets/attribution_footer.html:31
+#: flaskr/templates/snippets/attribution_footer.html:32
 #, fuzzy, python-format
 msgid "Icons made by %(author)s from %(url)s"
 msgstr "Icons erstellt von %(author)s von %(url)s"
@@ -310,24 +322,26 @@ msgstr "Kalender"
 msgid "URL:"
 msgstr "URL:"
 
-#: flaskr/templates/snippets/humidity.html:7
+#: flaskr/templates/snippets/humidity.html:9
 msgid "Humidity optimal"
 msgstr "Luftfeuchte optimal"
 
-#: flaskr/templates/snippets/humidity.html:11
+#: flaskr/templates/snippets/humidity.html:14
+#: flaskr/templates/snippets/humidity.html:24
 msgid "Humidity slightly out of range"
 msgstr "Luftfeuchte etwas außerhalb des optimalen Bereichs"
 
-#: flaskr/templates/snippets/humidity.html:15
+#: flaskr/templates/snippets/humidity.html:19
+#: flaskr/templates/snippets/humidity.html:29
 msgid "Humidity out of range"
 msgstr "Luftfeuchte außerhalb des optimalen Bereichs"
 
-#: flaskr/templates/snippets/humidity.html:18
+#: flaskr/templates/snippets/humidity.html:34
 #, python-format
 msgid "?%%"
 msgstr "?%%"
 
-#: flaskr/templates/snippets/humidity.html:19
+#: flaskr/templates/snippets/humidity.html:35
 msgid "Humidity unknown"
 msgstr "Luftfeuchte unbekannt"
 
@@ -365,41 +379,44 @@ msgstr "?W"
 msgid "Power consumption unknown"
 msgstr "Stromverbrauch unbekannt"
 
-#: flaskr/templates/snippets/temperature.html:7
+#: flaskr/templates/snippets/temperature.html:9
 msgid "Temperature optimal"
 msgstr "Temperatur optimal"
 
-#: flaskr/templates/snippets/temperature.html:11
+#: flaskr/templates/snippets/temperature.html:14
+#: flaskr/templates/snippets/temperature.html:24
 msgid "Temperature slightly out of range"
 msgstr "Temperatur leicht außerhalb des optimalen Bereichs"
 
-#: flaskr/templates/snippets/temperature.html:15
+#: flaskr/templates/snippets/temperature.html:19
+#: flaskr/templates/snippets/temperature.html:29
 msgid "Temperature out of range"
 msgstr "Temperatur weit außerhalb des optimalen Bereichs"
 
-#: flaskr/templates/snippets/temperature.html:18
+#: flaskr/templates/snippets/temperature.html:34
 msgid "?°C"
 msgstr "?°C"
 
-#: flaskr/templates/snippets/temperature.html:19
+#: flaskr/templates/snippets/temperature.html:35
 msgid "Temperature unknown"
 msgstr "Temperatur unbekannt"
 
-#: flaskr/views/Appliance.py:22 flaskr/views/Appliance.py:38
-#: flaskr/views/Appliance.py:49
-msgid "No appliance found with that name"
-msgstr "Kein Gerät mit dem Namen gefunden"
+#: flaskr/views/Appliance.py:22 flaskr/views/Appliance.py:39
+#: flaskr/views/Appliance.py:51
+#, python-format
+msgid "There is no appliance with name '%(appliance_name)s'"
+msgstr "Kein Gerät mit Namen '%(appliance_name)s' gefunden"
 
-#: flaskr/views/Appliance.py:56
+#: flaskr/views/Appliance.py:59
 msgid "Appliance successfully updated"
 msgstr "Gerät erfolgreich aktualisiert"
 
-#: flaskr/views/Appliance.py:60 flaskr/views/Person.py:70
+#: flaskr/views/Appliance.py:63 flaskr/views/Person.py:70
 #: flaskr/views/Room.py:59
 msgid "Something went wrong"
 msgstr "Etwas ist schief gelaufen"
 
-#: flaskr/views/Appliance.py:63
+#: flaskr/views/Appliance.py:66
 msgid "Failed to change appliance, see errors in the form"
 msgstr "Gerät nicht geändert, siehe Fehler im Formular"
 
@@ -463,4 +480,7 @@ msgstr "Raumdaten nicht aktualisiert, siehe Fehler im Formular"
 
 #~ msgid "Online?"
 #~ msgstr "Online?"
+
+#~ msgid "No appliance found with that name"
+#~ msgstr "Kein Gerät mit dem Namen gefunden"
 
