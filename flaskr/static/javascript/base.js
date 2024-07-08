@@ -2,6 +2,13 @@ const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]
 const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
 (function () {
+    const params = new URLSearchParams(window.location.search)
+    if (params.has('refresh_interval')) {
+        setTimeout(() => {
+            window.location.reload()
+        }, params.get('refresh_interval') * 1000)
+    }
+
     document.querySelectorAll('a.back').forEach(element => {
         if (element.href === document.referrer) {
             element.setAttribute('href', 'javascript:window.history.back()')

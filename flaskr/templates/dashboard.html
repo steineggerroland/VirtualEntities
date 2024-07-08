@@ -45,15 +45,3 @@
         </div>
     </aside>
 {% endblock %}
-{% block additional_scripts %}
-    <script>
-        (function () {
-            const params = new URLSearchParams(window.location.search)
-            if (params.has('refresh_interval')) {
-                setTimeout(() => {
-                    window.location.reload()
-                }, params.get('refresh_interval') * 1000)
-            }
-        })()
-    </script>
-{% endblock %}
