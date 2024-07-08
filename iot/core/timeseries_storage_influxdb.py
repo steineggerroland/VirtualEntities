@@ -51,7 +51,6 @@ class InfluxDbTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
         rs = self.influxdb.query(f"SELECT * FROM {POWER_CONSUMPTION_SERIES} WHERE time >= now() - {seconds}s")
         points = rs.get_points(measurement=POWER_CONSUMPTION_SERIES, tags={THING_NAME_TAG: thing_name})
         measurements = []
-        self.logger.debug(points)
         for point in points:
             measurements.append(ConsumptionMeasurement(datetime.fromisoformat(point['time']), point[CONSUMPTION_FIELD]))
         return measurements
@@ -88,16 +87,27 @@ class InfluxDbTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
             if old_points:
                 chunks = [old_points[i:i + MAX_COUNT_TO_UPDATE] for i in range(0, len(old_points), MAX_COUNT_TO_UPDATE)]
                 for chunk in chunks:
-                    reassigned_points = list(map(lambda p: self._change_thing_name_of_point(p, new_name), chunk))
-                    self.influxdb.write_points(reassigned_points)
+                    reassigned_points = list(
+                        map(lambda p: self._change_thing_name_of_point(p, time_series_name, new_name), chunk))
+                    self.influxdb.write_points(reassigned_points, time_precision='n')
                 self.influxdb.delete_series(measurement=time_series_name, tags={THING_NAME_TAG: old_name})
-        except InfluxDBClientError:  # Exception is raised on query when no data exists (404 by db)
-            self.logger.debug(f'No climate data to rename for entity {old_name}')
+        except InfluxDBClientError as e:  # Exception is raised on query when no data exists (404 by db)
+            if e.code == 404:
+                self.logger.debug(f'No climate data to rename for entity {old_name}')
+            else:
+                self.logger.debug(f'Failed to move times series from {old_name} to {new_name} because of %s', e,
+                                  exc_info=e)
 
-    def _change_thing_name_of_point(self, point: dict, new_name: str) -> dict:
+    def _change_thing_name_of_point(self, point: dict, time_series_name: str, new_name: str) -> dict:
         try:
-            point[THING_NAME_TAG] = new_name
+            if time_series_name == POWER_CONSUMPTION_SERIES:
+                return {"measurement": time_series_name, "tags": {THING_NAME_TAG: new_name},
+                        "fields": {CONSUMPTION_FIELD: float(point[CONSUMPTION_FIELD])},
+                        'time': datetime.fromisoformat(point['time'])}
+            else:
+                return {"measurement": time_series_name, "tags": {THING_NAME_TAG: new_name},
+                        "fields": {TEMPERATURE_FIELD: float(point[TEMPERATURE_FIELD]),
+                                   HUMIDITY_FIELD: float(point[HUMIDITY_FIELD])}}
         except KeyError as e:
             self.logger.error("Could not set entity name to point: (%s)", point)
             raise DatabaseException("Failed to change entity name.", e) from e
-        return point

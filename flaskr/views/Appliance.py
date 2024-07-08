@@ -19,7 +19,8 @@ class Details(View):
         if appliance is not None:
             return render_template("appliance.html", appliance=appliance)
         else:
-            flash(gettext("No appliance found with that name"), category="danger")
+            flash(gettext("There is no appliance with name '%(appliance_name)s'", appliance_name=name),
+                  category="danger")
             return redirect(url_for("ve_list"))
 
 
@@ -35,7 +36,8 @@ class Configuration(MethodView):
     def get(self, name: str):
         appliance = self.appliance_service.get_machine(name)
         if appliance is None:
-            flash(gettext("No appliance found with that name"), category="danger")
+            flash(gettext("There is no appliance with name '%(appliance_name)s'", appliance_name=name),
+                  category="danger")
             return redirect(url_for("ve_list"))
 
         appliance_form = ApplianceForm()
@@ -46,7 +48,8 @@ class Configuration(MethodView):
     def post(self, name: str):
         appliance = self.appliance_service.get_machine(name)
         if appliance is None:
-            flash(gettext("No appliance found with that name"), category="danger")
+            flash(gettext("There is no appliance with name '%(appliance_name)s'", appliance_name=name),
+                  category="danger")
             return redirect(url_for("ve_list"))
 
         appliance_form = ApplianceForm()

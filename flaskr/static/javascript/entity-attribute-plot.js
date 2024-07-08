@@ -1,7 +1,9 @@
 (function () {
 
     function drawChart(measures, containerId, attribute, thresholds, strategy, xAxisLabel, fullscreen) {
-        attribute = attribute === 'power-consumption' ? 'consumption' : attribute
+        if (attribute === 'power-consumption') {
+            measures.forEach(m => m[attribute] = m['consumption'])
+        }
         let diagramContainer = document.getElementById(containerId);
         diagramContainer.childNodes.forEach(function (child) {
             diagramContainer.removeChild(child)
@@ -85,7 +87,13 @@
             style: "overflow: visible;",
             marks: [
                 ...marks,
-                Plot.lineY(measures, {x: "time", y: attribute, curve: "catmull-rom", marker: 'dot'}),
+                Plot.lineY(measures, {
+                    x: "time",
+                    y: attribute,
+                    curve: "catmull-rom",
+                    marker: 'dot',
+                    className: `data-${attribute}`
+                }),
                 Plot.crosshairX(measures, {x: "time", y: attribute})
             ]
         });

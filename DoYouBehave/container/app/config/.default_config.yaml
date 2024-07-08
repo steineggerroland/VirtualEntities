@@ -51,7 +51,20 @@ things:
         type: unloading
     destinations:
       planned_notifications:
-        - mqtt_topic: home/things/robot-cleaner
+        - mqtt_topic: home/things/dryer
+          cron_expression: '* * * * * */30'
+  - name: Toploader
+    type: washing_machine
+    sources:
+      - mqtt_topic: zigbee/home/indoor/toploader
+        type: consumption
+      - mqtt_topic: home/things/toploader/load
+        type: loading
+      - mqtt_topic: home/things/toploader/unload
+        type: unloading
+    destinations:
+      planned_notifications:
+        - mqtt_topic: home/things/toploader
           cron_expression: '* * * * * */30'
   - name: Washer Kai
     type: washing_machine
