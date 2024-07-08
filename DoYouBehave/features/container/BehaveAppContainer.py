@@ -40,7 +40,7 @@ class BehaveAppContainer(DockerContainer):
         while True:
             if self.get_wrapped_container() is not None:
                 for line in self.get_wrapped_container().logs(stream=True):
-                    logging.getLogger('BehaveAppContainer').debug(line)
+                    print(line)
             sleep(3)
 
     @wait_container_is_ready(urllib.error.URLError)

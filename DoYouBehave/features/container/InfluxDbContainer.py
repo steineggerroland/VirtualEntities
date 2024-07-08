@@ -38,7 +38,7 @@ class InfluxDbContainerWrapper(InfluxDb2Container):
         while True:
             if self.get_wrapped_container() is not None:
                 for line in self.get_wrapped_container().logs(stream=True):
-                    logging.getLogger('InfluxDBContainer').debug(line)
+                    print(line)
             sleep(3)
 
     @wait_container_is_ready(AssertionError)

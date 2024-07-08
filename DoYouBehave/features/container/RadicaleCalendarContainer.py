@@ -28,7 +28,7 @@ class RadicaleCalendarContainer(DockerContainer):
         while True:
             if self.get_wrapped_container() is not None:
                 for line in self.get_wrapped_container().logs(stream=True):
-                    logging.getLogger('RadicaleContainer').debug(line)
+                    print(line)
             sleep(3)
 
     def start(self) -> 'RadicaleCalendarContainer':
