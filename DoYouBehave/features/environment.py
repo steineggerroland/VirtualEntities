@@ -12,6 +12,7 @@ from pathlib import Path
 import paho.mqtt.client as paho_mqtt
 from behave import fixture, use_fixture
 from behave.model_core import Status
+from influxdb import InfluxDBClient
 from paho.mqtt.enums import CallbackAPIVersion
 from testcontainers.core.docker_client import DockerClient
 
@@ -31,7 +32,7 @@ app_logging = False
 influxdb_logging = False
 mqtt_logging = False
 calendar_logging = False
-keep_run_folder = True
+keep_run_folder = False
 BUCKET_NAME = "time_series"
 app_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 stdout_handler = logging.StreamHandler(sys.stdout)
@@ -123,6 +124,9 @@ def appliances_setup(context, timeout=10, **kwargs):
     if not mqtt_client.is_connected():
         mqtt_client.username_pw_set('mqtt', 'mqtt')
         mqtt_client.connect(client.gateway_ip(context.mqtt_container.get_wrapped_container().id), 8883)
+    context.influxClient = InfluxDBClient(client.gateway_ip(context.influxdb_container.get_wrapped_container().id),
+                                          port=8884, username='integration-test-user',
+                                          password='the-giant-pink-unicorn', database='time_series')
     context.appliances = {
         'Washing machine': Appliance(mqtt_client, 'Washing machine',
                                      'measurements/home/indoor/washing_machine/power/power',
@@ -132,9 +136,10 @@ def appliances_setup(context, timeout=10, **kwargs):
                                 'home/things/dishwasher/unload'),
         'Dryer': Appliance(mqtt_client, 'Dryer',
                            'zigbee/home/indoor/dryer', 'home/things/dryer/load', 'home/things/dryer/unload'),
-        'Washer Kai': Appliance(mqtt_client, 'Washer Kai',
-                                'measurements/home/indoor/washing_machine_kai/power/power',
-                                'home/things/washing_machine_kai/load', 'home/things/washing_machine_kai/unload')
+        'Washer Kai': Appliance(mqtt_client, 'Washer Kai', 'measurements/home/indoor/washing_machine_kai/power',
+                                'home/things/washing_machine_kai/load', 'home/things/washing_machine_kai/unload'),
+        'Toploader': Appliance(mqtt_client, 'Toploader', 'measurements/home/indoor/toploader/power',
+                               'home/things/toploader/load', 'home/things/toploader/unload')
     }
     context.rooms = {
         'Kitchen': Room(mqtt_client, 'Kitchen', 'zigbee/home/kitchen/sensor01'),

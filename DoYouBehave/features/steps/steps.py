@@ -1,8 +1,12 @@
 import random
 import re
+from datetime import timedelta, datetime
 from typing import Optional
 
+import pytz
 from behave import *
+from influxdb import InfluxDBClient
+from influxdb_client import Point, WritePrecision
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -10,25 +14,47 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
 from selenium.webdriver.support.wait import WebDriverWait
 
+use_step_matcher('re')
 
-@given('the user goes to the {page_name} page')
+
+@given(r'(?>the user goes|they go) to the (?P<page_name>\w+(?> \w+)*) page')
 def load_page(context, page_name: str):
     context.webdriver.switch_to.new_window('tab')
     context.pages[page_name].navigate_to()
     context.pages[page_name].is_current_page()
 
 
-@given('the user goes to the {page_name} page of {entity_name}')
-def load_page(context, page_name: str, entity_name: str):
+@given(r'(?>the user goes|they go) to the (?P<page_name>\w+(?> \w+)*) page of (?P<entity_name>\w+(?> \w+)*)')
+def load_page_for_entity(context, page_name: str, entity_name: str):
     # "the" may be added to entity name because of grammar, thus, remove it
-    entity_name = entity_name.replace('the ', '')
+    entity_name = re.sub('^the ', '', entity_name)
     context.entity_name = entity_name
     context.webdriver.switch_to.new_window('tab')
     context.pages[page_name].navigate_to_entity(entity_name)
     context.pages[page_name].is_current_page()
 
 
-use_step_matcher('re')
+@given(r'(?P<count>\d+) power consumptions are created for the (?P<appliance_name>\w+(?> \w+)*?)(?> '
+       r'spread over the last (?>(?>(?P<timeperiod_days>\d+) days)|(?>(?P<timeperiod_hours>\d+) hours)|(?>(?P<timeperiod_seconds>\d+) seconds)))?')
+def create_bulk_power_consumptions(context, count: int, appliance_name: str, timeperiod_days: int = 0,
+                                   timeperiod_hours: int = 0, timeperiod_seconds: int = 0):
+    count, timeperiod_days, timeperiod_hours, timeperiod_seconds = int(count), int(
+        timeperiod_days) if timeperiod_days else 0, int(
+        timeperiod_hours) if timeperiod_hours else 0, int(timeperiod_seconds) if timeperiod_seconds else 0
+    total_seconds = timedelta(days=timeperiod_days, hours=timeperiod_hours, seconds=timeperiod_seconds).total_seconds()
+    total_seconds = total_seconds if total_seconds > 0 else 60 * 60
+    lines = '\n'.join(Point('power_consumption')
+                      .tag('thing', appliance_name)
+                      .field('consumption', round(min(2400.0, max(0.0, random.gauss() * i * 2400 / count)), 2))
+                      .time(datetime.now().astimezone(pytz.timezone("Europe/Berlin")) -
+                            timedelta(seconds=max(0, round(i * total_seconds / count))),
+                            WritePrecision.NS)
+                      .to_line_protocol(precision=WritePrecision.NS) for i in range(1, count + 1)) + '\n'
+    client: InfluxDBClient = context.influxClient
+    client.write_points(lines, protocol='line')
+    assert len(list(client.query('SELECT * FROM power_consumption WHERE time >= now() - 7200s')
+                    .get_points(measurement='power_consumption',
+                                tags={'thing': appliance_name}))) > 0
 
 
 @When(r'the power consumption of the (?P<appliance_name>\w+(?> \w+)*?) is updated(?> to (?P<value>\d+))?')
@@ -61,6 +87,15 @@ def click_on_name(context, entity_name: str):
                 return True
 
     assert WebDriverWait(context.webdriver, 30).until(find_and_click)
+
+
+@When('they successfully submit the change of the {field_name} to {new_value}')
+def submit_change_input(context, field_name, new_value):
+    context.execute_steps(f'''
+        when they change the {field_name} to {new_value}
+        and they submit the form
+        then they see a success message
+    ''')
 
 
 @When('they change the {field_name} to {new_value}')
@@ -182,9 +217,6 @@ def property_has_new_value(context, property_name=None, entity_name=None, value=
                                    refresh=d))
 
 
-use_step_matcher('parse')
-
-
 def property_has_value(context, property_name, entity_name, entity_type):
     property_name_in_class = property_name.replace(' ', '-')
     WebDriverWait(context.webdriver, 30).until(
@@ -266,37 +298,38 @@ def _handle_property_of_entity_not_found(elements_matching_entity_type, entity_n
         print(f'Found {matching_names} entities for {entity_name} ({entity_type}) but no expected value {value}')
 
 
-@then('the main headline contains {some_string}')
+@then(r'the main headline contains (?P<some_string>\w+(?> \w+)*)')
 def headline_contains(context, some_string):
     return context.webdriver.find_element(By.TAG_NAME, 'h1').text.find(some_string) >= 0
 
 
-@then('they see an icon indicating {entity_type} being the type of {entity_category}')
+@then(r'(?>the user sees|they see) an icon indicating (?P<entity_type>\w+(?> \w+)*) '
+      r'being the type of (?P<entity_category>\w+(?> \w+)*)')
 def icon_indicating_entity_type(context, entity_type: str, entity_category: str):
     assert any(icon_element.get_attribute('src').lower().find(entity_type.lower()) for icon_element in
                context.webdriver.find_elements(By.CSS_SELECTOR, '.%s img.icon' % entity_category))
 
 
-@then('they see the {class_name} is {some_string}')
+@then(r'(?>the user sees|they see) the (?P<class_name>\w+(?> \w+)*) is (?P<some_string>\w+(?> \w+)*)')
 def some_string_in_class_name(context, class_name: str, some_string: str):
     elements = context.webdriver.find_elements(By.CLASS_NAME, class_name)
     assert any(matching_element.text.lower().find(some_string.lower()) >= 0 for matching_element in elements)
 
 
-@then('they see an input for the {field_name} having value {value}')
+@then(r'(?>the user sees|they see) an input for the (?P<field_name>\w+(?> \w+)*) having value (?P<value>\w+(?> \w+)*)')
 def input_with_value(context, field_name, value):
     WebDriverWait(context.webdriver, 30).until(
         lambda d: d.find_element(By.ID, field_name).get_attribute('value') == value)
 
 
-@then('they see a {message_type} message')
+@then(r'(?>the user sees|they see) a (?P<message_type>\w+(?> \w+)*) message')
 def message_of_type(context, message_type):
     WebDriverWait(context.webdriver, 30).until(
         presence_of_element_located((By.CSS_SELECTOR, '.messages .message.%s' % message_type)),
         'No message of type "%s" found' % message_type)
 
 
-@then('the user sees the new appointment after a refresh')
+@then(r'(?>the user sees|they see) the new appointment after a refresh')
 def find_appointment(context):
     summary = context.new_value
     WebDriverWait(context.webdriver, 30).until(lambda d: _find_appointment(d, summary, d))
@@ -314,36 +347,45 @@ def _find_appointment(webdriver: WebDriver, summary, refresh=None):
     return True
 
 
-@then(u'the user sees a diagram with {property_type} values')
-def step_impl(context, property_type: str):
-    value = _get_diagram_path_for_property(context.webdriver, property_type)
-    setattr(context, f'prop_{property_type}', value)
+@then(r'(?>the user sees|they see) (?>a|the) diagram '
+      r'with (?>(?P<updated>updated|the previous) )?(?P<property_type>\w+(?> \w+)*) values')
+def get_or_verify_diagram_path(context, property_type, updated: str = None):
+    values = None
+    if updated is not None:
+        shall_be_same = updated != 'updated'
+        old_value = getattr(context, f'prop_{property_type}')
+        values = WebDriverWait(context.webdriver, 30, 5).until(
+            lambda d: _compare_diagram_path_for_property(d, property_type, old_value) == shall_be_same)
+    values = values if values is not None else WebDriverWait(context.webdriver, 30, 5) \
+        .until(lambda d: _get_diagram_path_for_property(d, property_type),
+               "Could not retrieve diagram for property %s" % property_type)
+    assert values is not None and (type(values) is not str or len(values) > 0)
+    setattr(context, f'prop_{property_type}', values)
 
 
-@then(u'the user sees the diagram with updated {property_type} values')
-def step_impl(context, property_type):
-    old_value = getattr(context, f'prop_{property_type}')
-    WebDriverWait(context.webdriver, 10, 1).until(
-        lambda d: _compare_diagram_path_for_property(d, property_type, old_value))
-    setattr(context, f'prop_{property_type}', _get_diagram_path_for_property(context.webdriver, property_type))
-
-
-def _compare_diagram_path_for_property(webdriver, property_type, old_value) -> Optional[str]:
+def _compare_diagram_path_for_property(webdriver, property_type, old_value) -> bool:
     value = _get_diagram_path_for_property(webdriver, property_type)
-    return value is not None and old_value != value
+    print(
+        f'Old value "{old_value if old_value is None or type(old_value) is not str or len(old_value) < 30 else old_value[:15] + old_value[-15:]}", '
+        f'found value "{value if value is None or type(value) is not str or len(value) < 30 else value[:15] + value[-15:]}"')
+    if old_value == value:
+        return True
+    else:
+        return False
 
 
 def _get_diagram_path_for_property(webdriver, property_type) -> Optional[str]:
     webdriver.refresh()
     try:
-        css_selector = '.diagram[data-attribute="%s"] svg > g > path' % property_type.replace(' ', '-')
+        css_selector = '.diagram[data-attribute="%s"] svg > g.data-%s > path' % (
+            to_class(property_type), to_class(property_type))
         new_value = webdriver.find_element(By.CSS_SELECTOR, css_selector).get_dom_attribute('d')
         return new_value
     except:
         return None
 
 
-@then('they see the calendar called {calendar_name}')
+@then(r'(?>the user sees|they see) the calendar called (?P<calendar_name>\w+(?> \w+)*)')
 def find_calendar(context, calendar_name: str):
     context.webdriver.find_elements()
     WebDriverWait(context.webdriver, 30).until(

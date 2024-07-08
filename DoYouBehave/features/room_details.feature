@@ -16,6 +16,7 @@ Feature: The user can see the static configuration of the Kitchen room and chang
 
   Scenario: the user sees a diagram with the room climate, i.e., temperature and humidity.
     Given the user goes to the room details page of the Kitchen
+    When the room climate of the Kitchen is updated
     Then the user sees a diagram with temperature values
     And the user sees a diagram with humidity values
     When the room climate of the Kitchen is updated
