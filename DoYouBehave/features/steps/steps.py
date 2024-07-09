@@ -101,6 +101,16 @@ def submit_change_input(context, field_name, new_value):
 @When('they change the {field_name} to {new_value}')
 def change_input(context, field_name, new_value):
     input: WebElement = context.webdriver.find_element(By.ID, field_name)
+    # rename internal entity too
+    if field_name == 'name':
+        old_name = input.get_attribute('value')
+        entity_type = get_type_for_entity_with_name(context, old_name)
+        if entity_type == 'appliance':
+            context.appliances[new_value] = old_name
+        elif entity_type == 'room':
+            context.rooms[new_value] = old_name
+        else:
+            context.persons[new_value] = old_name
     input.clear()
     input.send_keys(new_value)
 
@@ -204,8 +214,7 @@ use_step_matcher('re')
 @then(r'(?>the user sees|they see) the(?> (?P<new>new))? ?(?P<property_name>\w+(?> \w+)*?) of the '
       r'(?P<entity_name>\w+(?> \w+)*?)(?> (?>being (?P<value>(?>\d|\w)+(?> (?>\d|\w)+)*?) )?after a refresh)?')
 def property_has_new_value(context, property_name=None, entity_name=None, value=None, new=None):
-    entity_type = 'appliance' if any(a == entity_name for a in context.appliances) else \
-        'room' if any(r == entity_name for r in context.rooms) else 'person'
+    entity_type = get_type_for_entity_with_name(context, entity_name)
     if new is None:
         return property_has_value(context, property_name, entity_name, entity_type)
     property_name_in_class = property_name.replace(' ', '-')
@@ -217,6 +226,12 @@ def property_has_new_value(context, property_name=None, entity_name=None, value=
                                    refresh=d))
 
 
+def get_type_for_entity_with_name(context, entity_name):
+    entity_type = 'appliance' if any(a == entity_name for a in context.appliances) else \
+        'room' if any(r == entity_name for r in context.rooms) else 'person'
+    return entity_type
+
+
 def property_has_value(context, property_name, entity_name, entity_type):
     property_name_in_class = property_name.replace(' ', '-')
     WebDriverWait(context.webdriver, 30).until(
@@ -226,18 +241,34 @@ def property_has_value(context, property_name, entity_name, entity_type):
 def _verify_property(d, entity_name, entity_type, property_selector, value=None, refresh=None):
     if refresh is not None:
         refresh.refresh()
-    matching_names = 0
-    elements_matching_entity_type = d.find_elements(By.CLASS_NAME, entity_type)
     values_not_matching = []
-    for entity_element in elements_matching_entity_type:
-        if entity_element.find_element(By.CLASS_NAME, 'name').text == entity_name:
-            matching_names += 1
-            match_found = _find_property_and_match_with(value, entity_element, property_selector, values_not_matching)
-            if match_found:
-                return True
-    _handle_property_of_entity_not_found(elements_matching_entity_type, entity_name, entity_type, matching_names, value,
-                                         values_not_matching)
+    try:
+        elements_for_entity_with_name = _find_element_for_entity_with_name(d, entity_type, entity_name)
+    except AssertionError as e:
+        print(e)
+        return False
+    for e in elements_for_entity_with_name:
+        match_found = _find_property_and_match_with(value, e, property_selector, values_not_matching)
+        if match_found:
+            return True
+    if len(values_not_matching) > 0:
+        print(f'None of the found values ({values_not_matching}) matches expected value "{value}" for '
+              f'entity {entity_name} ({entity_type})')
+    else:
+        print(f'Found {len(elements_for_entity_with_name)} entities for {entity_name} ({entity_type})'
+              f' but no values for property {property_selector}')
     return False
+
+
+def _find_element_for_entity_with_name(webdriver, entity_type: str, entity_name: str):
+    elements_for_entity_type = webdriver.find_elements(By.CLASS_NAME, entity_type)
+    found_elements = list(filter(lambda element: element.find_element(By.CLASS_NAME, 'name').text == entity_name,
+                                 elements_for_entity_type))
+    if len(elements_for_entity_type) == 0:
+        raise AssertionError('There are no elements of type %s' % entity_type)
+    if len(found_elements) == 0:
+        raise AssertionError('There are no elements of type %s with name %s' % (entity_type, entity_name))
+    return found_elements
 
 
 def _find_property_and_match_with(value, entity_element, property_selector, values_not_matching):
@@ -285,17 +316,6 @@ def _find_and_compare_property(value, entity_element, property_selector, values_
         else:
             values_not_matching.extend(property_values)
             return False
-
-
-def _handle_property_of_entity_not_found(elements_matching_entity_type, entity_name, entity_type, matching_names, value,
-                                         values_not_matching):
-    if len(values_not_matching) > 0:
-        print(f'None of the found values ({values_not_matching}) matches expected value "{value}" for '
-              f'entity {entity_name} ({entity_type})')
-    elif len(elements_matching_entity_type) <= 0:
-        print(f'Could not find any entity of type {entity_type} with name {entity_name}')
-    else:
-        print(f'Found {matching_names} entities for {entity_name} ({entity_type}) but no expected value {value}')
 
 
 @then(r'the main headline contains (?P<some_string>\w+(?> \w+)*)')
@@ -348,38 +368,61 @@ def _find_appointment(webdriver: WebDriver, summary, refresh=None):
 
 
 @then(r'(?>the user sees|they see) (?>a|the) diagram '
-      r'with (?>(?P<updated>updated|the previous) )?(?P<property_type>\w+(?> \w+)*) values')
-def get_or_verify_diagram_path(context, property_type, updated: str = None):
+      r'with (?>(?P<updated>updated|the previous) )?(?P<property_type>\w+(?> \w+)*) values'
+      r'(?> for(?> the)? (?P<entity_name>\w+(?> \w+)*))?')
+def get_or_verify_diagram_path(context, property_type, updated: str = None, entity_name: str = None):
+    if entity_name is not None:
+        entity_type = get_type_for_entity_with_name(context, entity_name)
+    else:
+        entity_type = None
     values = None
     if updated is not None:
         shall_be_same = updated != 'updated'
         old_value = getattr(context, f'prop_{property_type}')
         values = WebDriverWait(context.webdriver, 30, 5).until(
-            lambda d: _compare_diagram_path_for_property(d, property_type, old_value) == shall_be_same)
+            lambda d: _compare_diagram_path_for_property(d, property_type, old_value,
+                                                         entity_type, entity_name) == shall_be_same)
     values = values if values is not None else WebDriverWait(context.webdriver, 30, 5) \
-        .until(lambda d: _get_diagram_path_for_property(d, property_type),
+        .until(lambda d: _get_diagram_path_for_property(d, property_type, entity_type, entity_name),
                "Could not retrieve diagram for property %s" % property_type)
     assert values is not None and (type(values) is not str or len(values) > 0)
     setattr(context, f'prop_{property_type}', values)
 
 
-def _compare_diagram_path_for_property(webdriver, property_type, old_value) -> bool:
-    value = _get_diagram_path_for_property(webdriver, property_type)
-    print(
-        f'Old value "{old_value if old_value is None or type(old_value) is not str or len(old_value) < 30 else old_value[:15] + old_value[-15:]}", '
-        f'found value "{value if value is None or type(value) is not str or len(value) < 30 else value[:15] + value[-15:]}"')
+def _compare_diagram_path_for_property(webdriver, property_type, old_value, entity_type: str = None,
+                                       entity_name: str = None) -> bool:
+    value = _get_diagram_path_for_property(webdriver, property_type, entity_type, entity_name)
+    print(f'Old value "{old_value}", found value "{value}"')
+    if value is not None and type(value) is str and len(value) > 100:  # long texts shall be compared more fuzzy
+        suffix_to_compare_length = round(len(value) * 2.0 / 3.0)
+        offset = round(len(value) / 6.0)
+        if (len(old_value) / len(value)) >= 0.9:  # verify that the length of the two values have a quite similar length
+            return value.find(old_value[offset:offset + suffix_to_compare_length]) >= 0
+        else:  # the old value is much shorter than the new value
+            return False
     if old_value == value:
         return True
     else:
         return False
 
 
-def _get_diagram_path_for_property(webdriver, property_type) -> Optional[str]:
+def _get_diagram_path_for_property(webdriver, property_type, entity_type: str = None, entity_name: str = None) -> \
+        Optional[str]:
     webdriver.refresh()
     try:
-        css_selector = '.diagram[data-attribute="%s"] svg > g.data-%s > path' % (
-            to_class(property_type), to_class(property_type))
-        new_value = webdriver.find_element(By.CSS_SELECTOR, css_selector).get_dom_attribute('d')
+        if entity_name is None:
+            container = webdriver
+        else:
+            try:
+                matching_elements_of_entity = _find_element_for_entity_with_name(webdriver, entity_type, entity_name)
+                if len(matching_elements_of_entity) > 1:
+                    print('There are more elements matching the entity, but only one is compared.')
+                container = matching_elements_of_entity[0]
+            except AssertionError as e:
+                print(e)
+                return None
+        css_selector = '.diagram.%s' % to_class(property_type)
+        new_value = container.find_element(By.CSS_SELECTOR, css_selector).get_dom_attribute('data-displayed-measures')
         return new_value
     except:
         return None

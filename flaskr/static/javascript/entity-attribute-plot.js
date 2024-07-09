@@ -4,7 +4,8 @@
         if (attribute === 'power-consumption') {
             measures.forEach(m => m[attribute] = m['consumption'])
         }
-        let diagramContainer = document.getElementById(containerId);
+        const diagramContainer = document.getElementById(containerId)
+        diagramContainer.dataset.displayedMeasures = JSON.stringify(measures)
         diagramContainer.childNodes.forEach(function (child) {
             diagramContainer.removeChild(child)
         })
