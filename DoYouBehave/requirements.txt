@@ -3,6 +3,6 @@ selenium~=4.21.0
 testcontainers==3.7.1
 testcontainers-core==0.0.1rc1
 testcontainers-python-influxdb==0.2.2
-influxdb-client~=1.43.0
+influxdb-client~=1.44.0
 paho-mqtt==2.1.0
 influxdb~=5.3.2
