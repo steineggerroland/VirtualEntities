@@ -28,20 +28,4 @@
             {% endif %}
         </section>
     </main>
-    <aside class="container text-center">
-        <p class="d-inline-flex gap-1">
-            <button class="btn btn-secondary" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#dashboard-options"
-                    aria-expanded="false" aria-controls="dashboard-options">
-                {{ _('Options') }}
-            </button>
-        </p>
-        <div class="collapse" id="dashboard-options">
-            <div class="card card-body">
-                <a href="{{ url_for('ve_dashboard', _anchor='main', refresh_interval=30) }}">
-                    {{ _('Refresh every 30 seconds') }}
-                </a>
-            </div>
-        </div>
-    </aside>
 {% endblock %}

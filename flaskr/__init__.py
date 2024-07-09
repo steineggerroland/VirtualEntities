@@ -8,6 +8,7 @@ from flask_bootstrap import Bootstrap5
 
 from flaskr.api.ApplianceDepot import appliance_depot_api
 from flaskr.api.RoomCatalog import room_catalog_api
+from flaskr.options_controller import options_blueprint
 from flaskr.views import VirtualEntities, Room, Appliance, Person
 from flaskr.views.Homepage import Homepage
 from iot.core.configuration_manager import ConfigurationManager
@@ -71,6 +72,8 @@ def create_app(default_config_file_name: str, machine_service: MachineService, a
         "/person/<name>/configuration",
         view_func=Person.Configuration.as_view('person_configuration', register_of_persons, configuration_manager)
     )
+
+    app.register_blueprint(options_blueprint(), url_prefix='/options/')
 
     def locale_selector():
         return request.accept_languages.best_match(app.config['LANGUAGES'].keys())

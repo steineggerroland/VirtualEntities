@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  0.1\n"
 "Report-Msgid-Bugs-To: roland@steinegger.one\n"
-"POT-Creation-Date: 2024-07-09 12:47+0200\n"
+"POT-Creation-Date: 2024-07-09 14:23+0200\n"
 "PO-Revision-Date: 2024-05-24 21:54+0200\n"
 "Last-Translator: Roland Steinegger <roland@steinegger.one>\n"
 "Language: de\n"
@@ -153,6 +153,14 @@ msgstr "Überblick"
 msgid "Dashboard"
 msgstr "Dashboard"
 
+#: flaskr/templates/base.html:71
+msgid "Refresh every 30 seconds"
+msgstr "Alle 30 Sekunden aktualisieren"
+
+#: flaskr/templates/base.html:84
+msgid  "Fullscreen"
+msgstr "Vollbild"
+
 #: flaskr/templates/dashboard.html:14 flaskr/templates/virtual_entities.html:14
 msgid "The depot is empty"
 msgstr "Das Lager ist leer"
@@ -166,14 +174,6 @@ msgstr "Raumverzeichnis"
 #: flaskr/templates/dashboard.html:26 flaskr/templates/virtual_entities.html:26
 msgid "No rooms in catalog"
 msgstr "Das Verzeichnis ist leer"
-
-#: flaskr/templates/dashboard.html:36
-msgid "Options"
-msgstr "Optionen"
-
-#: flaskr/templates/dashboard.html:42
-msgid "Refresh every 30 seconds"
-msgstr "Alle 30 Sekunden aktualisieren"
 
 #: flaskr/templates/person.html:2 flaskr/templates/person_configuration.html:2
 #, fuzzy, python-format
@@ -499,4 +499,7 @@ msgstr "Raumdaten nicht aktualisiert, siehe Fehler im Formular"
 
 #~ msgid "No appliance found with that name"
 #~ msgstr "Kein Gerät mit dem Namen gefunden"
+
+#~ msgid "Options"
+#~ msgstr "Optionen"
 
