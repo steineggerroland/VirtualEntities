@@ -6,14 +6,12 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Generated-By: Babel 2.15.0\n"
-"Project-Id-Version:  0.1\n"
-"Report-Msgid-Bugs-To: roland@steinegger.one\n"
-"POT-Creation-Date: 2024-07-09 12:47+0200\n"
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2024-07-09 14:23+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Roland Steinegger <roland@steinegger.one>\n"
-"Language-Team: de <roland@steinegger.one>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -152,6 +150,14 @@ msgstr ""
 msgid "Dashboard"
 msgstr ""
 
+#: flaskr/templates/base.html:71
+msgid "Refresh every 30 seconds"
+msgstr ""
+
+#: flaskr/templates/base.html:84
+msgid "Show Fullscreen"
+msgstr ""
+
 #: flaskr/templates/dashboard.html:14 flaskr/templates/virtual_entities.html:14
 msgid "The depot is empty"
 msgstr ""
@@ -164,14 +170,6 @@ msgstr ""
 
 #: flaskr/templates/dashboard.html:26 flaskr/templates/virtual_entities.html:26
 msgid "No rooms in catalog"
-msgstr ""
-
-#: flaskr/templates/dashboard.html:36
-msgid "Options"
-msgstr ""
-
-#: flaskr/templates/dashboard.html:42
-msgid "Refresh every 30 seconds"
 msgstr ""
 
 #: flaskr/templates/person.html:2 flaskr/templates/person_configuration.html:2

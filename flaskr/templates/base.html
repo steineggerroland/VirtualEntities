@@ -16,7 +16,7 @@
     {% endblock %}
 </head>
 <body class="d-flex flex-column">
-<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+<nav class="navbar navbar-expand-lg bg-primary {%- if request.args['fullscreen'] %} visually-hidden{% endif %}" data-bs-theme="dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">
             <img alt="Behave" class="d-inline-block align-text-top" height="24"
@@ -56,7 +56,37 @@
 <footer class="text-white bg-dark py-3 mt-auto">
     <div class="container">
         <div class="d-flex flex-wrap justify-content-between align-items-start">
-            <div class="col-md-4 d-flex align-items-center">
+            <aside class="col-md-4">
+                <div id="options">
+                    {%- if request.args['refresh_interval'] %}
+                        {% set action=url_for('options.refresh_interval') %}{% else %}
+                        {% set action=url_for('options.refresh_interval', refresh_interval=30) %}{% endif %}
+                    <form action="{{ action }}" method="post" id="options-refresh-interval-form">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch"
+                                   id="options-refresh-interval-toggle"
+                                   onchange="document.getElementById('options-refresh-interval-form').submit()"
+                                   {% if request.args['refresh_interval'] %}checked{% endif %}>
+                            <label class="form-check-label"
+                                   for="options-refresh-interval-toggle">{{ _('Refresh every 30 seconds') }}</label>
+                        </div>
+                    </form>
+                    {%- if request.args['fullscreen'] %}
+                        {% set action=url_for('options.fullscreen') %}{% else %}
+                        {% set action=url_for('options.fullscreen', fullscreen='true') %}{% endif %}
+                    <form action="{{ action }}" method="post" id="options-fullscreen-form">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch"
+                                   id="options-fullscreen-toggle"
+                                   onchange="document.getElementById('options-fullscreen-form').submit()"
+                                   {% if request.args['fullscreen'] %}checked{% endif %}>
+                            <label class="form-check-label"
+                                   for="options-fullscreen-toggle">{{ _('Fullscreen') }}</label>
+                        </div>
+                    </form>
+                </div>
+            </aside>
+            <div class="col-md-4 d-flex align-items-center justify-content-center">
                 <a class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1" href="{{ project_url }}"
                    target="_blank">
                     <img alt="GitHub" class="icon" src="{{ url_for('static', filename='img/flaticon/github.png') }}"
@@ -64,7 +94,7 @@
                 </a>
                 <span class="mb-3 mb-md-0">© 2024</span>
             </div>
-            <div class="col-md-8 d-flex-column align-items-center">
+            <div class="col-md-4 d-flex-column align-items-center">
                 {% include "snippets/attribution_footer.html" %}
             </div>
         </div>
