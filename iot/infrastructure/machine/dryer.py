@@ -1,5 +1,5 @@
 from iot.infrastructure.machine.machine_that_can_be_loaded import MachineThatCanBeLoaded
-from iot.infrastructure.thing import _datetime_from_dict_key
+from iot.infrastructure.virtual_entity import _datetime_from_dict_key
 
 
 class Dryer(MachineThatCanBeLoaded):

@@ -1,6 +1,6 @@
 mqtt:
   url: mqtt.local
-things:
+entities:
   - name: rld
     type: person
     sources:

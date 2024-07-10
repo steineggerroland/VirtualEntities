@@ -343,8 +343,9 @@ def icon_indicating_entity_type(context, entity_type: str, entity_category: str)
 
 @then(r'(?>the user sees|they see) the (?P<class_name>\w+(?> \w+)*) is (?P<some_string>\w+(?> \w+)*)')
 def some_string_in_class_name(context, class_name: str, some_string: str):
-    elements = context.webdriver.find_elements(By.CLASS_NAME, class_name)
-    assert any(matching_element.text.lower().find(some_string.lower()) >= 0 for matching_element in elements)
+    WebDriverWait(context.webdriver, 30).until(
+        lambda d: any(matching_element.text.lower().find(some_string.lower()) >= 0 for matching_element in
+                      d.find_elements(By.CLASS_NAME, class_name)))
 
 
 @then(r'(?>the user sees|they see) an input for the (?P<field_name>\w+(?> \w+)*) having value (?P<value>\w+(?> \w+)*)')

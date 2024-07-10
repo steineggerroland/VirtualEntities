@@ -1,7 +1,7 @@
-<div class="card appliance {{ appliance.thing_type }}">
+<div class="card appliance {{ appliance.entity_type }}">
     <div class="card-header">
         <h4 class="card-title mb-0 d-flex flex-nowrap">
-            {%- with type=appliance.thing_type %}
+            {%- with type=appliance.entity_type %}
                 <div class="me-2">
                     {%- include "snippets/appliance_icon.html" %}
                 </div>
@@ -17,7 +17,7 @@
         <div class="col-4">
             <div class="w-100 position-relative" style="aspect-ratio: 1">
                 <div class="power-consumption diagram position-absolute top-0 start-0 w-100 h-100 z-2"
-                     data-thing-name="{{ appliance.name }}" data-fullscreen="true"
+                     data-entity-name="{{ appliance.name }}" data-fullscreen="true"
                      data-x-axis-label="{{ _('Watt') }}"></div>
                 <div class="position-absolute top-0 start-0 w-100 h-100 z-1 fs-4">
                     {%- with power_consumption=appliance.watt %}
@@ -30,11 +30,11 @@
             {%- if appliance.running_state=='running' %}
                 {%- set text=_('Running') %}
                 {%- set color='warning' %}
-                {% if appliance.thing_type=='dishwasher' %}
+                {% if appliance.entity_type=='dishwasher' %}
                     {%- set icon='img/flaticon/clean-dishes.gif' %}
-                {% elif appliance.thing_type=='dryer' %}
+                {% elif appliance.entity_type=='dryer' %}
                     {%- set icon='img/flaticon/laundry.gif' %}
-                {% elif appliance.thing_type=='washing_machine' %}
+                {% elif appliance.entity_type=='washing_machine' %}
                     {%- set icon='img/flaticon/laundry.gif' %}
                 {% else %}
                     {%- set icon='img/flaticon/home-appliance.gif' %}
@@ -42,11 +42,11 @@
             {%- elif appliance.needs_unloading %}
                 {%- set text=_('Loaded') %}
                 {%- set color='danger' %}
-                {% if appliance.thing_type=='dishwasher' %}
+                {% if appliance.entity_type=='dishwasher' %}
                     {%- set icon='img/flaticon/dinnerware.gif' %}
-                {% elif appliance.thing_type=='dryer' %}
+                {% elif appliance.entity_type=='dryer' %}
                     {%- set icon='img/flaticon/smart-washing-machine.gif' %}
-                {% elif appliance.thing_type=='washing_machine' %}
+                {% elif appliance.entity_type=='washing_machine' %}
                     {%- set icon='img/flaticon/smart-washing-machine.gif' %}
                 {% else %}
                     {%- set icon='img/flaticon/smart-washing-machine.gif' %}

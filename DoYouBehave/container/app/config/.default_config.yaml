@@ -10,7 +10,7 @@ time_series:
   username: integration-test-user
   password: the-giant-pink-unicorn
   bucket_name: time_series
-things:
+entities:
   - name: Washing machine
     type: washing_machine
     sources:

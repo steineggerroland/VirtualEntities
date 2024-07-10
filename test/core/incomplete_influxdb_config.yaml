@@ -2,7 +2,7 @@ mqtt:
   url: mqtt.local
 time_series:
   url: ts.lan
-things:
+entities:
   - name: super_washer
     type: washing_machine
     sources:

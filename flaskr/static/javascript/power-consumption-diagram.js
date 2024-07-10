@@ -73,12 +73,12 @@
     }
 
     document.querySelectorAll('.power-consumption.diagram').forEach(container => {
-        const thingName = container.dataset.thingName
+        const entityName = container.dataset.entityName
         const xAxisLabel = container.dataset.xAxisLabel
         const fullscreen = !!container.dataset.fullscreen
-        if (!container.id) container.id = "power-consumption-diagram-container-" + makeSafeForCSS(thingName)
+        if (!container.id) container.id = "power-consumption-diagram-container-" + makeSafeForCSS(entityName)
         const measurements = []
-        const fetchAndDrawDiagram = () => fetch(`/api/appliances/${thingName}/power-consumptions`)
+        const fetchAndDrawDiagram = () => fetch(`/api/appliances/${entityName}/power-consumptions`)
             .then(data => data.json())
             .then(data => {
                 measurements.splice(0, measurements.length)

@@ -5,7 +5,7 @@ from typing import List
 
 from python_event_bus import EventBus
 
-from iot.core.configuration import IotThingConfig
+from iot.core.configuration import VirtualEntityConfig
 from iot.core.configuration_manager import ConfigurationManager
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.exceptions import DatabaseException
@@ -60,18 +60,18 @@ class MachineService:
         self.managed_machines = ManagedMachines()
         EventBus.subscribe("appliance/changed_config_name", self.change_name, priority=0)
 
-    def add_machines_by_config(self, thing_configs: List[IotThingConfig]):
-        for thing_config in thing_configs:
-            machine = self.appliance_depot.retrieve(thing_config.name)
+    def add_machines_by_config(self, entity_configs: List[VirtualEntityConfig]):
+        for entity_config in entity_configs:
+            machine = self.appliance_depot.retrieve(entity_config.name)
             self.managed_machines.add(
-                ManagedMachine(thing_config.name, SimpleHistoryRunCompleteStrategy(self.time_series_storage,
-                                                                                   thing_config.run_complete_when.below_threshold_for,
-                                                                                   thing_config.run_complete_when.threshold)))
+                ManagedMachine(entity_config.name, SimpleHistoryRunCompleteStrategy(self.time_series_storage,
+                                                                                   entity_config.run_complete_when.below_threshold_for,
+                                                                                   entity_config.run_complete_when.threshold)))
             if machine is None:
-                machine = MachineBuilder.from_dict(thing_config.__dict__)
+                machine = MachineBuilder.from_dict(entity_config.__dict__)
                 self.appliance_depot.stock(machine)
             if machine.started_run_at is not None:
-                self.started_run(thing_config.name)
+                self.started_run(entity_config.name)
             EventBus.call("machine/added", machine)
 
     def update_power_consumption(self, machine_name: str, new_power_consumption):
@@ -154,5 +154,5 @@ class MachineService:
         return self.appliance_depot.retrieve(machine_name)
 
 
-def supports_thing_type(thing_type) -> bool:
-    return MachineBuilder.can_build(thing_type)
+def supports_entity_type(entity_type) -> bool:
+    return MachineBuilder.can_build(entity_type)

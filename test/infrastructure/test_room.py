@@ -4,7 +4,7 @@ from datetime import datetime
 from random import Random
 
 from iot.infrastructure.room import Room, from_dict
-from iot.infrastructure.thing import OnlineStatus
+from iot.infrastructure.virtual_entity import OnlineStatus
 from iot.infrastructure.units import TemperatureUnit, Temperature, TemperatureThresholds, Range, HumidityThresholds, \
     TemperatureRating, HumidityRating
 

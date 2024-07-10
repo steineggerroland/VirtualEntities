@@ -2,11 +2,11 @@ from datetime import datetime, timedelta
 from functools import reduce
 from typing import List
 
-from iot.infrastructure.thing import Thing
+from iot.infrastructure.virtual_entity import VirtualEntity
 from iot.infrastructure.time.calendar import Calendar, Appointment
 
 
-class Person(Thing):
+class Person(VirtualEntity):
     def __init__(self, name: str, calendars: List[Calendar] = (), last_updated_at: datetime = datetime.now(),
                  last_seen_at: None | datetime = None):
         super().__init__(name, "person", last_updated_at, last_seen_at, online_delta_in_seconds=60 * 10)

@@ -10,13 +10,13 @@ class ConfigDumpers:
 
     def configuration_dumper(dumper: Dumper, c) -> Node:
         to_dict = {'mqtt': c.mqtt,
-                   'things': [thing for thing in c.things]}
+                   'entities': [entity for entity in c.entities]}
         if c.time_series: to_dict['time_series'] = c.time_series
         if c.calendars_config and (c.calendars_config.categories or c.calendars_config.calendars): to_dict[
             'calendars'] = c.calendars_config
         if c.flaskr: to_dict['flaskr'] = c.flaskr
         return dumper.represent_dict(
-            _sort_keys(OrderedDict(to_dict), ['mqtt', 'time_series', 'things', 'calendars', 'flaskr']).items())
+            _sort_keys(OrderedDict(to_dict), ['mqtt', 'time_series', 'entities', 'calendars', 'flaskr']).items())
 
     def time_series_dumper(dumper: Dumper, ts) -> Node:
         dict__ = ts.__dict__
@@ -107,7 +107,7 @@ class ConfigDumpers:
         to_dict['optimal'] = o.optimal
         return dumper.represent_dict(_sort_keys(to_dict, ['optimal', 'critical_lower', 'critical_upper']).items())
 
-    def iot_thing_dumper(dumper: Dumper, o) -> Node:
+    def entity_dumper(dumper: Dumper, o) -> Node:
         to_dict = OrderedDict({'name': o.name, 'type': o.type})
         default_run_complete_when = RunCompleteWhen()
         if o.run_complete_when.below_threshold_for != default_run_complete_when.below_threshold_for or \

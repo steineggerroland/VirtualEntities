@@ -10,8 +10,8 @@ time_series:
   username: influxdb
   password: secret
   bucket_name: bucket_to_save_to
-things:
-  - name: super_thing
+entities:
+  - name: super_entity
     type: dryer
     run_complete_when:
       below_threshold_for: 5
