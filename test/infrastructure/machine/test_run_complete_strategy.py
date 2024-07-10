@@ -5,7 +5,7 @@ from unittest.mock import Mock
 
 from iot.core.storage import Storage
 from iot.core.timeseries_types import ConsumptionMeasurement
-from iot.infrastructure.machine.run_complete_strategy import SimpleHistoryRunCompleteStrategy
+from iot.infrastructure.appliance.run_complete_strategy import SimpleHistoryRunCompleteStrategy
 
 
 class TestSimpleHistoryRunCompleteStrategy(unittest.TestCase):

@@ -1,7 +1,7 @@
 from python_event_bus import EventBus
 
 from iot.core.configuration import Sources, Destinations
-from iot.infrastructure.machine.machine_service import MachineService, DatabaseException
+from iot.infrastructure.appliance.machine_service import MachineService, DatabaseException
 from iot.mqtt.mqtt_client import MqttClient
 from iot.mqtt.mqtt_mediator import MqttMediator
 
@@ -50,24 +50,24 @@ class MqttMachineMediator(MqttMediator):
             self.machine_service.update_power_consumption(machine_name, consumption)
             self.logger.debug("Updated power consumption '%s'", consumption)
         except DatabaseException as e:
-            self.logger.error("Failed to update machine's %s power consumption because of database error '%s'",
+            self.logger.error("Failed to update appliance's %s power consumption because of database error '%s'",
                               machine_name, e, exc_info=True)
 
     def load_machine(self, machine_name, msg=None):
         try:
             needs_unloading = self._read_value_from_message(msg, value_type=bool) if msg.payload else True
             self.machine_service.loaded(machine_name, needs_unloading=needs_unloading)
-            self.logger.debug("Set machine loaded.")
+            self.logger.debug("Set appliance loaded.")
         except DatabaseException as e:
-            self.logger.error("Failed set machine %s loaded because of database error '%s'",
+            self.logger.error("Failed set appliance %s loaded because of database error '%s'",
                               machine_name, e, exc_info=True)
 
     def unload_machine(self, machine_name, msg=None):
         try:
             self.machine_service.unloaded(machine_name)
-            self.logger.debug("Set machine unloaded.")
+            self.logger.debug("Set appliance unloaded.")
         except DatabaseException as e:
-            self.logger.error("Failed set machine %s unloaded because of database error '%s'",
+            self.logger.error("Failed set appliance %s unloaded because of database error '%s'",
                               machine_name, e, exc_info=True)
 
     def rename(self, name: str, old_name: str):

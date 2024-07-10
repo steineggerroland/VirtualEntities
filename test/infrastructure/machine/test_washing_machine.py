@@ -1,9 +1,9 @@
 import unittest
 from datetime import datetime, timedelta
 
-from iot.infrastructure.machine.machine_that_can_be_loaded import RunningState
-from iot.infrastructure.machine.power_state_decorator import PowerState
-from iot.infrastructure.machine.washing_machine import from_dict
+from iot.infrastructure.appliance.machine_that_can_be_loaded import RunningState
+from iot.infrastructure.appliance.power_state_decorator import PowerState
+from iot.infrastructure.appliance.washing_machine import from_dict
 from iot.infrastructure.virtual_entity import OnlineStatus
 
 

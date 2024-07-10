@@ -3,8 +3,8 @@ from unittest.mock import MagicMock, call
 
 from iot.core.storage import Storage
 from iot.core.time_series_storage import TimeSeriesStorage
-from iot.infrastructure.machine.appliance_depot import ApplianceDepot
-from iot.infrastructure.machine.washing_machine import WashingMachine
+from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
+from iot.infrastructure.appliance.washing_machine import WashingMachine
 
 
 class TestApplianceDepot(unittest.TestCase):

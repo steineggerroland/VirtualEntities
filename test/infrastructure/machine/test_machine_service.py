@@ -6,15 +6,15 @@ from iot.core.configuration import VirtualEntityConfig
 from iot.core.configuration_manager import ConfigurationManager
 from iot.core.storage import Storage
 from iot.core.time_series_storage import TimeSeriesStorage
-from iot.infrastructure.machine.appliance_depot import ApplianceDepot
-from iot.infrastructure.machine.machine_service import MachineService, DatabaseException
-from iot.infrastructure.machine.washing_machine import WashingMachine
+from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
+from iot.infrastructure.appliance.machine_service import MachineService, DatabaseException
+from iot.infrastructure.appliance.washing_machine import WashingMachine
 
 
 class InitTest(unittest.TestCase):
     def test_init(self):
         configuration_mock = Mock(type='washing_machine')
-        configuration_mock.name = 'washing machine'
+        configuration_mock.name = 'washing appliance'
         storage_mock = Mock()
         storage_mock.load_entity = Mock(return_value=WashingMachine('washing_machine', 'washing_machine'))
         time_series_storage_mock = TimeSeriesStorage()

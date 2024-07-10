@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 from iot.core.configuration import VirtualEntityConfig, ThresholdsConfig, RangeConfig
 from iot.core.storage import Storage
-from iot.infrastructure.machine.machine_service import DatabaseException
+from iot.infrastructure.appliance.machine_service import DatabaseException
 from iot.infrastructure.room import Room
 from iot.infrastructure.room_catalog import RoomCatalog
 from iot.infrastructure.room_service import RoomService

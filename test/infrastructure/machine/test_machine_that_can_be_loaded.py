@@ -1,40 +1,40 @@
 import unittest
 from datetime import datetime, timedelta
 
-from iot.infrastructure.machine.machine_that_can_be_loaded import MachineThatCanBeLoaded, RunningState
-from iot.infrastructure.machine.power_state_decorator import PowerState
+from iot.infrastructure.appliance.machine_that_can_be_loaded import MachineThatCanBeLoaded, RunningState
+from iot.infrastructure.appliance.power_state_decorator import PowerState
 from iot.infrastructure.virtual_entity import OnlineStatus
 
 
 class InitTest(unittest.TestCase):
     def test_name(self):
-        power_state_machine = MachineThatCanBeLoaded('super_power_state_machine', "some machine")
+        power_state_machine = MachineThatCanBeLoaded('super_power_state_machine', "some appliance")
         self.assertEqual(power_state_machine.name, 'super_power_state_machine')
 
     def test_unknown_watt(self):
-        power_state_machine = MachineThatCanBeLoaded('power_state_machine', "some machine")
+        power_state_machine = MachineThatCanBeLoaded('power_state_machine', "some appliance")
         self.assertEqual(power_state_machine.power_state, PowerState.UNKNOWN)
 
     def test_zero_watt_is_off(self):
-        power_state_machine = MachineThatCanBeLoaded('power_state_machine', "some machine", 0)
+        power_state_machine = MachineThatCanBeLoaded('power_state_machine', "some appliance", 0)
         self.assertEqual(power_state_machine.power_state, PowerState.OFF)
 
     def test_low_watt_is_idle(self):
-        power_state_machine = MachineThatCanBeLoaded('power_state_machine', "some machine", 4)
+        power_state_machine = MachineThatCanBeLoaded('power_state_machine', "some appliance", 4)
         self.assertEqual(power_state_machine.power_state, PowerState.IDLE)
 
     def test_high_watt_is_running(self):
-        power_state_machine = MachineThatCanBeLoaded('power_state_machine', "some machine", 400)
+        power_state_machine = MachineThatCanBeLoaded('power_state_machine', "some appliance", 400)
         self.assertEqual(power_state_machine.power_state, PowerState.RUNNING)
 
 
 class MachineThatCanBeLoadedTest(unittest.TestCase):
     def setUp(self):
-        self.machine = MachineThatCanBeLoaded('my-power_state_machine', "some machine", 0)
+        self.machine = MachineThatCanBeLoaded('my-power_state_machine', "some appliance", 0)
 
     def test_sets_running_state_idle_when_off_after_updating_power_consumption(self):
         # given
-        machine = MachineThatCanBeLoaded('unknown machine', "some machine", running_state=RunningState.UNKNOWN)
+        machine = MachineThatCanBeLoaded('unknown appliance', "some appliance", running_state=RunningState.UNKNOWN)
         # when
         machine.update_power_consumption(0)
         # then
@@ -42,7 +42,7 @@ class MachineThatCanBeLoadedTest(unittest.TestCase):
 
     def test_sets_running_state_run_when_running_after_updating_power_consumption(self):
         # given
-        machine = MachineThatCanBeLoaded('unknown machine', "some machine", running_state=RunningState.UNKNOWN)
+        machine = MachineThatCanBeLoaded('unknown appliance', "some appliance", running_state=RunningState.UNKNOWN)
         # when
         machine.update_power_consumption(2000)
         # then
@@ -184,10 +184,10 @@ class MachineThatCanBeLoadedTest(unittest.TestCase):
     def test_to_dict_has_mandatory_fields(self):
         last_updated_at = datetime.now()
         last_seen_at = datetime.now() - timedelta(seconds=5)
-        power_state_machine = MachineThatCanBeLoaded("test", "some machine", 312.5, last_updated_at=last_updated_at,
+        power_state_machine = MachineThatCanBeLoaded("test", "some appliance", 312.5, last_updated_at=last_updated_at,
                                                      last_seen_at=last_seen_at)
         self.assertDictEqual(power_state_machine.to_dict(),
-                             {"name": "test", "type": "some machine", "watt": 312.5, "power_state": PowerState.RUNNING,
+                             {"name": "test", "type": "some appliance", "watt": 312.5, "power_state": PowerState.RUNNING,
                               "needs_unloading": False, "is_loaded": False,
                               "started_run_at": None, "running_state": RunningState.UNKNOWN,
                               "finished_last_run_at": None, "online_status": OnlineStatus.ONLINE,
