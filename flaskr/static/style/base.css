@@ -5,10 +5,21 @@
 .icon {
     height: 1em;
 }
+
 .icon-primary {
     filter: invert(24%) sepia(100%) saturate(2152%) hue-rotate(211deg) brightness(107%) contrast(98%);
 }
 
 body {
     min-height: 100vh;
+}
+
+[data-bs-theme=dark] .icon {
+    filter: invert(100%);
+}
+
+[data-bs-theme=dark] .bg-dark .icon, [data-bs-theme=dark] .bg-danger .icon, [data-bs-theme=dark] .bg-warning .icon, [data-bs-theme=dark] .bg-success .icon,
+[data-bs-theme=dark] .text-bg-dark .icon, [data-bs-theme=dark] .text-bg-danger .icon, [data-bs-theme=dark] .text-bg-warning .icon, [data-bs-theme=dark] .text-bg-success .icon,
+[data-bs-theme=dark] .icon-primary {
+    filter: unset;
 }

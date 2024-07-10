@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ lang }}">
+<html lang="{{ lang }}" {%- if session['dark_mode'] %}data-bs-theme="dark"{% endif %}>
 <head>
     {% block head %}
         <meta charset="utf-8">
@@ -16,7 +16,8 @@
     {% endblock %}
 </head>
 <body class="d-flex flex-column">
-<nav class="navbar navbar-expand-lg bg-primary {%- if request.args['fullscreen'] %} visually-hidden{% endif %}" data-bs-theme="dark">
+<nav class="navbar navbar-expand-lg bg-primary {%- if session['fullscreen'] %} visually-hidden{% endif %}"
+     data-bs-theme="dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">
             <img alt="Behave" class="d-inline-block align-text-top" height="24"
@@ -58,30 +59,43 @@
         <div class="d-flex flex-wrap justify-content-between align-items-start">
             <aside class="col-md-4">
                 <div id="options">
-                    {%- if request.args['refresh_interval'] %}
-                        {% set action=url_for('options.refresh_interval') %}{% else %}
-                        {% set action=url_for('options.refresh_interval', refresh_interval=30) %}{% endif %}
+                    {%- if session['refresh_interval'] %}
+                        {% set action=url_for('options.toggle_param', refresh_interval='false') %}{% else %}
+                        {% set action=url_for('options.toggle_param', refresh_interval=30) %}{% endif %}
                     <form action="{{ action }}" method="post" id="options-refresh-interval-form">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" role="switch"
                                    id="options-refresh-interval-toggle"
                                    onchange="document.getElementById('options-refresh-interval-form').submit()"
-                                   {% if request.args['refresh_interval'] %}checked{% endif %}>
+                                   {% if session['refresh_interval'] %}checked{% endif %}>
                             <label class="form-check-label"
                                    for="options-refresh-interval-toggle">{{ _('Refresh every 30 seconds') }}</label>
                         </div>
                     </form>
-                    {%- if request.args['fullscreen'] %}
-                        {% set action=url_for('options.fullscreen') %}{% else %}
-                        {% set action=url_for('options.fullscreen', fullscreen='true') %}{% endif %}
+                    {%- if session['fullscreen'] %}
+                        {% set action=url_for('options.toggle_param', fullscreen='false') %}{% else %}
+                        {% set action=url_for('options.toggle_param', fullscreen='true') %}{% endif %}
                     <form action="{{ action }}" method="post" id="options-fullscreen-form">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" role="switch"
                                    id="options-fullscreen-toggle"
                                    onchange="document.getElementById('options-fullscreen-form').submit()"
-                                   {% if request.args['fullscreen'] %}checked{% endif %}>
+                                   {% if session['fullscreen'] %}checked{% endif %}>
                             <label class="form-check-label"
                                    for="options-fullscreen-toggle">{{ _('Fullscreen') }}</label>
+                        </div>
+                    </form>
+                    {%- if session['dark_mode'] %}
+                        {% set action=url_for('options.toggle_param', dark_mode='false') %}{% else %}
+                        {% set action=url_for('options.toggle_param', dark_mode='true') %}{% endif %}
+                    <form action="{{ action }}" method="post" id="options-dark-mode-form">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch"
+                                   id="options-dark-mode-toggle"
+                                   onchange="document.getElementById('options-dark-mode-form').submit()"
+                                   {% if session['dark_mode'] %}checked{% endif %}>
+                            <label class="form-check-label"
+                                   for="options-dark-mode-toggle">{{ _('Dark mode') }}</label>
                         </div>
                     </form>
                 </div>
