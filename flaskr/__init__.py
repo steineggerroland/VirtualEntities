@@ -5,6 +5,7 @@ import yamlenv
 from flask import Flask, request
 from flask_babel import Babel
 from flask_bootstrap import Bootstrap5
+from urllib3.util import parse_url
 
 from flaskr.api.ApplianceDepot import appliance_depot_api
 from flaskr.api.RoomCatalog import room_catalog_api
@@ -35,41 +36,41 @@ def create_app(default_config_file_name: str, machine_service: MachineService, a
         view_func=Homepage.as_view("home")
     )
     app.add_url_rule(
-        "/virtual-entities/",
+        "/virtual-entities.html",
         view_func=VirtualEntities.ListView.as_view("ve_list", appliance_depot, room_catalog, register_of_persons)
     )
     app.add_url_rule(
-        "/dashboard",
+        "/dashboard.html",
         view_func=VirtualEntities.Dashboard.as_view("ve_dashboard", appliance_depot, room_catalog)
     )
 
     app.add_url_rule(
-        "/appliance/<name>",
+        "/appliance/<name>.html",
         view_func=Appliance.Details.as_view('appliance', appliance_depot)
     )
     app.add_url_rule(
-        "/appliance/<name>/configuration",
+        "/appliance/<name>/configuration.html",
         view_func=Appliance.Configuration.as_view('appliance_configuration', machine_service, configuration_manager)
     )
     app.register_blueprint(appliance_depot_api(machine_service, appliance_depot, time_series_storage),
                            url_prefix='/api/')
 
     app.add_url_rule(
-        "/room/<name>",
+        "/room/<name>.html",
         view_func=Room.Details.as_view('room', room_catalog)
     )
     app.add_url_rule(
-        "/room/<name>/configuration",
+        "/room/<name>/configuration.html",
         view_func=Room.Configuration.as_view('room_configuration', room_catalog, configuration_manager)
     )
     app.register_blueprint(room_catalog_api(room_catalog, time_series_storage), url_prefix='/api/')
 
     app.add_url_rule(
-        "/person/<name>",
+        "/person/<name>.html",
         view_func=Person.Details.as_view('person', register_of_persons)
     )
     app.add_url_rule(
-        "/person/<name>/configuration",
+        "/person/<name>/configuration.html",
         view_func=Person.Configuration.as_view('person_configuration', register_of_persons, configuration_manager)
     )
 

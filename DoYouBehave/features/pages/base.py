@@ -31,7 +31,7 @@ class EntityPage(BasePage):
     def __init__(self, driver: WebDriver, base_url: str, page_name: str, path_suffix: str = None,
                  path_prefix: str = None):
         super().__init__(driver, base_url, page_name,
-                         f'{"/" + path_prefix if path_prefix else ""}/%s{"/" + path_suffix if path_suffix else ""}')
+                         f'{"/" + path_prefix if path_prefix else ""}/%s{"/" + path_suffix if path_suffix else ""}.html')
 
     def navigate_to_entity(self, entity_name: str):
         self._webdriver.get(self.url % entity_name)
@@ -44,7 +44,7 @@ class EntityPage(BasePage):
 
 class VirtualEntityPage(BasePage):
     def __init__(self, driver, base_url):
-        super().__init__(driver, base_url, 'virtual entities', '/virtual-entities')
+        super().__init__(driver, base_url, 'virtual entities', '/virtual-entities.html')
 
     def shows_virtual_entities(self):
         return self.appliances() and self.rooms() and self.persons()
