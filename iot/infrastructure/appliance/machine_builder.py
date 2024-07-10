@@ -1,8 +1,8 @@
 from iot.infrastructure.exceptions import InvalidEntityType
-from iot.infrastructure.machine.dishwasher import from_dict as dw_from_dict
-from iot.infrastructure.machine.dryer import from_dict as d_from_dict
-from iot.infrastructure.machine.machine_that_can_be_loaded import MachineThatCanBeLoaded
-from iot.infrastructure.machine.washing_machine import from_dict as wm_from_dict
+from iot.infrastructure.appliance.dishwasher import from_dict as dw_from_dict
+from iot.infrastructure.appliance.dryer import from_dict as d_from_dict
+from iot.infrastructure.appliance.machine_that_can_be_loaded import MachineThatCanBeLoaded
+from iot.infrastructure.appliance.washing_machine import from_dict as wm_from_dict
 
 
 class MachineBuilder:

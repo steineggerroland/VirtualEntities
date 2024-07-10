@@ -10,8 +10,8 @@ from iot.core.configuration_manager import ConfigurationManager
 from iot.core.storage import Storage
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.dav.calendar_reader import CalendarLoader
-from iot.infrastructure.machine.appliance_depot import ApplianceDepot
-from iot.infrastructure.machine.machine_service import MachineService, \
+from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
+from iot.infrastructure.appliance.machine_service import MachineService, \
     supports_entity_type as machine_service_supports_entity_type
 from iot.infrastructure.person_service import PersonService, supports_entity_type as person_service_supports_entity_type
 from iot.infrastructure.register_of_persons import RegisterOfPersons
@@ -53,7 +53,7 @@ def run():
     for entity_config in machine_configs:
         mqtt_machine_mediator.add_machine_by_config(entity_config.name, entity_config.sources,
                                                     entity_config.destinations)
-    logger.debug("Mqtt machine mediator loaded")
+    logger.debug("Mqtt appliance mediator loaded")
     for entity_config in config.entities:
         if room_service_supports_entity_type(entity_type=entity_config.type):
             room_service = RoomService(room_catalog, time_series_storage, entity_config)

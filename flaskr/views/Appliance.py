@@ -6,8 +6,8 @@ from flask_babel import gettext
 
 from flaskr.forms.ApplianceForm import ApplianceForm
 from iot.core.configuration_manager import ConfigurationManager
-from iot.infrastructure.machine.appliance_depot import ApplianceDepot
-from iot.infrastructure.machine.machine_service import MachineService
+from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
+from iot.infrastructure.appliance.machine_service import MachineService
 
 
 class Details(View):

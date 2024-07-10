@@ -8,10 +8,10 @@ from waiting import wait
 
 from iot.core.configuration import PlannedNotification, Destinations, Sources, MqttMeasureSource, Measure
 from iot.infrastructure.exceptions import DatabaseException
-from iot.infrastructure.machine.dryer import Dryer
-from iot.infrastructure.machine.machine_service import MachineService
-from iot.infrastructure.machine.machine_that_can_be_loaded import RunningState
-from iot.infrastructure.machine.power_state_decorator import PowerState
+from iot.infrastructure.appliance.dryer import Dryer
+from iot.infrastructure.appliance.machine_service import MachineService
+from iot.infrastructure.appliance.machine_that_can_be_loaded import RunningState
+from iot.infrastructure.appliance.power_state_decorator import PowerState
 from iot.infrastructure.virtual_entity import OnlineStatus
 from iot.mqtt.mqtt_client import MqttClient
 from iot.mqtt.mqtt_machine_mediator import MqttMachineMediator
@@ -32,7 +32,7 @@ class MqttMediatorTest(unittest.TestCase):
     @patch('iot.core.configuration.Destinations')
     @patch('iot.core.configuration.Sources')
     @patch('iot.core.configuration.MqttConfiguration')
-    @patch('iot.infrastructure.machine.machine_service.MachineService')
+    @patch('iot.infrastructure.appliance.machine_service.MachineService')
     def setUp(self, machine_service_mock, mqtt_config_mock, sources_mock, destinations_mock, mqtt_client_mock):
         self.machine_service_mock: Mock | MachineService = machine_service_mock
         self.machine_service_mock.entities.to_dict = Mock(return_value={})
@@ -40,7 +40,7 @@ class MqttMediatorTest(unittest.TestCase):
         self.sources_mock: Mock | Sources = sources_mock
         self.destinations_mock: Mock | Destinations = destinations_mock
         self.mqtt_client_mock: Mock | MqttClient = mqtt_client_mock
-        self.machine_name = 'some machine'
+        self.machine_name = 'some appliance'
 
     def test_publishing_updates_when_specified_by_cron(self):
         # given
@@ -65,7 +65,7 @@ class MqttMediatorTest(unittest.TestCase):
         # when
         mqtt_mediator.start()
         # then
-        expected_json = json.loads(Path.open(DIR / "machine-update.json").read())
+        expected_json = json.loads(Path.open(DIR / "appliance-update.json").read())
         # enums have to be converted
         expected_json['online_status'] = OnlineStatus(expected_json['online_status'])
         expected_json['power_state'] = PowerState(expected_json['power_state'])
@@ -92,7 +92,7 @@ class MqttMediatorTest(unittest.TestCase):
 
     def test_subscribes_for_consumption_on_start(self):
         # given
-        consumption_topic = "machine/consumption/topic"
+        consumption_topic = "appliance/consumption/topic"
         self.mqtt_client_mock.subscribe = Mock()
         # when
         mqtt_mediator = MqttMachineMediator(self.machine_service_mock, self.mqtt_client_mock)

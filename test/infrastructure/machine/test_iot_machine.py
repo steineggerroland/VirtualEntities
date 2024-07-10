@@ -2,14 +2,14 @@ import random
 import unittest
 from datetime import datetime, timedelta
 
-from iot.infrastructure.machine.iot_machine import IotMachine
-from iot.infrastructure.machine.power_state_decorator import PowerState
+from iot.infrastructure.appliance.iot_machine import IotMachine
+from iot.infrastructure.appliance.power_state_decorator import PowerState
 from iot.infrastructure.virtual_entity import OnlineStatus
 
 
 class ConstructionTest(unittest.TestCase):
     def test_name(self):
-        self.assertEqual(IotMachine('super machine', "some type").name, 'super machine')
+        self.assertEqual(IotMachine('super appliance', "some type").name, 'super appliance')
 
     def test_watt_parameters(self):
         test_cases = [(None, PowerState.UNKNOWN), (0, PowerState.OFF), (1.3, PowerState.IDLE),
@@ -18,16 +18,16 @@ class ConstructionTest(unittest.TestCase):
             self._test_watt(parameters[0], parameters[1])
 
     def _test_watt(self, watt, state):
-        machine = IotMachine('machine', "some type", watt)
+        machine = IotMachine('appliance', "some type", watt)
         self.assertEqual(machine.watt, watt)
         self.assertEqual(machine.power_state, state)
 
     def test_online_status(self):
-        self.assertEqual(IotMachine('machine', "some type").online_status(), OnlineStatus.UNKNOWN)
-        machine_updated_now_and_online_delta_ten_seconds = IotMachine('machine', "some type",
+        self.assertEqual(IotMachine('appliance', "some type").online_status(), OnlineStatus.UNKNOWN)
+        machine_updated_now_and_online_delta_ten_seconds = IotMachine('appliance', "some type",
                                                                       last_seen_at=datetime.now())
         self.assertEqual(machine_updated_now_and_online_delta_ten_seconds.online_status(), OnlineStatus.ONLINE)
-        machine_without_online_delta = IotMachine('machine', "some type", online_delta_in_seconds=20,
+        machine_without_online_delta = IotMachine('appliance', "some type", online_delta_in_seconds=20,
                                                   last_seen_at=datetime.now() - timedelta(seconds=20 + 1))
         self.assertEqual(machine_without_online_delta.online_status(), OnlineStatus.OFFLINE)
 
@@ -43,7 +43,7 @@ class ConstructionTest(unittest.TestCase):
 
 class IotMachineTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.machine = IotMachine('machine', "some type")
+        self.machine = IotMachine('appliance', "some type")
 
     def test_unknown_watt(self):
         self.machine.update_power_consumption(None)

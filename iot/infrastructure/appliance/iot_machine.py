@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from iot.infrastructure.machine.power_state_decorator import PowerState, SimplePowerStateDecorator
+from iot.infrastructure.appliance.power_state_decorator import PowerState, SimplePowerStateDecorator
 from iot.infrastructure.virtual_entity import VirtualEntity
 
 

@@ -1,8 +1,8 @@
 import logging
 
 from iot.core.time_series_storage import TimeSeriesStorage
-from iot.infrastructure.machine.iot_machine import IotMachine
-from iot.infrastructure.machine.power_state_decorator import PowerState
+from iot.infrastructure.appliance.iot_machine import IotMachine
+from iot.infrastructure.appliance.power_state_decorator import PowerState
 
 
 class SimpleHistoryRunCompleteStrategy:

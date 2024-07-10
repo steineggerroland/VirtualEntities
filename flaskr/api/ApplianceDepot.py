@@ -6,8 +6,8 @@ from flask import Blueprint, Response, make_response
 from iot.core.configuration_manager import ConfigurationManager
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.core.timeseries_types import ConsumptionMeasurement
-from iot.infrastructure.machine.appliance_depot import ApplianceDepot
-from iot.infrastructure.machine.machine_service import MachineService
+from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
+from iot.infrastructure.appliance.machine_service import MachineService
 
 
 def appliance_depot_api(appliance_service: MachineService, appliance_depot: ApplianceDepot,

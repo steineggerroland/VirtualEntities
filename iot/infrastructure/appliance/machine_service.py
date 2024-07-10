@@ -9,11 +9,11 @@ from iot.core.configuration import VirtualEntityConfig
 from iot.core.configuration_manager import ConfigurationManager
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.exceptions import DatabaseException
-from iot.infrastructure.machine.appliance_depot import ApplianceDepot
-from iot.infrastructure.machine.machine_builder import MachineBuilder
-from iot.infrastructure.machine.machine_that_can_be_loaded import MachineThatCanBeLoaded
-from iot.infrastructure.machine.power_state_decorator import PowerState
-from iot.infrastructure.machine.run_complete_strategy import SimpleHistoryRunCompleteStrategy
+from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
+from iot.infrastructure.appliance.machine_builder import MachineBuilder
+from iot.infrastructure.appliance.machine_that_can_be_loaded import MachineThatCanBeLoaded
+from iot.infrastructure.appliance.power_state_decorator import PowerState
+from iot.infrastructure.appliance.run_complete_strategy import SimpleHistoryRunCompleteStrategy
 
 
 class ManagedMachine:
@@ -72,7 +72,7 @@ class MachineService:
                 self.appliance_depot.stock(machine)
             if machine.started_run_at is not None:
                 self.started_run(entity_config.name)
-            EventBus.call("machine/added", machine)
+            EventBus.call("appliance/added", machine)
 
     def update_power_consumption(self, machine_name: str, new_power_consumption):
         try:
@@ -82,7 +82,7 @@ class MachineService:
             self.time_series_storage.append_power_consumption(new_power_consumption, machine_name)
             if machine.started_run_at is None and machine.power_state is PowerState.RUNNING:
                 self.started_run(machine_name)
-            EventBus.call("machine/updatedPowerConsumption", machine)
+            EventBus.call("appliance/updatedPowerConsumption", machine)
         except ValueError as e:
             raise DatabaseException('Failed to save new power consumption because of database error.', e) from e
 
@@ -96,7 +96,7 @@ class MachineService:
             managed_machine = self.managed_machines.find(machine_name)
             managed_machine.init_check_if_run_completed_thread(
                 self._create_thread_for_is_running_check(managed_machine))
-            EventBus.call("machine/startedRun", machine)
+            EventBus.call("appliance/startedRun", machine)
         except ValueError as e:
             raise DatabaseException('Failed to save started run because of database error.', e) from e
 
@@ -116,7 +116,7 @@ class MachineService:
             machine = self.appliance_depot.retrieve(name)
             machine.finish_run()
             self.appliance_depot.stock(machine)
-            EventBus.call("machine/finishedRun", machine)
+            EventBus.call("appliance/finishedRun", machine)
         except ValueError as e:
             raise DatabaseException("Failed to finish run of '%s' because of database error." % name, e) from e
 
@@ -125,18 +125,18 @@ class MachineService:
             machine = self.appliance_depot.retrieve(machine_name)
             machine.unload()
             self.appliance_depot.stock(machine)
-            EventBus.call("machine/unloaded", machine)
+            EventBus.call("appliance/unloaded", machine)
         except ValueError as e:
-            raise DatabaseException('Failed to save unloading machine because of database error.', e) from e
+            raise DatabaseException('Failed to save unloading appliance because of database error.', e) from e
 
     def loaded(self, machine_name: str, needs_unloading=False):
         try:
             machine = self.appliance_depot.retrieve(machine_name)
             machine.load(needs_unloading)
             self.appliance_depot.stock(machine)
-            EventBus.call("machine/loaded", machine)
+            EventBus.call("appliance/loaded", machine)
         except ValueError as e:
-            raise DatabaseException('Failed to save setting machine to loaded.', e) from e
+            raise DatabaseException('Failed to save setting appliance to loaded.', e) from e
 
     def change_name(self, name: str, old_name: str):
         managed_machine = self.managed_machines.find(old_name)

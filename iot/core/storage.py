@@ -8,8 +8,8 @@ from typing import List
 from python_event_bus import EventBus
 
 from iot.infrastructure.exceptions import InvalidEntityType
-from iot.infrastructure.machine.machine_builder import MachineBuilder
-from iot.infrastructure.machine.machine_that_can_be_loaded import MachineThatCanBeLoaded
+from iot.infrastructure.appliance.machine_builder import MachineBuilder
+from iot.infrastructure.appliance.machine_that_can_be_loaded import MachineThatCanBeLoaded
 from iot.infrastructure.room import from_dict as r_from_dict, Room
 from iot.infrastructure.virtual_entity import VirtualEntity
 

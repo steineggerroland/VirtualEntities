@@ -13,7 +13,7 @@ DIR = Path(__file__).parent
 class ConfigurationTest(unittest.TestCase):
     def test_complete_config(self):
         config = ConfigurationManager().load(DIR / "complete_test_config.yaml")
-        self.assertEqual("my.machine.local", config.mqtt.url)
+        self.assertEqual("my.appliance.local", config.mqtt.url)
         self.assertEqual(1337, config.mqtt.port)
         self.assertEqual("user", config.mqtt.username)
         self.assertTrue(config.mqtt.has_credentials)
