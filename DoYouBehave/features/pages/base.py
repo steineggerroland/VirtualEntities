@@ -37,10 +37,9 @@ class EntityPage(BasePage):
         self._webdriver.get(self.url % entity_name)
 
     def is_current_page_for_entity(self, name: str):
-        print(f"^{self.url.replace('.', r'\.') % name.replace(' ', '%20')}/?".replace('/', r'\/') + '(\\?.*)?$')
         WebDriverWait(self._webdriver, 10).until(
-            url_matches(f"^{self.url.replace('.', r'\.') % name.replace(' ', '%20')}/?".replace(
-                '/', r'\/') + '(\\?.*)?$'),
+            url_matches((("^%s/?(\\?.*)?$" % self.url.replace('.', r'\.')) % name.replace(' ', '%20')).replace(
+                '/', r'\/')),
             "Failed to navigate to %s page of %s. Current page is %s" % (
                 self.page_name, name, self._webdriver.current_url))
 
