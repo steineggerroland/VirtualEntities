@@ -15,7 +15,7 @@ class BasePage(object):
         self.page_name = page_name
         self.base_url = base_url
         self.url = f"{self.base_url}{path}"
-        self.url_matcher = f"^{self.url.replace('%s', r'(([-A-Za-z0-9_.,() ]+)((%20)?[-A-Za-z0-9_.,() ]+)*)')}/?".replace(
+        self.url_matcher = f"^{self.url.replace('%s', r'(([-A-Za-z0-9_.,() ]+)((%20)?[-A-Za-z0-9_.,() ]+)*)')}/?(\\?.*)?".replace(
             '/', r'\/')
 
     def is_current_page(self):
@@ -31,15 +31,18 @@ class EntityPage(BasePage):
     def __init__(self, driver: WebDriver, base_url: str, page_name: str, path_suffix: str = None,
                  path_prefix: str = None):
         super().__init__(driver, base_url, page_name,
-                         f'{"/" + path_prefix if path_prefix else ""}/%s{"/" + path_suffix if path_suffix else ""}.html')
+                         f'{("/" + path_prefix) if path_prefix else ""}/%s{("/" + path_suffix) if path_suffix else ""}.html')
 
     def navigate_to_entity(self, entity_name: str):
         self._webdriver.get(self.url % entity_name)
 
     def is_current_page_for_entity(self, name: str):
-        WebDriverWait(self._webdriver, 10).until(url_to_be(self.url % name.replace(' ', '%20')),
-                                                 "Failed to navigate to %s page of %s. Current page is %s" % (
-                                                     self.page_name, name, self._webdriver.current_url))
+        print(f"^{self.url.replace('.', r'\.') % name.replace(' ', '%20')}/?(\\?.*)?$".replace('/', r'\/'))
+        WebDriverWait(self._webdriver, 10).until(
+            url_matches(f"^{self.url.replace('.', r'\.') % name.replace(' ', '%20')}/?(\\?.*)?$".replace(
+                '/', r'\/')),
+            "Failed to navigate to %s page of %s. Current page is %s" % (
+            self.page_name, name, self._webdriver.current_url))
 
 
 class VirtualEntityPage(BasePage):
