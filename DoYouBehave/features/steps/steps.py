@@ -11,7 +11,7 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support.expected_conditions import presence_of_element_located
+from selenium.webdriver.support.expected_conditions import presence_of_element_located, url_matches
 from selenium.webdriver.support.wait import WebDriverWait
 
 use_step_matcher('re')
@@ -123,9 +123,9 @@ def submit_form(context):
 use_step_matcher('re')
 
 
-@When(
-    r'they click the (?P<class_name>\w+(?> \w+)*) button(?> of (?P<entity_type>appliance|room|person) (?P<entity_name>\w+(?> \w+)*))?')
-def click_on_button(context, class_name: str, entity_type=None, entity_name=None):
+@When(r'they click the (?P<class_name>\w+(?> \w+)*?) (?P<clickable_type>\w+)'
+      r'(?> of (?P<entity_type>appliance|room|person) (?P<entity_name>\w+(?> \w+)*))?')
+def click_on_something(context, class_name: str, clickable_type: str, entity_type=None, entity_name=None):
     if entity_type is None:
         parent = context.webdriver.find_element(By.TAG_NAME, 'body')
     else:
@@ -134,9 +134,20 @@ def click_on_button(context, class_name: str, entity_type=None, entity_name=None
                               entity_element.find_element(By.CLASS_NAME, 'name').text == entity_name,
                               elements_of_entity_type))
                   .pop())
-    button_matching_class = parent.find_element(By.CSS_SELECTOR, 'button.%s' % to_class(class_name))
+    button_matching_class = parent.find_element(By.CSS_SELECTOR, '%s.%s' % (clickable_type, to_class(class_name)))
     assert button_matching_class is not None
     button_matching_class.click()
+
+
+@when(r'they (?P<state>activate|deactivate) (?P<option_name>\w+(?> \w+)*)')
+def adapt_switch(context, state, option_name):
+    d: WebDriver = context.webdriver
+    checkbox = d.find_element(By.CSS_SELECTOR, 'input.%s' % to_class(option_name))
+    form = d.find_element(By.CSS_SELECTOR, 'form:has(input.%s)' % to_class(option_name))
+    if state == 'activate' and not checkbox.is_selected():
+        form.submit()
+    elif state == 'deactivate' and checkbox.is_selected():
+        form.submit()
 
 
 use_step_matcher('parse')
@@ -436,6 +447,25 @@ def find_calendar(context, calendar_name: str):
         f"No calendar {calendar_name} of person {context.entity_name} found")
 
 
+@then(r'the (?P<option_name>\w+(?> \w+)*) is'
+      r'(?>(?> still)? (?P<state>active|inactive)| set to (?P<value>\w+(?> \w+)*))')
+def verify_option_in_url(context, option_name, state=None, value=None):
+    if option_name == 'dark mode':
+        html: WebElement = context.webdriver.find_element(By.TAG_NAME, 'html')
+        assert html.get_attribute('data-bs-theme') == 'dark' if state == 'active' else None
+
+    elif option_name == 'fullscreen mode':
+        html: WebElement = context.webdriver.find_element(By.TAG_NAME, 'html')
+        assert (html.get_attribute('class').find('fullscreen') < 0) == (state == 'active')
+
+    matcher = r'.*(\?|&)%s=%s(&.*)?' % (to_url_param(option_name),
+                                        'true' if state == 'active' else 'false' if state == 'inactive' else value)
+    WebDriverWait(context.webdriver, 10).until(url_matches(matcher),
+                                               "The option %s is not %s, the url looks as follows: %s" % (
+                                                   option_name, state if state is not None else value,
+                                                   context.webdriver.current_url))
+
+
 def _scroll_and_click_on_element(webdriver, element):
     actions = ActionChains(webdriver)
     actions.click(element)
@@ -444,3 +474,7 @@ def _scroll_and_click_on_element(webdriver, element):
 
 def to_class(name: str) -> str:
     return name.lower().replace(' ', '-')
+
+
+def to_url_param(name: str) -> str:
+    return name.lower().replace(' ', '_')

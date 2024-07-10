@@ -14,6 +14,23 @@ body {
     min-height: 100vh;
 }
 
+.form-check * {
+    cursor: pointer;
+}
+
+body.fullscreen > footer {
+    max-height: 0.5rem;
+    overflow: hidden;
+}
+body.fullscreen > footer:hover, body.fullscreen > footer:focus-within {
+    max-height: unset;
+    overflow: unset;
+}
+
+body.fullscreen > .navbar {
+    display: none;
+}
+
 [data-bs-theme=dark] .icon {
     filter: invert(100%);
 }
