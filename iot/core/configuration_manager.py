@@ -12,7 +12,7 @@ def _read_mqtt_configuration(conf_dict) -> MqttConfiguration:
     mqtt_dict = conf_dict['mqtt']
     _verify_keys(mqtt_dict, ['url'], 'mqtt')
     return MqttConfiguration(mqtt_dict['url'],
-                             mqtt_dict['client_id'] if 'client_id' in mqtt_dict else f"iot-things-client",
+                             mqtt_dict['client_id'] if 'client_id' in mqtt_dict else f"entities-client",
                              mqtt_dict['port'] if 'port' in mqtt_dict else None,
                              credentials=_read_mqtt_credentials(mqtt_dict))
 
@@ -23,53 +23,53 @@ def _read_mqtt_credentials(mqtt_dict) -> dict | None:
     return None
 
 
-def _read_run_complete_threshold(thing_dict) -> RunCompleteWhen:
-    if 'run_complete_when' in thing_dict:
+def _read_run_complete_threshold(entity_dict) -> RunCompleteWhen:
+    if 'run_complete_when' in entity_dict:
         return RunCompleteWhen(
-            thing_dict['run_complete_when']['below_threshold_for'] if 'below_threshold_for' in thing_dict[
+            entity_dict['run_complete_when']['below_threshold_for'] if 'below_threshold_for' in entity_dict[
                 'run_complete_when'] else None,
-            thing_dict['run_complete_when']['threshold'] if 'threshold' in thing_dict['run_complete_when'] else None)
+            entity_dict['run_complete_when']['threshold'] if 'threshold' in entity_dict['run_complete_when'] else None)
     else:
         return RunCompleteWhen()
 
 
-def _read_destination_configuration(thing_dict) -> Destinations:
-    if 'destinations' not in thing_dict or 'planned_notifications' not in thing_dict['destinations']:
+def _read_destination_configuration(entity_dict) -> Destinations:
+    if 'destinations' not in entity_dict or 'planned_notifications' not in entity_dict['destinations']:
         return Destinations([])
     planned_notifications = []
-    for entry in thing_dict['destinations']['planned_notifications']:
+    for entry in entity_dict['destinations']['planned_notifications']:
         _verify_keys(entry, ['mqtt_topic', 'cron_expression'],
-                     'things[%s].destinations.planned_notification[]' % thing_dict['name'])
+                     'entities[%s].destinations.planned_notification[]' % entity_dict['name'])
         planned_notifications.append(
             PlannedNotification(entry['mqtt_topic'], entry['cron_expression'],
                                 entry['subject'] if 'subject' in entry else None))
     return Destinations(planned_notifications)
 
 
-def _read_sources_configuration(thing_dict, calendars: List[CaldavConfig]) -> Sources:
-    if 'sources' not in thing_dict:
+def _read_sources_configuration(entity_dict, calendars: List[CaldavConfig]) -> Sources:
+    if 'sources' not in entity_dict:
         return Sources([])
 
-    if not thing_dict['sources']:
+    if not entity_dict['sources']:
         raise IncompleteConfiguration("Sources configuration is not a list")
 
     sources = []
-    for source in thing_dict['sources']:
+    for source in entity_dict['sources']:
         if "mqtt_topic" in source:
             sources.append(_read_mqtt_source(source))
         elif "application" in source and source["application"] == "calendar":
             _verify_keys_set(source, [['reference_name'], ['url', 'name']],
-                             "things[%s].sources[%s]" % (thing_dict['name'], source["application"]))
+                             "entities[%s].sources[%s]" % (entity_dict['name'], source["application"]))
 
             if 'reference_name' in source:
-                conf = _get_referenced_calendar_conf(source["reference_name"], calendars, "things[%s].sources[%s]" % (
-                    thing_dict['name'], source["application"]))
+                conf = _get_referenced_calendar_conf(source["reference_name"], calendars, "entities[%s].sources[%s]" % (
+                    entity_dict['name'], source["application"]))
             else:
                 conf = CaldavConfig(_read_new_url_conf(source, "calendar"),
                                     source["color_hex"] if "color_hex" in source else None)
             sources.append(conf)
         else:
-            raise IncompleteConfiguration("Unknown source '%s' of thing '%s'" % (source, thing_dict['name']))
+            raise IncompleteConfiguration("Unknown source '%s' of entity '%s'" % (source, entity_dict['name']))
 
     return Sources(sources)
 
@@ -94,11 +94,11 @@ def _read_mqtt_source(source):
     measures = []
     if 'measures' in source:
         for measure in source['measures']:
-            _verify_keys(measure, ['type'], "things[].sources[].measures[]")
+            _verify_keys(measure, ['type'], "entities[].sources[].measures[]")
             measures.append(Measure(source_type=measure['type'],
                                     path=measure['path'] if 'path' in measure else None))
     else:
-        _verify_keys(source, ['type'], "things[].sources[]")
+        _verify_keys(source, ['type'], "entities[].sources[]")
         measures.append(
             Measure(source_type=source['type'], path=source['path'] if 'path' in source else None))
     return MqttMeasureSource(mqtt_topic=source['mqtt_topic'], measures=measures)
@@ -111,16 +111,16 @@ def _read_thresholds_config(thresholds_config: dict, prefix) -> ThresholdsConfig
                             thresholds_config['critical_lower'], thresholds_config['critical_upper'])
 
 
-def _read_temperature_thresholds_configuration(thing_config: dict) -> None | ThresholdsConfig:
-    if "temperature_thresholds" in thing_config:
-        return _read_thresholds_config(thing_config['temperature_thresholds'], "things[].temperature_thresholds")
+def _read_temperature_thresholds_configuration(entity_config: dict) -> None | ThresholdsConfig:
+    if "temperature_thresholds" in entity_config:
+        return _read_thresholds_config(entity_config['temperature_thresholds'], "entities[].temperature_thresholds")
     else:
         return None
 
 
-def _read_humidity_thresholds_configuration(thing_config: dict) -> None | ThresholdsConfig:
-    if "humidity_thresholds" in thing_config:
-        return _read_thresholds_config(thing_config['humidity_thresholds'], "things[].humidity_thresholds")
+def _read_humidity_thresholds_configuration(entity_config: dict) -> None | ThresholdsConfig:
+    if "humidity_thresholds" in entity_config:
+        return _read_thresholds_config(entity_config['humidity_thresholds'], "entities[].humidity_thresholds")
     else:
         return None
 
@@ -146,29 +146,29 @@ def _read_calendar_categories_configuration(categories_config):
     return list(map(_read_category_config, categories_config))
 
 
-def _read_calendars_configuration(thing_config: dict) -> CalendarsConfig:
-    if "calendars" not in thing_config:
+def _read_calendars_configuration(entity_config: dict) -> CalendarsConfig:
+    if "calendars" not in entity_config:
         return CalendarsConfig([], [])
-    calendars_config = thing_config["calendars"]
+    calendars_config = entity_config["calendars"]
     calendars = _read_caldav_configuration(calendars_config["caldav"]) if "caldav" in calendars_config else []
     categories = _read_calendar_categories_configuration(
         calendars_config["categories"]) if "categories" in calendars_config else []
     return CalendarsConfig(categories, calendars)
 
 
-def _read_thing(thing_config, calendars) -> IotThingConfig:
-    _verify_keys(thing_config, ["name", "type"], "things[]")
-    return IotThingConfig(thing_config['name'], thing_config['type'],
-                          _read_temperature_thresholds_configuration(thing_config),
-                          _read_humidity_thresholds_configuration(thing_config),
-                          _read_sources_configuration(thing_config, calendars),
-                          _read_destination_configuration(thing_config),
-                          _read_run_complete_threshold(thing_config))
+def _read_entity(entity_config, calendars) -> VirtualEntityConfig:
+    _verify_keys(entity_config, ["name", "type"], "entities[]")
+    return VirtualEntityConfig(entity_config['name'], entity_config['type'],
+                               _read_temperature_thresholds_configuration(entity_config),
+                               _read_humidity_thresholds_configuration(entity_config),
+                               _read_sources_configuration(entity_config, calendars),
+                               _read_destination_configuration(entity_config),
+                               _read_run_complete_threshold(entity_config))
 
 
-def _read_things(conf_dict, calendars) -> List[IotThingConfig]:
-    _verify_keys(conf_dict, ["things"])
-    return [_read_thing(thing_config, calendars) for thing_config in conf_dict['things']]
+def _read_entities(conf_dict, calendars) -> List[VirtualEntityConfig]:
+    _verify_keys(conf_dict, ["entities"])
+    return [_read_entity(entity_config, calendars) for entity_config in conf_dict['entities']]
 
 
 def _read_time_series_config(time_series_config) -> TimeSeriesConfig:
@@ -182,7 +182,7 @@ def _read_time_series_config(time_series_config) -> TimeSeriesConfig:
 def _read_configuration(conf_dict) -> Configuration:
     calendars_config = _read_calendars_configuration(conf_dict)
     return Configuration(_read_mqtt_configuration(conf_dict),
-                         _read_things(conf_dict, calendars_config.calendars),
+                         _read_entities(conf_dict, calendars_config.calendars),
                          _read_time_series_config(conf_dict['time_series']) if 'time_series' in conf_dict else None,
                          calendars_config,
                          conf_dict['flaskr'] if 'flaskr' in conf_dict else {})
@@ -209,7 +209,7 @@ for item in [(Configuration, ConfigDumpers.configuration_dumper), (TimeSeriesCon
              (CategoryConfig, ConfigDumpers.category_dumper), (CalendarsConfig, ConfigDumpers.calendars_dumper),
              (Sources, ConfigDumpers.sources_dumper), (PlannedNotification, ConfigDumpers.planned_notification_dumper),
              (Destinations, ConfigDumpers.destinations_dumper), (RangeConfig, ConfigDumpers.range_dumper),
-             (ThresholdsConfig, ConfigDumpers.thresholds_dumper), (IotThingConfig, ConfigDumpers.iot_thing_dumper),
+             (ThresholdsConfig, ConfigDumpers.thresholds_dumper), (VirtualEntityConfig, ConfigDumpers.entity_dumper),
              (RunCompleteWhen, ConfigDumpers.run_complete_when_dumper)]:
     sd.add_representer(item[0], item[1])
 
@@ -240,22 +240,22 @@ class ConfigurationManager:
 
     def rename_appliance(self, old_name: str, new_name: str):
         if new_name != old_name:
-            thing = list(filter(lambda t: t.name == old_name, self.configuration.things)).pop()
-            thing.name = new_name
+            entity = list(filter(lambda t: t.name == old_name, self.configuration.entities)).pop()
+            entity.name = new_name
             self.save()
             EventBus.call("appliance/changed_config_name", name=new_name, old_name=old_name)
 
     def rename_room(self, old_name, new_name):
         if new_name != old_name:
-            thing = list(filter(lambda t: t.name == old_name, self.configuration.things)).pop()
-            thing.name = new_name
+            entity = list(filter(lambda t: t.name == old_name, self.configuration.entities)).pop()
+            entity.name = new_name
             self.save()
             EventBus.call("room/changed_config_name", name=new_name, old_name=old_name)
 
     def rename_person(self, old_name, new_name):
         if new_name != old_name:
-            thing = list(filter(lambda t: t.name == old_name, self.configuration.things)).pop()
-            thing.name = new_name
+            entity = list(filter(lambda t: t.name == old_name, self.configuration.entities)).pop()
+            entity.name = new_name
             self.save()
             EventBus.call("person/changed_config_name", name=new_name, old_name=old_name)
 

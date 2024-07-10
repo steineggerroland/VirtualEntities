@@ -20,7 +20,7 @@
                 <div class="row">
                     <div class="col d-flex justify-content-center">
                         <div style="width: 4rem; max-width: 30vw">
-                            {% with type=appliance.thing_type %}
+                            {% with type=appliance.entity_type %}
                                 {% include "snippets/appliance_icon.html" %}
                             {% endwith %}
                         </div>
@@ -46,14 +46,14 @@
                 </div>
                 <div class="row">
                     <div class="col type">
-                        {% if appliance.thing_type=='dishwasher' %}
+                        {% if appliance.entity_type=='dishwasher' %}
                             {{ _('Dishwasher') }}
-                        {% elif appliance.thing_type=='dryer' %}
+                        {% elif appliance.entity_type=='dryer' %}
                             {{ _('Dryer') }}
-                        {% elif appliance.thing_type=='washing_machine' %}
+                        {% elif appliance.entity_type=='washing_machine' %}
                             {{ _('Washing machine') }}
                         {% else %}
-                            {{ _('Unknown thing') }}
+                            {{ _('Unknown entity') }}
                         {% endif %}
                     </div>
                 </div>
@@ -103,7 +103,7 @@
                 </div>
                 <div class="power-consumption diagram" data-entity-type="appliance"
                      data-attribute="power-consumption" data-use-run-complete-strategy="true"
-                     data-thing-name="{{ appliance.name }}" data-x-axis-label="{{ _('Watt') }}"></div>
+                     data-entity-name="{{ appliance.name }}" data-x-axis-label="{{ _('Watt') }}"></div>
             </div>
         </div>
         {% if debug %}{{ appliance.to_dict() }}{% endif %}

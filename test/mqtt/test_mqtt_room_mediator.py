@@ -6,7 +6,7 @@ from unittest.mock import Mock, ANY, patch, call
 
 from waiting import wait
 
-from iot.core.configuration import IotThingConfig, Sources, MqttMeasureSource, Destinations, PlannedNotification, \
+from iot.core.configuration import VirtualEntityConfig, Sources, MqttMeasureSource, Destinations, PlannedNotification, \
     Measure
 from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.room import Room
@@ -34,20 +34,20 @@ class TemperatureTest(unittest.TestCase):
         self.mqtt_client_mock: MqttClient = Mock()
 
     def test_subscribes_for_temp_when_init(self):
-        thing_config = IotThingConfig("Kitchen", "room",
-                                      sources=Sources(
+        entity_config = VirtualEntityConfig("Kitchen", "room",
+                                           sources=Sources(
                                           [MqttMeasureSource(mqtt_topic="some/topic",
                                                              measures=[Measure(source_type='temperature', path="$")])]))
         # when
-        MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
+        MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, entity_config)
         # then
         self.mqtt_client_mock.subscribe.assert_called_with(ANY, "some/topic", ANY)
 
     def test_forwards_to_mediator_when_updating_temperature_with_jsonpath(self):
-        thing_config = IotThingConfig("Kitchen", "room",
-                                      sources=Sources([MqttMeasureSource(mqtt_topic="some/topic", measures=[
+        entity_config = VirtualEntityConfig("Kitchen", "room",
+                                           sources=Sources([MqttMeasureSource(mqtt_topic="some/topic", measures=[
                                           Measure(source_type='temperature', path="$.temperature")])]))
-        mediator = MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
+        mediator = MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, entity_config)
         mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][2]
         self.room_service_mock.update_temperature = Mock()
         temperature = Temperature(23.12)
@@ -61,10 +61,10 @@ class TemperatureTest(unittest.TestCase):
         self.assertEqual(temperature, self.room_service_mock.update_temperature.call_args[0][0])
 
     def test_forwards_to_mediator_when_updating_temperature_without_jsonpath(self):
-        thing_config = IotThingConfig("Kitchen", "room",
-                                      sources=Sources([MqttMeasureSource(mqtt_topic="some/topic", measures=[
+        entity_config = VirtualEntityConfig("Kitchen", "room",
+                                           sources=Sources([MqttMeasureSource(mqtt_topic="some/topic", measures=[
                                           Measure(source_type='temperature')])]))
-        MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
+        MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, entity_config)
         mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][2]
         self.room_service_mock.update_temperature = Mock()
         temperature = Temperature(23.12)
@@ -77,12 +77,12 @@ class TemperatureTest(unittest.TestCase):
 
     def test_no_error_when_json_path_not_found(self):
         unsupported_json_path = "$.unknownPath"
-        thing_config = IotThingConfig("Kitchen", "room",
-                                      sources=Sources(
+        entity_config = VirtualEntityConfig("Kitchen", "room",
+                                           sources=Sources(
                                           [MqttMeasureSource(mqtt_topic="some/topic", measures=[
                                               Measure(source_type='temperature',
                                                       path=unsupported_json_path)])]))
-        MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
+        MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, entity_config)
         mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][2]
         self.room_service_mock.update_temperature = Mock()
         msg = b'{"battery":100,"humidity":71.65,"linkquality":216,"temperature":23.12,"voltage":3000}'
@@ -93,12 +93,12 @@ class TemperatureTest(unittest.TestCase):
 
     def test_no_error_when_not_json_with_jsonpath(self):
         unsupported_json_path = "$.unknownPath"
-        thing_config = IotThingConfig("Kitchen", "room",
-                                      sources=Sources(
+        entity_config = VirtualEntityConfig("Kitchen", "room",
+                                           sources=Sources(
                                           [MqttMeasureSource(mqtt_topic="some/topic", measures=[
                                               Measure(source_type='temperature',
                                                       path=unsupported_json_path)])]))
-        MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, thing_config)
+        MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, entity_config)
         mqtt_callback = self.mqtt_client_mock.subscribe.call_args[0][2]
         self.room_service_mock.update_temperature = Mock()
         msg = b"21.3"
@@ -111,7 +111,7 @@ class TemperatureTest(unittest.TestCase):
         # given
         destinations = Destinations([PlannedNotification("some/topic", "* * * * * *")])
         mqtt_room_mediator = MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock,
-                                              thing_config=IotThingConfig("Kitchen", "room", destinations=destinations))
+                                              entity_config=VirtualEntityConfig("Kitchen", "room", destinations=destinations))
         _set_up_croniter()
         # when
         mqtt_room_mediator.start()
@@ -124,7 +124,7 @@ class TemperatureTest(unittest.TestCase):
         # given
         destinations = Destinations([PlannedNotification("some/topic", "* * * * * *")])
         mqtt_room_mediator = MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock,
-                                              thing_config=IotThingConfig("Kitchen", "room", destinations=destinations))
+                                              entity_config=VirtualEntityConfig("Kitchen", "room", destinations=destinations))
         self._set_up_room_matching_json()
         _set_up_croniter()
         # when
@@ -146,7 +146,7 @@ class TemperatureTest(unittest.TestCase):
                                                        datetime.fromisoformat("2024-01-01T01:01:01.111111"))
 
     def test_handles_database_exceptions_without_breaking(self):
-        mqtt_mediator = MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, IotThingConfig())
+        mqtt_mediator = MqttRoomMediator(self.mqtt_client_mock, self.room_service_mock, VirtualEntityConfig())
 
         self.room_service_mock.update_temperature = Mock(side_effect=DatabaseException)
         mqtt_mediator.temperature_update(Mock(mqtt_topic="temperature/topic", payload='23.1'))

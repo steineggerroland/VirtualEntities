@@ -149,14 +149,14 @@ class RunCompleteWhen:
         self.threshold = threshold if threshold is not None else 10
 
 
-class IotThingConfig:
-    def __init__(self, name: None | str = None, thing_type: None | str = None,
+class VirtualEntityConfig:
+    def __init__(self, name: None | str = None, entity_type: None | str = None,
                  temperature_thresholds: None | ThresholdsConfig = None,
                  humidity_thresholds: None | ThresholdsConfig = None,
                  sources: None | Sources = None,
                  destinations: None | Destinations = None, run_complete_when=RunCompleteWhen()):
         self.name = name
-        self.type = thing_type
+        self.type = entity_type
         self.temperature_thresholds = temperature_thresholds
         self.humidity_thresholds = humidity_thresholds
         self.sources = sources
@@ -168,13 +168,13 @@ class IotThingConfig:
 
 
 class Configuration:
-    def __init__(self, mqtt: MqttConfiguration, things: [IotThingConfig], time_series: TimeSeriesConfig | None,
+    def __init__(self, mqtt: MqttConfiguration, entities: [VirtualEntityConfig], time_series: TimeSeriesConfig | None,
                  calendars_config: CalendarsConfig, flaskr: dict):
         self.mqtt = mqtt
-        self.things = things
+        self.entities = entities
         self.time_series = time_series
         self.calendars_config = calendars_config
         self.flaskr = flaskr
 
     def __str__(self):
-        return f"{self.mqtt}, {self.things}, {self.time_series}, {self.calendars_config}"
+        return f"{self.mqtt}, {self.entities}, {self.time_series}, {self.calendars_config}"

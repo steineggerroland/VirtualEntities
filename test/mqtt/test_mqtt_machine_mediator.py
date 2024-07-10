@@ -12,7 +12,7 @@ from iot.infrastructure.machine.dryer import Dryer
 from iot.infrastructure.machine.machine_service import MachineService
 from iot.infrastructure.machine.machine_that_can_be_loaded import RunningState
 from iot.infrastructure.machine.power_state_decorator import PowerState
-from iot.infrastructure.thing import OnlineStatus
+from iot.infrastructure.virtual_entity import OnlineStatus
 from iot.mqtt.mqtt_client import MqttClient
 from iot.mqtt.mqtt_machine_mediator import MqttMachineMediator
 
@@ -35,7 +35,7 @@ class MqttMediatorTest(unittest.TestCase):
     @patch('iot.infrastructure.machine.machine_service.MachineService')
     def setUp(self, machine_service_mock, mqtt_config_mock, sources_mock, destinations_mock, mqtt_client_mock):
         self.machine_service_mock: Mock | MachineService = machine_service_mock
-        self.machine_service_mock.thing.to_dict = Mock(return_value={})
+        self.machine_service_mock.entities.to_dict = Mock(return_value={})
         self.mqtt_config_mock = mqtt_config_mock
         self.sources_mock: Mock | Sources = sources_mock
         self.destinations_mock: Mock | Destinations = destinations_mock
@@ -46,7 +46,7 @@ class MqttMediatorTest(unittest.TestCase):
         # given
         destinations = Destinations(list([PlannedNotification("some/topic", "* * * * * *")]))
         mqtt_mediator = MqttMachineMediator(self.machine_service_mock, self.mqtt_client_mock)
-        mqtt_mediator.add_thing_by_config(self.machine_name, self.sources_mock, destinations)
+        mqtt_mediator.add_machine_by_config(self.machine_name, self.sources_mock, destinations)
         _set_up_croniter(responses=[datetime.now(), datetime.now(), datetime.now() + timedelta(weeks=1)])
         # when
         mqtt_mediator.start()
@@ -59,7 +59,7 @@ class MqttMediatorTest(unittest.TestCase):
         # given
         destinations = Destinations(list([PlannedNotification("some/topic", "* * * * * *")]))
         mqtt_mediator = MqttMachineMediator(self.machine_service_mock, self.mqtt_client_mock)
-        mqtt_mediator.add_thing_by_config(self.machine_name, self.sources_mock, destinations)
+        mqtt_mediator.add_machine_by_config(self.machine_name, self.sources_mock, destinations)
         self._set_up_thing_matching_json_file()
         _set_up_croniter(responses=[datetime.now(), datetime.now() + timedelta(weeks=1)])
         # when
@@ -96,10 +96,10 @@ class MqttMediatorTest(unittest.TestCase):
         self.mqtt_client_mock.subscribe = Mock()
         # when
         mqtt_mediator = MqttMachineMediator(self.machine_service_mock, self.mqtt_client_mock)
-        mqtt_mediator.add_thing_by_config(self.machine_name,
-                                          Sources([MqttMeasureSource(consumption_topic,
+        mqtt_mediator.add_machine_by_config(self.machine_name,
+                                            Sources([MqttMeasureSource(consumption_topic,
                                                                      [Measure(source_type='consumption')])]),
-                                          self.destinations_mock)
+                                            self.destinations_mock)
         # then
         self.mqtt_client_mock.subscribe.assert_called_with(self.machine_name, consumption_topic, ANY)
 
@@ -108,7 +108,7 @@ class MqttMediatorTest(unittest.TestCase):
         watt = 45.0
         msg = Mock(topic="some/topic", payload=str(watt))
         mqtt_mediator = MqttMachineMediator(self.machine_service_mock, self.mqtt_client_mock)
-        mqtt_mediator.add_thing_by_config(self.machine_name, self.sources_mock, self.destinations_mock)
+        mqtt_mediator.add_machine_by_config(self.machine_name, self.sources_mock, self.destinations_mock)
         self.machine_service_mock.update_power_consumption = Mock()
         # when
         mqtt_mediator.power_consumption_update(self.machine_name, msg)
@@ -122,11 +122,11 @@ class MqttMediatorTest(unittest.TestCase):
         self.mqtt_client_mock.subscribe = Mock()
         # when
         mqtt_mediator = MqttMachineMediator(self.machine_service_mock, self.mqtt_client_mock)
-        mqtt_mediator.add_thing_by_config(self.machine_name,
-                                          Sources([MqttMeasureSource(loading_topic, [Measure(source_type='loading')]),
+        mqtt_mediator.add_machine_by_config(self.machine_name,
+                                            Sources([MqttMeasureSource(loading_topic, [Measure(source_type='loading')]),
                                                    MqttMeasureSource(unloading_topic,
                                                                      [Measure(source_type='unloading')])]),
-                                          self.destinations_mock)
+                                            self.destinations_mock)
         # then
         self.mqtt_client_mock.subscribe.assert_any_call(self.machine_name, loading_topic, ANY)
         self.mqtt_client_mock.subscribe.assert_any_call(self.machine_name, unloading_topic, ANY)
@@ -134,7 +134,7 @@ class MqttMediatorTest(unittest.TestCase):
     def test_loading_machine(self):
         # given
         mqtt_mediator = MqttMachineMediator(self.machine_service_mock, self.mqtt_client_mock)
-        mqtt_mediator.add_thing_by_config(self.machine_name, self.sources_mock, self.destinations_mock)
+        mqtt_mediator.add_machine_by_config(self.machine_name, self.sources_mock, self.destinations_mock)
         msg = Mock(topic="load/topic", payload=None)
         self.machine_service_mock.loaded = Mock()
         # when
@@ -145,7 +145,7 @@ class MqttMediatorTest(unittest.TestCase):
     def test_loading_machine_needing_unload(self):
         # given
         mqtt_mediator = MqttMachineMediator(self.machine_service_mock, self.mqtt_client_mock)
-        mqtt_mediator.add_thing_by_config(self.machine_name, self.sources_mock, self.destinations_mock)
+        mqtt_mediator.add_machine_by_config(self.machine_name, self.sources_mock, self.destinations_mock)
         msg = Mock(topic="load/topic", payload=str(True))
         self.machine_service_mock.loaded = Mock()
         # when
@@ -156,7 +156,7 @@ class MqttMediatorTest(unittest.TestCase):
     def test_unloading_machine(self):
         # given
         mqtt_mediator = MqttMachineMediator(self.machine_service_mock, self.mqtt_client_mock)
-        mqtt_mediator.add_thing_by_config(self.machine_name, self.sources_mock, self.destinations_mock)
+        mqtt_mediator.add_machine_by_config(self.machine_name, self.sources_mock, self.destinations_mock)
         self.machine_service_mock.unloaded = Mock()
         # when
         mqtt_mediator.unload_machine(self.machine_name)
@@ -165,7 +165,7 @@ class MqttMediatorTest(unittest.TestCase):
 
     def test_handles_database_exceptions_without_breaking(self):
         mqtt_mediator = MqttMachineMediator(self.machine_service_mock, self.mqtt_client_mock)
-        mqtt_mediator.add_thing_by_config(self.machine_name, self.sources_mock, self.destinations_mock)
+        mqtt_mediator.add_machine_by_config(self.machine_name, self.sources_mock, self.destinations_mock)
 
         self.machine_service_mock.unloaded = Mock(side_effect=DatabaseException)
         mqtt_mediator.unload_machine(self.machine_name)

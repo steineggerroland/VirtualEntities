@@ -3,7 +3,7 @@ from typing import List
 
 import pytz
 
-from iot.infrastructure.thing import Thing
+from iot.infrastructure.virtual_entity import VirtualEntity
 
 
 class Appointment:
@@ -35,7 +35,7 @@ class Appointment:
                 "last_updated_at": self.last_updated_at.isoformat() if self.last_updated_at is not None else None}
 
 
-class Calendar(Thing):
+class Calendar(VirtualEntity):
     def __init__(self, name: str, url: str, color: str, appointments: List[Appointment] = [],
                  last_updated_at: datetime = datetime.now(),
                  last_seen_at: None | datetime = None):

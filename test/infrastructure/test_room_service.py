@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock
 
-from iot.core.configuration import IotThingConfig, ThresholdsConfig, RangeConfig
+from iot.core.configuration import VirtualEntityConfig, ThresholdsConfig, RangeConfig
 from iot.core.storage import Storage
 from iot.infrastructure.machine.machine_service import DatabaseException
 from iot.infrastructure.room import Room
@@ -20,7 +20,7 @@ class InitTest(unittest.TestCase):
     def test_loads_from_storage(self):
         # when
         RoomService(RoomCatalog(self.storage_mock), self.storage_mock,
-                    IotThingConfig(name='Dining room', thing_type='room'))
+                    VirtualEntityConfig(name='Dining room', entity_type='room'))
         # then
         self.storage_mock.load_room.assert_called_with("Dining room")
 
@@ -29,8 +29,8 @@ class InitTest(unittest.TestCase):
         temperature_thresholds_config = ThresholdsConfig(RangeConfig(20, 22), 16, 28)
         # when
         RoomService(RoomCatalog(self.storage_mock), self.storage_mock,
-                    IotThingConfig(name='Dining room', thing_type='room',
-                                   temperature_thresholds=temperature_thresholds_config))
+                    VirtualEntityConfig(name='Dining room', entity_type='room',
+                                        temperature_thresholds=temperature_thresholds_config))
         # then
         updated_room_arg: Room = self.storage_mock.update.call_args[0][0]
         self.assertEqual(20, updated_room_arg.temperature_thresholds.optimal.lower_value)
@@ -43,8 +43,8 @@ class InitTest(unittest.TestCase):
         humidity_thresholds_config = ThresholdsConfig(RangeConfig(70, 80), 50, 90)
         # when
         room_service = RoomService(RoomCatalog(self.storage_mock), self.storage_mock,
-                                   IotThingConfig(name='Dining room', thing_type='room',
-                                                  humidity_thresholds=humidity_thresholds_config))
+                                   VirtualEntityConfig(name='Dining room', entity_type='room',
+                                                       humidity_thresholds=humidity_thresholds_config))
         # then
         updated_room_arg: Room = self.storage_mock.update.call_args[0][0]
         self.assertEqual(70, updated_room_arg.humidity_thresholds.optimal.lower_value)
@@ -61,7 +61,7 @@ class RoomServiceTest(unittest.TestCase):
 
     def test_saves_updated_temperature_when_updating_temperature(self):
         room_service = RoomService(RoomCatalog(self.storage_mock), self.storage_mock,
-                                   IotThingConfig(name='Dining room', thing_type='room'))
+                                   VirtualEntityConfig(name='Dining room', entity_type='room'))
         new_temperature = Temperature(21.41, TemperatureUnit.DEGREE_CELSIUS)
         self.storage_mock.update = Mock()
         self.room.update_temperature = Mock()
@@ -73,7 +73,7 @@ class RoomServiceTest(unittest.TestCase):
 
     def test_raises_db_exception_when_storage_fails_while_updating(self):
         room_service = RoomService(RoomCatalog(self.storage_mock), self.storage_mock,
-                                   IotThingConfig(name='Dining room', thing_type='room'))
+                                   VirtualEntityConfig(name='Dining room', entity_type='room'))
         self.room.update_temperature = Mock(side_effect=[ValueError])
         self.assertRaises(DatabaseException, room_service.update_temperature, Temperature(20))
 

@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime, timedelta
 
 from iot.infrastructure.person import Person
-from iot.infrastructure.thing import OnlineStatus
+from iot.infrastructure.virtual_entity import OnlineStatus
 from iot.infrastructure.time.calendar import Calendar
 
 

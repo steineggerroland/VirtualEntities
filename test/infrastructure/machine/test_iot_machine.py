@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 from iot.infrastructure.machine.iot_machine import IotMachine
 from iot.infrastructure.machine.power_state_decorator import PowerState
-from iot.infrastructure.thing import OnlineStatus
+from iot.infrastructure.virtual_entity import OnlineStatus
 
 
 class ConstructionTest(unittest.TestCase):
