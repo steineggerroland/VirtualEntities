@@ -5,7 +5,6 @@ import yamlenv
 from flask import Flask, request
 from flask_babel import Babel
 from flask_bootstrap import Bootstrap5
-from urllib3.util import parse_url
 
 from flaskr.api.ApplianceDepot import appliance_depot_api
 from flaskr.api.RoomCatalog import room_catalog_api
