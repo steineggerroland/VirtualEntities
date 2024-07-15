@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, call
 from iot.core.storage import Storage
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
-from iot.infrastructure.appliance.washing_machine import WashingMachine
+from iot.infrastructure.appliance.appliance_that_can_be_loaded import ApplianceThatCanBeLoaded
 
 
 class TestApplianceDepot(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestApplianceDepot(unittest.TestCase):
         self.storage_mock: Storage | MagicMock = MagicMock()
         self.time_series_storage: TimeSeriesStorage | MagicMock = MagicMock()
         self.depot = ApplianceDepot(self.storage_mock, self.time_series_storage)
-        self.sample_appliance = WashingMachine("washer1", 'washing_machine')
+        self.sample_appliance = ApplianceThatCanBeLoaded("washer1", 'washing_machine')
 
     def test_stock_stores_new_appliance(self):
         """Test storing a new appliance."""
@@ -26,7 +26,7 @@ class TestApplianceDepot(unittest.TestCase):
         self.storage_mock.update.return_value = False
         self.depot.stock(self.sample_appliance)
         self.storage_mock.update.return_value = True
-        updated_machine = WashingMachine("washer1", 233)
+        updated_machine = ApplianceThatCanBeLoaded("washer1", 233)
         result = self.depot.stock(updated_machine)
         self.storage_mock.update.assert_has_calls([call(self.sample_appliance), call(updated_machine)])
         self.assertTrue(result)

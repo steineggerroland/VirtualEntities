@@ -8,9 +8,8 @@ from waiting import wait
 
 from iot.core.configuration import PlannedNotification, Destinations, Sources, MqttMeasureSource, Measure
 from iot.infrastructure.exceptions import DatabaseException
-from iot.infrastructure.appliance.dryer import Dryer
 from iot.infrastructure.appliance.appliance_service import ApplianceService
-from iot.infrastructure.appliance.appliance_that_can_be_loaded import RunningState
+from iot.infrastructure.appliance.appliance_that_can_be_loaded import RunningState, ApplianceThatCanBeLoaded
 from iot.infrastructure.appliance.power_state_decorator import PowerState
 from iot.infrastructure.virtual_entity import OnlineStatus
 from iot.mqtt.mqtt_client import MqttClient
@@ -78,17 +77,18 @@ class MqttMediatorTest(unittest.TestCase):
 
     def _set_up_thing_matching_json_file(self):
         # matches the values of the json file
-        self.appliance_service_mock.get_appliance = Mock(return_value=Dryer("dryer", "dryer", 2400.121,
-                                                                          datetime.fromisoformat(
-                                                                            "2024-01-02T03:04:05.678910"),
-                                                                          False, True,
-                                                                          datetime.fromisoformat(
-                                                                            "2024-01-02T01:01:01.111111"),
-                                                                          RunningState.RUNNING,
-                                                                          datetime.fromisoformat(
-                                                                            "2023-12-31T23:59:02.133742"),
-                                                                          datetime.fromisoformat(
-                                                                            "2024-01-02T03:04:05.678910")))
+        self.appliance_service_mock.get_appliance = Mock(
+            return_value=ApplianceThatCanBeLoaded("dryer", "dryer", 2400.121,
+                                                  datetime.fromisoformat(
+                                                      "2024-01-02T03:04:05.678910"),
+                                                  False, True,
+                                                  datetime.fromisoformat(
+                                                      "2024-01-02T01:01:01.111111"),
+                                                  RunningState.RUNNING,
+                                                  datetime.fromisoformat(
+                                                      "2023-12-31T23:59:02.133742"),
+                                                  datetime.fromisoformat(
+                                                      "2024-01-02T03:04:05.678910")))
 
     def test_subscribes_for_consumption_on_start(self):
         # given
@@ -98,7 +98,7 @@ class MqttMediatorTest(unittest.TestCase):
         mqtt_mediator = MqttApplianceMediator(self.appliance_service_mock, self.mqtt_client_mock)
         mqtt_mediator.add_appliance_by_config(self.appliance_name,
                                               Sources([MqttMeasureSource(consumption_topic,
-                                                                     [Measure(source_type='consumption')])]),
+                                                                         [Measure(source_type='consumption')])]),
                                               self.destinations_mock)
         # then
         self.mqtt_client_mock.subscribe.assert_called_with(self.appliance_name, consumption_topic, ANY)
@@ -123,7 +123,8 @@ class MqttMediatorTest(unittest.TestCase):
         # when
         mqtt_mediator = MqttApplianceMediator(self.appliance_service_mock, self.mqtt_client_mock)
         mqtt_mediator.add_appliance_by_config(self.appliance_name,
-                                              Sources([MqttMeasureSource(loading_topic, [Measure(source_type='loading')]),
+                                              Sources(
+                                                  [MqttMeasureSource(loading_topic, [Measure(source_type='loading')]),
                                                    MqttMeasureSource(unloading_topic,
                                                                      [Measure(source_type='unloading')])]),
                                               self.destinations_mock)

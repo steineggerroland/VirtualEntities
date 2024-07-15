@@ -29,6 +29,8 @@ entities:
           cron_expression: "*/1 * * * * *"
         - mqtt_topic: update/every-15-minutes/topic
           cron_expression: "* */15 * * * *"
+  - name: Coffee machine
+    type: this_is_some_unknown_type #verify unknown types can be used
   - name: Kitchen
     type: room
     sources:

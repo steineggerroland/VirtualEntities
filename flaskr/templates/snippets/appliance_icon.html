@@ -1,13 +1,17 @@
 {% if type=='dishwasher' %}
-<img alt="{{_('Dishwasher')}}" class="icon appliance-type"
-     data-bs-title="{{_('Dishwasher')}}" data-bs-toggle="tooltip" src="{{url_for('static', filename='img/flaticon/dishwasher.png')}}"/>
+    <img alt="{{ _('Dishwasher') }}" class="icon appliance-type"
+         data-bs-title="{{ _('Dishwasher') }}" data-bs-toggle="tooltip"
+         src="{{ url_for('static', filename='img/flaticon/dishwasher.png') }}"/>
 {% elif type=='dryer' %}
-<img alt="{{_('Dryer')}}" class="icon appliance-type"
-     data-bs-title="{{_('Dryer')}}" data-bs-toggle="tooltip" src="{{url_for('static', filename='img/flaticon/dryer.png')}}"/>
+    <img alt="{{ _('Dryer') }}" class="icon appliance-type"
+         data-bs-title="{{ _('Dryer') }}" data-bs-toggle="tooltip"
+         src="{{ url_for('static', filename='img/flaticon/dryer.png') }}"/>
 {% elif type=='washing_machine' %}
-<img alt="{{_('Washing machine')}}" class="icon appliance-type"
-     data-bs-title="{{_('Washing machine')}}" data-bs-toggle="tooltip" src="{{url_for('static', filename='img/flaticon/washing_machine.png')}}"/>
+    <img alt="{{ _('Washing machine') }}" class="icon appliance-type"
+         data-bs-title="{{ _('Washing machine') }}" data-bs-toggle="tooltip"
+         src="{{ url_for('static', filename='img/flaticon/washing_machine.png') }}"/>
 {% else %}
-<img alt="{{_('Unknown entity')}}" class="icon appliance-type"
-     data-bs-title="{{_('Unknown entity')}}" data-bs-toggle="tooltip" src="{{url_for('static', filename='img/flaticon/unknown_box.png')}}"/>
+    <img alt="{{ _('Unknown type: %(type)s', type=type) }}" class="icon appliance-type"
+         data-bs-title="{{ _('Unknown type: %(type)s', type=type) }}" data-bs-toggle="tooltip"
+         src="{{ url_for('static', filename='img/flaticon/unknown_box.png') }}"/>
 {% endif %}

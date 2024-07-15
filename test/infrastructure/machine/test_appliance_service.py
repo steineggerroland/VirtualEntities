@@ -8,7 +8,7 @@ from iot.core.storage import Storage
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
 from iot.infrastructure.appliance.appliance_service import ApplianceService, DatabaseException
-from iot.infrastructure.appliance.washing_machine import WashingMachine
+from iot.infrastructure.appliance.appliance_that_can_be_loaded import ApplianceThatCanBeLoaded
 
 
 class InitTest(unittest.TestCase):
@@ -16,11 +16,11 @@ class InitTest(unittest.TestCase):
         configuration_mock = Mock(type='washing_machine')
         configuration_mock.name = 'washing appliance'
         storage_mock = Mock()
-        storage_mock.load_entity = Mock(return_value=WashingMachine('washing_machine', 'washing_machine'))
+        storage_mock.load_entity = Mock(return_value=ApplianceThatCanBeLoaded('washing_machine', 'washing_machine'))
         time_series_storage_mock = TimeSeriesStorage()
         configuration_manager_mock = ConfigurationManager()
         appliance_service = ApplianceService(ApplianceDepot(storage_mock, time_series_storage_mock),
-                                           time_series_storage_mock, configuration_manager_mock)
+                                             time_series_storage_mock, configuration_manager_mock)
         appliance_service.add_appliance_by_config([configuration_mock])
         self.assertIsNotNone(appliance_service.time_series_storage)
         self.assertIsNotNone(appliance_service.appliance_depot)
@@ -46,7 +46,7 @@ class InitTest(unittest.TestCase):
 class AppliancePowerTest(unittest.TestCase):
     def setUp(self) -> None:
         self.entity_name = "some entity"
-        self.entity: WashingMachine = WashingMachine(self.entity_name, 'washing_machine')
+        self.entity: ApplianceThatCanBeLoaded = ApplianceThatCanBeLoaded(self.entity_name, 'washing_machine')
         self.configuration_mock: Mock | VirtualEntityConfig = MagicMock(type='washing_machine')
         self.configuration_mock.name = self.entity_name
         self.storage_mock: Mock | Storage = Mock()
@@ -156,7 +156,8 @@ class DatabaseExceptionTranslationTests(unittest.TestCase):
     def setUp(self) -> None:
         self.configuration_mock: Mock | VirtualEntityConfig = Mock(type='washing_machine')
         self.storage_mock: Mock | Storage = Mock()
-        self.storage_mock.load_appliance = Mock(return_value=WashingMachine('washing_machine', 'washing_machine'))
+        self.storage_mock.load_appliance = Mock(
+            return_value=ApplianceThatCanBeLoaded('washing_machine', 'washing_machine'))
         self.time_series_storage = MagicMock()
         self.configuration_manager = MagicMock()
         self.appliance_service = ApplianceService(ApplianceDepot(self.storage_mock, self.time_series_storage),
