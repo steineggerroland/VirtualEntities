@@ -1,6 +1,7 @@
 import json
 import logging
 import time
+from json import JSONDecodeError
 from pathlib import Path
 from threading import Thread
 from typing import List
@@ -28,6 +29,8 @@ class Storage:
                     self.entities[entity_name] = entities_in_db[entity_name]
         except FileNotFoundError:
             self.logger.debug('Skipping to load files from db: Database file does not exist')
+        except JSONDecodeError as e:
+            self.logger.debug(f'Failed to load previous storage state from "%s" due to error: "%s"', db_path, e)
         finally:
             if db_file:
                 db_file.close()

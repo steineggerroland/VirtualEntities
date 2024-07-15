@@ -1,3 +1,5 @@
-project = {
-    "url": "https://github.com/steineggerroland/VirtualEntities"
-}
+class Project:
+    url = "https://github.com/steineggerroland/VirtualEntities",
+    appliance_types_that_can_be_loaded = [
+        'washing_machine', 'dryer', 'dishwasher', 'coffee_machine', 'vacuum', 'top_loader'
+    ]

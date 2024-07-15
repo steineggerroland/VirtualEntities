@@ -18,7 +18,7 @@ from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
 from iot.infrastructure.appliance.appliance_service import ApplianceService
 from iot.infrastructure.register_of_persons import RegisterOfPersons
 from iot.infrastructure.room_catalog import RoomCatalog
-from project import project
+from project import Project
 
 
 def create_app(default_config_file_name: str, appliance_service: ApplianceService, appliance_depot: ApplianceDepot,
@@ -81,7 +81,7 @@ def create_app(default_config_file_name: str, appliance_service: ApplianceServic
 
     @app.context_processor
     def utility_processor():
-        return dict(lang=locale_selector(), debug=request.args.get('debug'), project_url=project['url'])
+        return dict(lang=locale_selector(), debug=request.args.get('debug'), project_url=Project.url)
 
     babel = Babel(app, default_translation_directories="../translations",
                   locale_selector=locale_selector)

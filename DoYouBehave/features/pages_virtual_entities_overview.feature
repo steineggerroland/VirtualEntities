@@ -12,7 +12,7 @@ Feature: Showing general information of virtual entities
 
   Scenario: The user sees all appliances
     Given the user goes to the virtual entities page
-    Then they see the appliances Dishwasher, Dryer
+    Then they see the appliances Dishwasher, Dryer, Coffee machine
 
   Scenario: The user sees all persons
     Given the user goes to the virtual entities page

@@ -79,6 +79,19 @@ entities:
       planned_notifications:
         - mqtt_topic: home/things/washing_machine_kai
           cron_expression: '* * * * *'
+  - name: Coffee machine
+    type: coffee_machine
+    sources:
+      - mqtt_topic: measurements/home/indoor/coffee_machine/power
+        type: consumption
+      - mqtt_topic: home/things/coffee_machine/load
+        type: loading
+      - mqtt_topic: home/things/coffee_machine/unload
+        type: unloading
+    destinations:
+      planned_notifications:
+        - mqtt_topic: home/things/coffee_machine
+          cron_expression: '* * * * *'
   - name: Parents bedroom
     type: room
     temperature_thresholds:
