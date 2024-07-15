@@ -8,8 +8,8 @@ from typing import List
 from python_event_bus import EventBus
 
 from iot.infrastructure.exceptions import InvalidEntityType
-from iot.infrastructure.appliance.machine_builder import MachineBuilder
-from iot.infrastructure.appliance.machine_that_can_be_loaded import MachineThatCanBeLoaded
+from iot.infrastructure.appliance.appliance_builder import ApplianceBuilder
+from iot.infrastructure.appliance.appliance_that_can_be_loaded import ApplianceThatCanBeLoaded
 from iot.infrastructure.room import from_dict as r_from_dict, Room
 from iot.infrastructure.virtual_entity import VirtualEntity
 
@@ -49,11 +49,11 @@ class Storage:
         with open(self.db_name, 'w') as db_file:
             json.dump(self.entities, db_file)
 
-    def load_iot_machine(self, entity_name: str) -> MachineThatCanBeLoaded | None:
+    def load_appliance(self, entity_name: str) -> ApplianceThatCanBeLoaded | None:
         if entity_name not in self.entities:
             return None
         try:
-            return MachineBuilder.from_dict(self.entities[entity_name])
+            return ApplianceBuilder.from_dict(self.entities[entity_name])
         except InvalidEntityType:
             return None
 
@@ -75,9 +75,9 @@ class Storage:
             return True
         return False
 
-    def load_all_iot_machines(self) -> List[MachineThatCanBeLoaded]:
-        return list(map(MachineBuilder.from_dict,
-                        filter(lambda t: MachineBuilder.can_build(t['type']), self.entities.values())))
+    def load_all_appliances(self) -> List[ApplianceThatCanBeLoaded]:
+        return list(map(ApplianceBuilder.from_dict,
+                        filter(lambda t: ApplianceBuilder.can_build(t['type']), self.entities.values())))
 
     def load_all_rooms(self) -> List[Room]:
         return list(map(lambda r: r_from_dict(r), filter(lambda e: e['type'] == 'room', self.entities.values())))

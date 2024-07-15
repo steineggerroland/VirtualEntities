@@ -15,13 +15,13 @@ from flaskr.views.Homepage import Homepage
 from iot.core.configuration_manager import ConfigurationManager
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
-from iot.infrastructure.appliance.machine_service import MachineService
+from iot.infrastructure.appliance.appliance_service import ApplianceService
 from iot.infrastructure.register_of_persons import RegisterOfPersons
 from iot.infrastructure.room_catalog import RoomCatalog
 from project import project
 
 
-def create_app(default_config_file_name: str, machine_service: MachineService, appliance_depot: ApplianceDepot,
+def create_app(default_config_file_name: str, appliance_service: ApplianceService, appliance_depot: ApplianceDepot,
                time_series_storage: TimeSeriesStorage, room_catalog: RoomCatalog,
                register_of_persons: RegisterOfPersons, configuration_manager: ConfigurationManager,
                flask_config: dict = None):
@@ -50,9 +50,9 @@ def create_app(default_config_file_name: str, machine_service: MachineService, a
     )
     app.add_url_rule(
         "/appliance/<name>/configuration.html",
-        view_func=Appliance.Configuration.as_view('appliance_configuration', machine_service, configuration_manager)
+        view_func=Appliance.Configuration.as_view('appliance_configuration', appliance_service, configuration_manager)
     )
-    app.register_blueprint(appliance_depot_api(machine_service, appliance_depot, time_series_storage),
+    app.register_blueprint(appliance_depot_api(appliance_service, appliance_depot, time_series_storage),
                            url_prefix='/api/')
 
     app.add_url_rule(

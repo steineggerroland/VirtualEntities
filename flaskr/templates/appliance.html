@@ -70,7 +70,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col">
+                    <div class="col running-state">
                         {%- if appliance.running_state=='running' %}
                             <span data-bs-title="{{ appliance.started_run_at|datetimeformat('short') }}"
                                   data-bs-toggle="tooltip">{{ _('Running since %(xMinutes)s', xMinutes=appliance.running_for_time_period()|timedeltaformat()) }}</span>

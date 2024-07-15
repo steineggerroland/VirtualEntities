@@ -204,6 +204,56 @@ entities:
       planned_notifications:
         - mqtt_topic: home/rooms/living-room
           cron_expression: '* * * * *'
+  - name: Lobby
+    type: room
+    temperature_thresholds:
+      optimal:
+        lower: 20
+        upper: 23
+      critical_lower: 15
+      critical_upper: 30
+    humidity_thresholds:
+      optimal:
+        lower: 50
+        upper: 75
+      critical_lower: 40
+      critical_upper: 85
+    sources:
+      - mqtt_topic: zigbee/home/hallway/sensor01
+        measures:
+          - type: temperature
+            path: $.temperature
+          - type: humidity
+            path: $.humidity
+    destinations:
+      planned_notifications:
+        - mqtt_topic: home/rooms/hallway
+          cron_expression: '* * * * *'
+  - name: Storeroom
+    type: room
+    temperature_thresholds:
+      optimal:
+        lower: 21
+        upper: 24
+      critical_lower: 19
+      critical_upper: 30
+    humidity_thresholds:
+      optimal:
+        lower: 50
+        upper: 70
+      critical_lower: 40
+      critical_upper: 85
+    sources:
+      - mqtt_topic: zigbee/home/bathroom/sensor01
+        measures:
+          - type: temperature
+            path: $.temperature
+          - type: humidity
+            path: $.humidity
+    destinations:
+      planned_notifications:
+        - mqtt_topic: home/rooms/bathroom
+          cron_expression: '* * * * *'
   - name: Terrace
     type: room
     temperature_thresholds:

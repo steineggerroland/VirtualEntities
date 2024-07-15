@@ -45,9 +45,9 @@
          data-bs-title="{{ tooltip }}" data-bs-toggle="tooltip">
         <img class="icon" src="{{ url_for('static', filename=icon) }}" alt="{{ text }}"/>
         <div>{{ text }}</div>
-        <div class="visually-hidden humidity-rating-{{ rating.value }}" role="status">{{ _(rating) }}</div>
     </div>
 {%- endif %}
+<span class="visually-hidden humidity-rating humidity-rating-{{ rating.value }}" role="status">{{ _(rating) }}</span>
 <style>
     .humidity .icon {
         height: 50%;

@@ -31,13 +31,21 @@ def load_page_for_entity(context, page_name: str, entity_name: str):
     context.entity_name = entity_name
     context.webdriver.switch_to.new_window('tab')
     context.pages[page_name].navigate_to_entity(entity_name)
-    context.pages[page_name].is_current_page()
+    context.pages[page_name].is_current_page_for_entity(entity_name)
+
+
+@When(r'the power consumption of the (?P<appliance_name>\w+(?> \w+)*?) is updated(?> to (?P<value>\d+))?')
+def send_power_consumption(context, appliance_name: str = None, value: int = None):
+    setattr(context, f'prop_{to_class('power consumption')}',
+            round(random.random() * 2400, 2) if value is None else float(value))
+    context.appliances[appliance_name].send_power_consumption_update(
+        getattr(context, f'prop_{to_class('power consumption')}'))
 
 
 @given(r'(?P<count>\d+) power consumptions are created for the (?P<appliance_name>\w+(?> \w+)*?)(?> '
        r'spread over the last (?>(?>(?P<timeperiod_days>\d+) days)|(?>(?P<timeperiod_hours>\d+) hours)|(?>(?P<timeperiod_seconds>\d+) seconds)))?')
-def create_bulk_power_consumptions(context, count: int, appliance_name: str, timeperiod_days: int = 0,
-                                   timeperiod_hours: int = 0, timeperiod_seconds: int = 0):
+def send_bulk_power_consumptions(context, count: int, appliance_name: str, timeperiod_days: int = 0,
+                                 timeperiod_hours: int = 0, timeperiod_seconds: int = 0):
     count, timeperiod_days, timeperiod_hours, timeperiod_seconds = int(count), int(
         timeperiod_days) if timeperiod_days else 0, int(
         timeperiod_hours) if timeperiod_hours else 0, int(timeperiod_seconds) if timeperiod_seconds else 0
@@ -57,20 +65,40 @@ def create_bulk_power_consumptions(context, count: int, appliance_name: str, tim
                                 tags={'thing': appliance_name}))) > 0
 
 
-@When(r'the power consumption of the (?P<appliance_name>\w+(?> \w+)*?) is updated(?> to (?P<value>\d+))?')
-def send_power_consumption(context, appliance_name: str = None, value: int = None):
-    context.new_value = round(random.random() * 2400, 2) if value is None else float(value)
-    context.appliances[appliance_name].send_power_consumption_update(context.new_value)
+@When(r'the room climate of the (?P<room_name>\w+(?> \w+)*?) is updated')
+def send_room_climate(context, room_name: str):
+    context.prop_temperature = round(random.random() * 6 + 18, 2)
+    context.prop_humidity = round(random.random() * 40 + 50, 2)
+    context.rooms[room_name].send_room_climate_update(
+        {'temperature': context.prop_temperature, 'humidity': context.prop_humidity})
+
+
+@Given(r'(?P<count>\d+) room climate measures are created for the (?P<room_name>\w+(?> \w+)*?)'
+       r'(?> spread over the last (?>(?>(?P<timeperiod_days>\d+) days)|(?>(?P<timeperiod_hours>\d+) hours)|'
+       r'(?>(?P<timeperiod_seconds>\d+) seconds)))?')
+def send_bulk_room_climate(context, count: int, room_name: str, timeperiod_days: int = 0,
+                           timeperiod_hours: int = 0, timeperiod_seconds: int = 0):
+    count, timeperiod_days, timeperiod_hours, timeperiod_seconds = int(count), int(
+        timeperiod_days) if timeperiod_days else 0, int(
+        timeperiod_hours) if timeperiod_hours else 0, int(timeperiod_seconds) if timeperiod_seconds else 0
+    total_seconds = timedelta(days=timeperiod_days, hours=timeperiod_hours, seconds=timeperiod_seconds).total_seconds()
+    total_seconds = total_seconds if total_seconds > 0 else 60 * 60
+    lines = '\n'.join(Point('indoor_climate')
+                      .tag('thing', room_name)
+                      .field('temperature', round(min(30.0, max(15.0, random.gauss() * i * 15 / count) + 15), 2))
+                      .field('humidity', round(min(100.0, max(20.0, random.gauss() * i * 80 / count) + 20), 2))
+                      .time(datetime.now().astimezone(pytz.timezone("Europe/Berlin")) -
+                            timedelta(seconds=max(0, round(i * total_seconds / count))),
+                            WritePrecision.NS)
+                      .to_line_protocol(precision=WritePrecision.NS) for i in range(1, count + 1)) + '\n'
+    client: InfluxDBClient = context.influxClient
+    client.write_points(lines, protocol='line')
+    assert len(list(client.query('SELECT * FROM indoor_climate WHERE time >= now() - 7200s')
+                    .get_points(measurement='indoor_climate',
+                                tags={'thing': room_name}))) > 0
 
 
 use_step_matcher('parse')
-
-
-@When('the room climate of the {room_name} is updated')
-def send_room_climate(context, room_name: str):
-    context.new_value = {'temperature': round(random.random() * 6 + 18, 2),
-                         'humidity': round(random.random() * 40 + 50, 2)}
-    context.rooms[room_name].send_room_climate_update(context.new_value)
 
 
 @When('they click on the {entity_name}')
@@ -156,14 +184,16 @@ use_step_matcher('parse')
 @when('a new appointment for calendar {calendar_name} is created')
 def step_impl(context, calendar_name: str):
     person_name = context.entity_name
-    context.new_value = f'Test event #{random.randint(0, 99999)}'
-    context.persons[person_name].create_new_appointment(context.entity_name, calendar_name, context.new_value)
+    context.prop_name = f'Test event #{random.randint(0, 99999)}'
+    context.persons[person_name].create_new_appointment(context.entity_name, calendar_name,
+                                                        context.prop_name)
 
 
 use_step_matcher('re')
 
 
-@then(r'they are (?>redirected to|on) the (?P<page_name>\w+(?> \w+)*) page(?> of (?P<entity_name>\w+(?> \w+)*))?')
+@then(
+    r'they are (?>redirected to|on) the (?P<page_name>\w+(?> \w+)*) page(?> of(?> the)? (?P<entity_name>\w+(?> \w+)*))?')
 def current_page_is(context, page_name: str, entity_name: str = None):
     if entity_name:
         context.pages[page_name].is_current_page_for_entity(entity_name)
@@ -222,19 +252,17 @@ def appliance_is_shown(context, person_names: str):
 use_step_matcher('re')
 
 
-@then(r'(?>the user sees|they see) the(?> (?P<new>new))? ?(?P<property_name>\w+(?> \w+)*?) of the '
+@then(r'(?>the user sees|they see) the(?! diagram)(?> (?P<new>new|previous))? ?(?P<property_name>\w+(?> \w+)*?) of the '
       r'(?P<entity_name>\w+(?> \w+)*?)(?> (?>being (?P<value>(?>\d|\w)+(?> (?>\d|\w)+)*?) )?after a refresh)?')
 def property_has_new_value(context, property_name=None, entity_name=None, value=None, new=None):
-    entity_type = get_type_for_entity_with_name(context, entity_name)
+    entity_type = get_type_for_entity_with_name(context, entity_name) if entity_name else None
     if new is None:
         return property_has_value(context, property_name, entity_name, entity_type)
-    property_name_in_class = property_name.replace(' ', '-')
-    value = value if value is not None else (
-        context.new_value if type(context.new_value) is not dict else context.new_value[
-            property_name.replace(' ', '_')])
+    value = value if value is not None else getattr(context, f'prop_{to_class(property_name)}')
     WebDriverWait(context.webdriver, 30).until(
-        lambda d: _verify_property(d, entity_name, entity_type, f'.{property_name_in_class}', value,
+        lambda d: _verify_property(d, entity_name, entity_type, f'.{to_class(property_name)}', value,
                                    refresh=d))
+    setattr(context, f'prop_{to_class(property_name)}', value)
 
 
 def get_type_for_entity_with_name(context, entity_name):
@@ -244,9 +272,9 @@ def get_type_for_entity_with_name(context, entity_name):
 
 
 def property_has_value(context, property_name, entity_name, entity_type):
-    property_name_in_class = property_name.replace(' ', '-')
-    WebDriverWait(context.webdriver, 30).until(
-        lambda d: _verify_property(d, entity_name, entity_type, f'.{property_name_in_class}'))
+    value = WebDriverWait(context.webdriver, 30).until(
+        lambda d: _verify_property(d, entity_name, entity_type, f'.{to_class(property_name)}'))
+    setattr(context, f'prop_{to_class(property_name)}', value)
 
 
 def _verify_property(d, entity_name, entity_type, property_selector, value=None, refresh=None):
@@ -257,18 +285,18 @@ def _verify_property(d, entity_name, entity_type, property_selector, value=None,
         elements_for_entity_with_name = _find_element_for_entity_with_name(d, entity_type, entity_name)
     except AssertionError as e:
         print(e)
-        return False
+        return None
     for e in elements_for_entity_with_name:
-        match_found = _find_property_and_match_with(value, e, property_selector, values_not_matching)
-        if match_found:
-            return True
+        found_value = _find_property_and_match_with(value, e, property_selector, values_not_matching)
+        if found_value is not None:
+            return found_value
     if len(values_not_matching) > 0:
         print(f'None of the found values ({values_not_matching}) matches expected value "{value}" for '
               f'entity {entity_name} ({entity_type})')
     else:
         print(f'Found {len(elements_for_entity_with_name)} entities for {entity_name} ({entity_type})'
               f' but no values for property {property_selector}')
-    return False
+    return None
 
 
 def _find_element_for_entity_with_name(webdriver, entity_type: str, entity_name: str):
@@ -284,12 +312,21 @@ def _find_element_for_entity_with_name(webdriver, entity_type: str, entity_name:
 
 def _find_property_and_match_with(value, entity_element, property_selector, values_not_matching):
     if value is None:
-        return True
+        if any(entity_element.find_elements(By.CSS_SELECTOR, property_selector)):
+            return entity_element.find_elements(By.CSS_SELECTOR, property_selector)[0].text
+        else:
+            return None
     elif type(value) is float:
-        return _find_and_compare_float_property(value, entity_element, property_selector,
-                                                values_not_matching)
+        if _find_and_compare_float_property(value, entity_element, property_selector,
+                                            values_not_matching):
+            return value
+        else:
+            return None
     else:
-        return _find_and_compare_property(value, entity_element, property_selector, values_not_matching)
+        if _find_and_compare_property(value, entity_element, property_selector, values_not_matching):
+            return value
+        else:
+            return None
 
 
 def _find_and_compare_float_property(value, entity_element, property_selector, values_not_matching):
@@ -299,17 +336,20 @@ def _find_and_compare_float_property(value, entity_element, property_selector, v
             _extracted_value_matches(extracted_value_with_unit, value) for extracted_value_with_unit in
             property_values):
         values_not_matching.extend(property_values)
-        return False
+        return None
     else:
-        return True
+        return value
 
 
 def _extracted_value_matches(extracted_value_with_unit, value):
     regex_match = re.search(r'[-+]?[0-9]*\.?[0-9]+', extracted_value_with_unit)
     if regex_match is None:
-        return False
+        return None
     extracted_float = float(regex_match.group(0)) if extracted_value_with_unit.find('?') < 0 else None
-    return extracted_float == value
+    if extracted_float == value:
+        return value
+    else:
+        return None
 
 
 def _find_and_compare_property(value, entity_element, property_selector, values_not_matching):
@@ -317,16 +357,16 @@ def _find_and_compare_property(value, entity_element, property_selector, values_
                                entity_element.find_elements(By.CSS_SELECTOR, property_selector)))
     if type(value) is str:
         if any(extracted_value.lower().find(value.lower()) >= 0 for extracted_value in property_values):
-            return True
+            return value
         else:
             values_not_matching.extend(property_values)
-            return False
+            return None
     else:
         if any(extracted_value == value for extracted_value in property_values):
-            return True
+            return value
         else:
             values_not_matching.extend(property_values)
-            return False
+            return None
 
 
 @then(r'the main headline contains (?P<some_string>\w+(?> \w+)*)')
@@ -363,7 +403,7 @@ def message_of_type(context, message_type):
 
 @then(r'(?>the user sees|they see) the new appointment after a refresh')
 def find_appointment(context):
-    summary = context.new_value
+    summary = context.prop_name
     WebDriverWait(context.webdriver, 30).until(lambda d: _find_appointment(d, summary, d))
 
 
@@ -380,8 +420,8 @@ def _find_appointment(webdriver: WebDriver, summary, refresh=None):
 
 
 @then(r'(?>the user sees|they see) (?>a|the) diagram '
-      r'with (?>(?P<updated>updated|the previous) )?(?P<property_type>\w+(?> \w+)*) values'
-      r'(?> for(?> the)? (?P<entity_name>\w+(?> \w+)*))?')
+      r'with (?>(?P<updated>updated|the previous) )*(?P<property_type>\w+(?> \w+)*) values'
+      r'(?> (?>for|of)(?> the)? (?P<entity_name>\w+(?> \w+)*))?')
 def get_or_verify_diagram_path(context, property_type, updated: str = None, entity_name: str = None):
     if entity_name is not None:
         entity_type = get_type_for_entity_with_name(context, entity_name)
@@ -390,7 +430,7 @@ def get_or_verify_diagram_path(context, property_type, updated: str = None, enti
     values = None
     if updated is not None:
         shall_be_same = updated != 'updated'
-        old_value = getattr(context, f'prop_{property_type}')
+        old_value = getattr(context, f'prop_diagram_{property_type}')
         values = WebDriverWait(context.webdriver, 30, 5).until(
             lambda d: _compare_diagram_path_for_property(d, property_type, old_value,
                                                          entity_type, entity_name) == shall_be_same)
@@ -398,7 +438,7 @@ def get_or_verify_diagram_path(context, property_type, updated: str = None, enti
         .until(lambda d: _get_diagram_path_for_property(d, property_type, entity_type, entity_name),
                "Could not retrieve diagram for property %s" % property_type)
     assert values is not None and (type(values) is not str or len(values) > 0)
-    setattr(context, f'prop_{property_type}', values)
+    setattr(context, f'prop_diagram_{property_type}', values)
 
 
 def _compare_diagram_path_for_property(webdriver, property_type, old_value, entity_type: str = None,

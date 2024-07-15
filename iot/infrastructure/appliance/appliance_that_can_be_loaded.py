@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from iot.infrastructure.appliance.iot_machine import IotMachine
+from iot.infrastructure.appliance.appliance import Appliance
 from iot.infrastructure.appliance.power_state_decorator import PowerState
 
 
@@ -11,7 +11,7 @@ class RunningState(str, Enum):
     RUNNING = 'running'
 
 
-class MachineThatCanBeLoaded(IotMachine):
+class ApplianceThatCanBeLoaded(Appliance):
     def __init__(self, name, entity_type: str, watt: float | None = None, last_updated_at: datetime | None = None,
                  needs_unloading=False,
                  is_loaded=False, started_last_run_at=None, running_state=None,

@@ -147,6 +147,8 @@ def appliances_setup(context, timeout=10, **kwargs):
         'Terrace': Room(mqtt_client, 'Terrace', 'zigbee/home/terrace/sensor01'),
         'Bathroom': Room(mqtt_client, 'Bathroom', 'zigbee/home/bathroom/sensor01'),
         'Hallway': Room(mqtt_client, 'Hallway', 'zigbee/home/hallway/sensor01'),
+        'Storeroom': Room(mqtt_client, 'Storeroom', 'zigbee/home/storeroom/sensor01'),
+        'Lobby': Room(mqtt_client, 'Lobby', 'zigbee/home/lobby/sensor01'),
         'Parents bedroom': Room(mqtt_client, 'Parents bedroom', 'zigbee/home/parents-bedroom/sensor01')
     }
     context.persons = {
