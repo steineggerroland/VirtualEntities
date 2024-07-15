@@ -84,12 +84,14 @@ class InfluxDbTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
         try:
             rs = self.influxdb.query(f"SELECT * FROM {time_series_name}")
             old_points = list(rs.get_points(measurement=time_series_name, tags={ENTITY_NAME_TAG: old_name}))
+            self.logger.debug('Found %s points to rename', len(old_points))
             if old_points:
                 chunks = [old_points[i:i + MAX_COUNT_TO_UPDATE] for i in range(0, len(old_points), MAX_COUNT_TO_UPDATE)]
                 for chunk in chunks:
                     reassigned_points = list(
                         map(lambda p: self._change_entity_name_of_point(p, time_series_name, new_name), chunk))
                     self.influxdb.write_points(reassigned_points, time_precision='n')
+                self.logger.debug('Updated all points. Deleting old points.', len(old_points))
                 self.influxdb.delete_series(measurement=time_series_name, tags={ENTITY_NAME_TAG: old_name})
         except InfluxDBClientError as e:  # Exception is raised on query when no data exists (404 by db)
             if e.code == 404:
@@ -107,7 +109,8 @@ class InfluxDbTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
             else:
                 return {"measurement": time_series_name, "tags": {ENTITY_NAME_TAG: new_name},
                         "fields": {TEMPERATURE_FIELD: float(point[TEMPERATURE_FIELD]),
-                                   HUMIDITY_FIELD: float(point[HUMIDITY_FIELD])}}
+                                   HUMIDITY_FIELD: float(point[HUMIDITY_FIELD])},
+                        'time': datetime.fromisoformat(point['time'])}
         except KeyError as e:
             self.logger.error("Could not set entity name to point: (%s)", point)
             raise DatabaseException("Failed to change entity name.", e) from e

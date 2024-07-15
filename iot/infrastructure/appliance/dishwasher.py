@@ -1,8 +1,8 @@
-from iot.infrastructure.appliance.machine_that_can_be_loaded import MachineThatCanBeLoaded
+from iot.infrastructure.appliance.appliance_that_can_be_loaded import ApplianceThatCanBeLoaded
 from iot.infrastructure.virtual_entity import _datetime_from_dict_key
 
 
-class Dishwasher(MachineThatCanBeLoaded):
+class Dishwasher(ApplianceThatCanBeLoaded):
     pass
 
 

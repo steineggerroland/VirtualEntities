@@ -4,7 +4,7 @@ from iot.infrastructure.appliance.power_state_decorator import PowerState, Simpl
 from iot.infrastructure.virtual_entity import VirtualEntity
 
 
-class IotMachine(VirtualEntity):
+class Appliance(VirtualEntity):
     def __init__(self, name, entity_type: str, watt: float | None = None, last_updated_at: datetime = datetime.now(),
                  online_delta_in_seconds=300, started_last_run_at=None, finished_last_run_at=None,
                  last_seen_at: None | datetime = None):

@@ -46,16 +46,16 @@ class TestApplianceDepot(unittest.TestCase):
 
     def test_retrieve_appliance_details(self):
         """Test retrieving details of an appliance."""
-        self.storage_mock.load_iot_machine.return_value = self.sample_appliance
+        self.storage_mock.load_appliance.return_value = self.sample_appliance
         appliance = self.depot.retrieve('washer1')
-        self.storage_mock.load_iot_machine.assert_called_once_with('washer1')
+        self.storage_mock.load_appliance.assert_called_once_with('washer1')
         self.assertEqual(appliance, self.sample_appliance)
 
     def test_inventory_lists_all_appliances(self):
         """Test listing all appliances in the depot."""
-        self.storage_mock.load_all_iot_machines.return_value = [self.sample_appliance]
+        self.storage_mock.load_all_appliances.return_value = [self.sample_appliance]
         inventory = self.depot.inventory()
-        self.storage_mock.load_all_iot_machines.assert_called_once()
+        self.storage_mock.load_all_appliances.assert_called_once()
         self.assertIn(self.sample_appliance, inventory)
 
 

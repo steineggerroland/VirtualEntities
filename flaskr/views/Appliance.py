@@ -7,7 +7,7 @@ from flask_babel import gettext
 from flaskr.forms.ApplianceForm import ApplianceForm
 from iot.core.configuration_manager import ConfigurationManager
 from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
-from iot.infrastructure.appliance.machine_service import MachineService
+from iot.infrastructure.appliance.appliance_service import ApplianceService
 
 
 class Details(View):
@@ -28,13 +28,13 @@ class Configuration(MethodView):
     init_every_request = False
     methods = ['GET', 'POST']
 
-    def __init__(self, appliance_service: MachineService, configuration_manager: ConfigurationManager):
+    def __init__(self, appliance_service: ApplianceService, configuration_manager: ConfigurationManager):
         self.appliance_service = appliance_service
         self.configuration_manager = configuration_manager
         self.logger = logging.getLogger('Appliance.Configuration')
 
     def get(self, name: str):
-        appliance = self.appliance_service.get_machine(name)
+        appliance = self.appliance_service.get_appliance(name)
         if appliance is None:
             flash(gettext("There is no appliance with name '%(appliance_name)s'", appliance_name=name),
                   category="danger")
@@ -46,7 +46,7 @@ class Configuration(MethodView):
         return render_template("appliance_configuration.html", appliance=appliance, form=appliance_form)
 
     def post(self, name: str):
-        appliance = self.appliance_service.get_machine(name)
+        appliance = self.appliance_service.get_appliance(name)
         if appliance is None:
             flash(gettext("There is no appliance with name '%(appliance_name)s'", appliance_name=name),
                   category="danger")
