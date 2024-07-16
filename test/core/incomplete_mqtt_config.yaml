@@ -1,6 +1,6 @@
 mqtt:
   username: "john"
-things:
+entities:
   - name: super_washer
     type: washing_machine
     sources:

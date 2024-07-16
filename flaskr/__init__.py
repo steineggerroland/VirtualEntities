@@ -5,23 +5,24 @@ import yamlenv
 from flask import Flask, request
 from flask_babel import Babel
 from flask_bootstrap import Bootstrap5
-from urllib3.util import parse_url
+from flask_socketio import SocketIO
 
 from flaskr.api.ApplianceDepot import appliance_depot_api
+from flaskr.api.ApplianceSocketNotifier import ApplianceSocketNotifier
 from flaskr.api.RoomCatalog import room_catalog_api
 from flaskr.options_controller import options_blueprint
 from flaskr.views import VirtualEntities, Room, Appliance, Person
 from flaskr.views.Homepage import Homepage
 from iot.core.configuration_manager import ConfigurationManager
 from iot.core.time_series_storage import TimeSeriesStorage
-from iot.infrastructure.machine.appliance_depot import ApplianceDepot
-from iot.infrastructure.machine.machine_service import MachineService
+from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
+from iot.infrastructure.appliance.appliance_service import ApplianceService
 from iot.infrastructure.register_of_persons import RegisterOfPersons
 from iot.infrastructure.room_catalog import RoomCatalog
-from project import project
+from project import Project
 
 
-def create_app(default_config_file_name: str, machine_service: MachineService, appliance_depot: ApplianceDepot,
+def create_app(default_config_file_name: str, appliance_service: ApplianceService, appliance_depot: ApplianceDepot,
                time_series_storage: TimeSeriesStorage, room_catalog: RoomCatalog,
                register_of_persons: RegisterOfPersons, configuration_manager: ConfigurationManager,
                flask_config: dict = None):
@@ -30,6 +31,12 @@ def create_app(default_config_file_name: str, machine_service: MachineService, a
     app.secret_key = secrets.token_urlsafe(16)
     app.config.from_file(default_config_file_name, load=yamlenv.load)
     app.config.from_mapping(flask_config)
+
+    socketio = SocketIO(app)
+
+    @socketio.on('hello')
+    def handle_my_custom_event(json):
+        print('received json: ' + str(json))
 
     app.add_url_rule(
         "/",
@@ -50,9 +57,9 @@ def create_app(default_config_file_name: str, machine_service: MachineService, a
     )
     app.add_url_rule(
         "/appliance/<name>/configuration.html",
-        view_func=Appliance.Configuration.as_view('appliance_configuration', machine_service, configuration_manager)
+        view_func=Appliance.Configuration.as_view('appliance_configuration', appliance_service, configuration_manager)
     )
-    app.register_blueprint(appliance_depot_api(machine_service, appliance_depot, time_series_storage),
+    app.register_blueprint(appliance_depot_api(appliance_service, appliance_depot, time_series_storage),
                            url_prefix='/api/')
 
     app.add_url_rule(
@@ -81,7 +88,7 @@ def create_app(default_config_file_name: str, machine_service: MachineService, a
 
     @app.context_processor
     def utility_processor():
-        return dict(lang=locale_selector(), debug=request.args.get('debug'), project_url=project['url'])
+        return dict(lang=locale_selector(), debug=request.args.get('debug'), project_url=Project.url)
 
     babel = Babel(app, default_translation_directories="../translations",
                   locale_selector=locale_selector)
@@ -89,6 +96,8 @@ def create_app(default_config_file_name: str, machine_service: MachineService, a
     app.config['BOOTSTRAP_SERVE_LOCAL'] = True
     app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = 'united'
     bootstrap = Bootstrap5(app)
+
+    appliance_socket_notifier = ApplianceSocketNotifier(socketio, appliance_service)
 
     # ensure the instance folder exists
     try:

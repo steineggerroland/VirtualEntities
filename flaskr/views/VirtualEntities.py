@@ -1,7 +1,7 @@
 from flask import render_template, current_app
 from flask.views import View
 
-from iot.infrastructure.machine.appliance_depot import ApplianceDepot
+from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
 from iot.infrastructure.register_of_persons import RegisterOfPersons
 from iot.infrastructure.room_catalog import RoomCatalog
 

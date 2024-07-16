@@ -15,15 +15,15 @@ class TimeSeriesStorageStrategy(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def append_power_consumption(self, watt: float, thing_name: str):
+    def append_power_consumption(self, watt: float, entity_name: str):
         pass
 
     @abstractmethod
-    def get_power_consumptions_for_last_seconds(self, seconds: int, thing_name: str) -> List[ConsumptionMeasurement]:
+    def get_power_consumptions_for_last_seconds(self, seconds: int, entity_name: str) -> List[ConsumptionMeasurement]:
         pass
 
     @abstractmethod
-    def append_room_climate(self, temperature: Temperature, humidity: float, thing_name: str):
+    def append_room_climate(self, temperature: Temperature, humidity: float, entity_name: str):
         pass
 
     @abstractmethod

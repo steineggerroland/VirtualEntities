@@ -4,6 +4,6 @@ class DatabaseException(Exception):
         self.cause = cause
 
 
-class InvalidThingType(Exception):
-    def __init__(self, thing_type: str = None):
-        self.msg = f"thing type '{thing_type}' is unknown"
+class InvalidEntityType(Exception):
+    def __init__(self, entity_type: str = None):
+        self.msg = f"Entity type '{entity_type}' is unknown"

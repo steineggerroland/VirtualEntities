@@ -11,19 +11,19 @@ class InMemoryTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
         self.power_consumption_values = {}
         self.climate_values = {}
 
-    def append_power_consumption(self, watt: float, thing_name: str):
-        power_consumption_values = self.power_consumption_values[thing_name] \
-            if thing_name in self.power_consumption_values else []
-        power_consumption_values.append({"watt": watt, "created_at": datetime.now().isoformat()})
+    def append_power_consumption(self, measure: ConsumptionMeasurement, entity_name: str):
+        power_consumption_values = self.power_consumption_values[entity_name] \
+            if entity_name in self.power_consumption_values else []
+        power_consumption_values.append({"watt": measure.consumption, "created_at": measure.time.isoformat()})
         if len(power_consumption_values) > 10:
             power_consumption_values.reverse()
             power_consumption_values.pop()
             power_consumption_values.reverse()
-        self.power_consumption_values[thing_name] = power_consumption_values
+        self.power_consumption_values[entity_name] = power_consumption_values
 
-    def get_power_consumptions_for_last_seconds(self, seconds: int, thing_name: str) -> List[ConsumptionMeasurement]:
-        power_consumption_values = self.power_consumption_values[thing_name] \
-            if thing_name in self.power_consumption_values else []
+    def get_power_consumptions_for_last_seconds(self, seconds: int, entity_name: str) -> List[ConsumptionMeasurement]:
+        power_consumption_values = self.power_consumption_values[entity_name] \
+            if entity_name in self.power_consumption_values else []
         time_boundary = datetime.now() - timedelta(seconds=seconds)
         return [ConsumptionMeasurement(datetime.fromisoformat(power_consumption["created_at"]),
                                        power_consumption["watt"]) for power_consumption in power_consumption_values if

@@ -15,14 +15,14 @@ List of implemented and planned features of an iot machine.
     * False on startup
     * Set to true when switching from _working_ state to any other
     * Handle mqtt messages to manipulate _needs treatment status_
-* Manage things in web
-    * Display eThing details
+* Manage entities in web
+    * Display entity details
         * Internal State
         * _needs treatment status_
         * Current power consumption
         * _online status_
         * Date of last message
-    * Configure eThing
+    * Configure entity
         * Show power consumption timeline
 
 ## Planned
@@ -31,9 +31,9 @@ List of implemented and planned features of an iot machine.
     * Calculate state clusters for power consumption
     * Let user label state clusters, whereby _off_, _idle_ and _working_ must be declared
     * Propagate label for current power consumption
-* Manage things in web
-    * Add eThings
-    * Configure eThing
+* Manage entities in web
+    * Add entity
+    * Configure entity
         * Configure mqtt topics/queries (show last received message)
         * Choose how internal state is calculated (threshold or analytical)
         * Show power consumption timeline

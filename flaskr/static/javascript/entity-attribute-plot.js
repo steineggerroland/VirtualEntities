@@ -102,17 +102,17 @@
     }
 
     document.querySelectorAll('.diagram').forEach(container => {
-        if (!container.dataset.thingName) return
-        const thingName = container.dataset.thingName
+        if (!container.dataset.entityName) return
+        const entityName = container.dataset.entityName
         const entityType = container.dataset.entityType
         const attribute = container.dataset.attribute
         const xAxisLabel = container.dataset.xAxisLabel
         const fullscreen = !!container.dataset.fullscreen
-        if (!container.id) container.id = `${makeSafeForCSS(entityType)}-${makeSafeForCSS(thingName)}-${makeSafeForCSS(attribute)}-diagram-container`
+        if (!container.id) container.id = `${makeSafeForCSS(entityType)}-${makeSafeForCSS(entityName)}-${makeSafeForCSS(attribute)}-diagram-container`
         const measures = []
         let thresholds
         let strategy
-        const fetchAndDrawDiagram = () => fetch(`/api/${entityType}s/${thingName}/${attribute}s`)
+        const fetchAndDrawDiagram = () => fetch(`/api/${entityType}s/${entityName}/${attribute}s`)
             .then(data => data.json())
             .then(data => {
                 measures.pop()
@@ -127,14 +127,14 @@
             .then(() => window.setTimeout(fetchAndDrawDiagram, 30 * 1000))
         let promisesBeforeDrawing = []
         if (!!container.dataset.useRunCompleteStrategy) {
-            promisesBeforeDrawing.push(fetch(`/api/${entityType}s/${thingName}/run-complete-strategy`)
+            promisesBeforeDrawing.push(fetch(`/api/${entityType}s/${entityName}/run-complete-strategy`)
                 .then(data => data.json())
                 .then(data => {
                     strategy = data
                 }))
         }
         if (!!container.dataset.useThresholds) {
-            promisesBeforeDrawing.push(fetch(`/api/${entityType}s/${thingName}`)
+            promisesBeforeDrawing.push(fetch(`/api/${entityType}s/${entityName}`)
                 .then(data => data.json())
                 .then(data => {
                     thresholds = data[`${attribute}_thresholds`]

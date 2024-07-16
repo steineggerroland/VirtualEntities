@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 import pytz
 
-from iot.infrastructure.thing import OnlineStatus
+from iot.infrastructure.virtual_entity import OnlineStatus
 from iot.infrastructure.time.calendar import Appointment, Calendar
 
 

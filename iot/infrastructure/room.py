@@ -1,12 +1,12 @@
 from datetime import datetime
 
-from iot.infrastructure.thing import Thing, _datetime_from_dict_key
+from iot.infrastructure.virtual_entity import VirtualEntity, _datetime_from_dict_key
 from iot.infrastructure.units import Temperature, from_dict as temperature_from_dict, TemperatureThresholds, \
     HumidityThresholds, TemperatureRating, HumidityRating, temperature_thresholds_from_dict, \
     humidity_thresholds_from_dict
 
 
-class Room(Thing):
+class Room(VirtualEntity):
     def __init__(self, name: str, temperature: None | Temperature = None, humidity: None | float = None,
                  temperature_thresholds: TemperatureThresholds = None, humidity_thresholds: HumidityThresholds = None,
                  last_updated_at: datetime = datetime.now(), last_seen_at: None | datetime = None):
@@ -62,7 +62,7 @@ class Room(Thing):
 
     def to_dict(self):
         return {"name": self.name,
-                "type": self.thing_type,
+                "type": self.entity_type,
                 "temperature": self.temperature.to_dict() if self.temperature else None,
                 "humidity": self.humidity,
                 "temperature_thresholds": self.temperature_thresholds.to_dict() if self.temperature_thresholds else None,

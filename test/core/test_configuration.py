@@ -13,7 +13,7 @@ DIR = Path(__file__).parent
 class ConfigurationTest(unittest.TestCase):
     def test_complete_config(self):
         config = ConfigurationManager().load(DIR / "complete_test_config.yaml")
-        self.assertEqual("my.machine.local", config.mqtt.url)
+        self.assertEqual("my.appliance.local", config.mqtt.url)
         self.assertEqual(1337, config.mqtt.port)
         self.assertEqual("user", config.mqtt.username)
         self.assertTrue(config.mqtt.has_credentials)
@@ -26,65 +26,69 @@ class ConfigurationTest(unittest.TestCase):
         self.assertEqual("secret", config.time_series.password)
         self.assertEqual("bucket_to_save_to", config.time_series.bucket_name)
 
-        self.assertEqual("super_thing", config.things[0].name)
-        self.assertEqual("dryer", config.things[0].type)
-        self.assertEqual(5, config.things[0].run_complete_when.below_threshold_for)
-        self.assertEqual(10, config.things[0].run_complete_when.threshold)
+        self.assertEqual("super_entity", config.entities[0].name)
+        self.assertEqual("dryer", config.entities[0].type)
+        self.assertEqual(5, config.entities[0].run_complete_when.below_threshold_for)
+        self.assertEqual(10, config.entities[0].run_complete_when.threshold)
         self.assertIn(MqttMeasureSource('consumption/topic', [Measure(source_type='consumption')]),
-                      config.things[0].sources.list)
+                      config.entities[0].sources.list)
         self.assertIn(MqttMeasureSource('loading/topic', [Measure(source_type='loading')]),
-                      config.things[0].sources.list)
+                      config.entities[0].sources.list)
         self.assertIn(MqttMeasureSource('unloading/topic', [Measure(source_type='unloading')]),
-                      config.things[0].sources.list)
+                      config.entities[0].sources.list)
 
         self.assertIn(PlannedNotification('update/every-second/topic', '*/1 * * * * *'),
-                      config.things[0].destinations.planned_notifications)
+                      config.entities[0].destinations.planned_notifications)
         self.assertIn(PlannedNotification('update/every-15-minutes/topic', '* */15 * * * *'),
-                      config.things[0].destinations.planned_notifications)
+                      config.entities[0].destinations.planned_notifications)
 
-        self.assertEqual("Kitchen", config.things[1].name)
-        self.assertEqual("room", config.things[1].type)
-        self.assertEqual("kitchen/sensor/temperature", config.things[1].sources.list[0].mqtt_topic)
-        self.assertEqual("temperature", config.things[1].sources.list[0].measures[0].type)
-        self.assertEqual("$.update.temperature", config.things[1].sources.list[0].measures[0].path)
+        self.assertEqual("Coffee machine", config.entities[1].name)
+        self.assertEqual("this_is_some_unknown_type", config.entities[1].type)
 
-        self.assertEqual("Bathroom", config.things[2].name)
-        self.assertEqual("room", config.things[2].type)
-        self.assertEqual(15, config.things[2].temperature_thresholds.critical_lower)
-        self.assertEqual(20, config.things[2].temperature_thresholds.optimal.lower)
-        self.assertEqual(22, config.things[2].temperature_thresholds.optimal.upper)
-        self.assertEqual(30, config.things[2].temperature_thresholds.critical_upper)
-        self.assertEqual(50, config.things[2].humidity_thresholds.critical_lower)
-        self.assertEqual(65, config.things[2].humidity_thresholds.optimal.lower)
-        self.assertEqual(75, config.things[2].humidity_thresholds.optimal.upper)
-        self.assertEqual(90, config.things[2].humidity_thresholds.critical_upper)
-        self.assertEqual("bath/sensor/temperature", config.things[2].sources.list[0].mqtt_topic)
-        self.assertEqual("temperature", config.things[2].sources.list[0].measures[0].type)
-        self.assertEqual("$.temperature", config.things[2].sources.list[0].measures[0].path)
-        self.assertEqual("humidity", config.things[2].sources.list[0].measures[1].type)
-        self.assertEqual("$.humidity", config.things[2].sources.list[0].measures[1].path)
+        self.assertEqual("Kitchen", config.entities[2].name)
+        self.assertEqual("room", config.entities[2].type)
+        self.assertEqual("kitchen/sensor/temperature", config.entities[2].sources.list[0].mqtt_topic)
+        self.assertEqual("temperature", config.entities[2].sources.list[0].measures[0].type)
+        self.assertEqual("$.update.temperature", config.entities[2].sources.list[0].measures[0].path)
 
-        self.assertEqual("Jane", config.things[3].name)
-        self.assertEqual("person", config.things[3].type)
-        self.assertEqual("calendar", config.things[3].sources.list[0].application)
-        self.assertEqual("jane private", config.things[3].sources.list[0].name)
-        self.assertEqual("calendar.jane.private", config.things[3].sources.list[0].url)
-        self.assertEqual("calendar-user", config.things[3].sources.list[0].username)
-        self.assertEqual("secret-calendar", config.things[3].sources.list[0].password)
-        self.assertEqual("*/16 * * * *", config.things[3].sources.list[0].update_cron)
-        self.assertEqual("ffffff", config.things[3].sources.list[0].color_hex)
+        self.assertEqual("Bathroom", config.entities[3].name)
+        self.assertEqual("room", config.entities[3].type)
+        self.assertEqual(15, config.entities[3].temperature_thresholds.critical_lower)
+        self.assertEqual(20, config.entities[3].temperature_thresholds.optimal.lower)
+        self.assertEqual(22, config.entities[3].temperature_thresholds.optimal.upper)
+        self.assertEqual(30, config.entities[3].temperature_thresholds.critical_upper)
+        self.assertEqual(50, config.entities[3].humidity_thresholds.critical_lower)
+        self.assertEqual(65, config.entities[3].humidity_thresholds.optimal.lower)
+        self.assertEqual(75, config.entities[3].humidity_thresholds.optimal.upper)
+        self.assertEqual(90, config.entities[3].humidity_thresholds.critical_upper)
+        self.assertEqual("bath/sensor/temperature", config.entities[3].sources.list[0].mqtt_topic)
+        self.assertEqual("temperature", config.entities[3].sources.list[0].measures[0].type)
+        self.assertEqual("$.temperature", config.entities[3].sources.list[0].measures[0].path)
+        self.assertEqual("humidity", config.entities[3].sources.list[0].measures[1].type)
+        self.assertEqual("$.humidity", config.entities[3].sources.list[0].measures[1].path)
+
+        self.assertEqual("Jane", config.entities[4].name)
+        self.assertEqual("person", config.entities[4].type)
+        self.assertEqual("calendar", config.entities[4].sources.list[0].application)
+        self.assertEqual("jane private", config.entities[4].sources.list[0].name)
+        self.assertEqual("calendar.jane.private", config.entities[4].sources.list[0].url)
+        self.assertEqual("calendar-user", config.entities[4].sources.list[0].username)
+        self.assertEqual("secret-calendar", config.entities[4].sources.list[0].password)
+        self.assertEqual("*/16 * * * *", config.entities[4].sources.list[0].update_cron)
+        self.assertEqual("ffffff", config.entities[4].sources.list[0].color_hex)
         # referenced calendar
-        self.assertEqual("calendar", config.things[3].sources.list[1].application)
-        self.assertEqual("jane job", config.things[3].sources.list[1].name)
-        self.assertEqual("calendar.job/jane", config.things[3].sources.list[1].url)
-        self.assertEqual("jane", config.things[3].sources.list[1].username)
-        self.assertEqual("secret", config.things[3].sources.list[1].password)
-        self.assertEqual("0 0 * * * *", config.things[3].sources.list[1].update_cron)
-        self.assertEqual("f0f0f0", config.things[3].sources.list[1].color_hex)
+        self.assertEqual("calendar", config.entities[4].sources.list[1].application)
+        self.assertEqual("jane job", config.entities[4].sources.list[1].name)
+        self.assertEqual("calendar.job/jane", config.entities[4].sources.list[1].url)
+        self.assertEqual("jane", config.entities[4].sources.list[1].username)
+        self.assertEqual("secret", config.entities[4].sources.list[1].password)
+        self.assertEqual("0 0 * * * *", config.entities[4].sources.list[1].update_cron)
+        self.assertEqual("f0f0f0", config.entities[4].sources.list[1].color_hex)
         # notifications
-        self.assertEqual("persons/jane/appointments", config.things[3].destinations.planned_notifications[0].mqtt_topic)
-        self.assertEqual("*/15 * * * * 0", config.things[3].destinations.planned_notifications[0].cron_expression)
-        self.assertEqual("daily-appointments", config.things[3].destinations.planned_notifications[0].subject)
+        self.assertEqual("persons/jane/appointments",
+                         config.entities[4].destinations.planned_notifications[0].mqtt_topic)
+        self.assertEqual("*/15 * * * * 0", config.entities[4].destinations.planned_notifications[0].cron_expression)
+        self.assertEqual("daily-appointments", config.entities[4].destinations.planned_notifications[0].subject)
         # calendar category colors
         self.assertEqual("Special", config.calendars_config.categories[0].name)
         self.assertEqual("ffff00", config.calendars_config.categories[0].color_hex)
@@ -98,15 +102,15 @@ class ConfigurationTest(unittest.TestCase):
         self.assertFalse(min_config.mqtt.has_credentials)
         self.assertIsNotNone(min_config.mqtt.client_id)
 
-        self.assertEqual("super_washer", min_config.things[0].name)
-        self.assertEqual("washing_machine", min_config.things[0].type)
-        self.assertFalse(min_config.things[0].sources.list)
-        self.assertFalse(min_config.things[0].destinations.planned_notifications)
+        self.assertEqual("super_washer", min_config.entities[0].name)
+        self.assertEqual("washing_machine", min_config.entities[0].type)
+        self.assertFalse(min_config.entities[0].sources.list)
+        self.assertFalse(min_config.entities[0].destinations.planned_notifications)
 
-        self.assertEqual("Dining room", min_config.things[1].name)
-        self.assertEqual("room", min_config.things[1].type)
-        self.assertFalse(min_config.things[1].sources.list)
-        self.assertFalse(min_config.things[1].destinations.planned_notifications)
+        self.assertEqual("Dining room", min_config.entities[1].name)
+        self.assertEqual("room", min_config.entities[1].type)
+        self.assertFalse(min_config.entities[1].sources.list)
+        self.assertFalse(min_config.entities[1].destinations.planned_notifications)
 
     def test_incomplete_sources_produce_errors(self):
         with self.subTest("incomplete loading source"):
@@ -120,9 +124,9 @@ class ConfigurationTest(unittest.TestCase):
         with self.subTest("incomplete mqtt conf"):
             self.assertRaises(IncompleteConfiguration,
                               ConfigurationManager().load, (DIR / "incomplete_mqtt_config.yaml"))
-        with self.subTest("incomplete thing conf"):
+        with self.subTest("incomplete entity conf"):
             self.assertRaises(IncompleteConfiguration,
-                              ConfigurationManager().load, (DIR / "incomplete_thing_config.yaml"))
+                              ConfigurationManager().load, (DIR / "incomplete_entity_config.yaml"))
         with self.subTest("incomplete influxdb conf"):
             self.assertRaises(IncompleteConfiguration,
                               ConfigurationManager().load, (DIR / "incomplete_influxdb_config.yaml"))
@@ -144,7 +148,7 @@ class ConfigurationTest(unittest.TestCase):
             # add color that is set to default
             calendar_without_color = list(filter(lambda cal: cal['name'] == 'jane private' if 'name' in cal else False,
                                                  list(filter(lambda t: t['name'] == 'Jane',
-                                                             dict_of_loaded_config['things']))[0][
+                                                             dict_of_loaded_config['entities']))[0][
                                                      'sources']))[0]
             calendar_without_color['color_hex'] = 'ffffff'
             # when

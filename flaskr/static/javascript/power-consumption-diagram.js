@@ -1,3 +1,5 @@
+import {socket} from "./refresh.js";
+
 (function () {
 
     function drawChart(measures, containerId, xAxisLabel, fullscreen) {
@@ -73,12 +75,12 @@
     }
 
     document.querySelectorAll('.power-consumption.diagram').forEach(container => {
-        const thingName = container.dataset.thingName
+        const entityName = container.dataset.entityName
         const xAxisLabel = container.dataset.xAxisLabel
         const fullscreen = !!container.dataset.fullscreen
-        if (!container.id) container.id = "power-consumption-diagram-container-" + makeSafeForCSS(thingName)
+        if (!container.id) container.id = "power-consumption-diagram-container-" + makeSafeForCSS(entityName)
         const measurements = []
-        const fetchAndDrawDiagram = () => fetch(`/api/appliances/${thingName}/power-consumptions`)
+        const fetchAndDrawDiagram = () => fetch(`/api/appliances/${entityName}/power-consumptions`)
             .then(data => data.json())
             .then(data => {
                 measurements.splice(0, measurements.length)
@@ -86,7 +88,12 @@
                     return {"date": new Date(d.time), "value": d.consumption}
                 }))
                 drawChart(measurements, container.id, xAxisLabel, fullscreen)
-            }).then(() => window.setTimeout(fetchAndDrawDiagram, 30 * 1000))
+            })
+        socket.on(`appliances/${entityName}/powerConsumptionUpdated`, event => {
+            const measure = event.measure
+            measurements.push({"date": new Date(measure.time), "value": measure.consumption})
+            drawChart(measurements, container.id, xAxisLabel, fullscreen)
+        });
         fetchAndDrawDiagram().then(() => window.addEventListener('resize', () => drawChart(measurements, container.id, xAxisLabel, fullscreen)))
     })
 

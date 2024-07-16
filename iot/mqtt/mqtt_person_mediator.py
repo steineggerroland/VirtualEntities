@@ -6,7 +6,7 @@ from typing import List
 import caldav
 from croniter import croniter
 
-from iot.core.configuration import IotThingConfig, CaldavConfig
+from iot.core.configuration import VirtualEntityConfig, CaldavConfig
 from iot.dav.calendar_reader import CalendarLoader
 from iot.infrastructure.person_service import PersonService
 from iot.mqtt.mqtt_client import MqttClient
@@ -16,7 +16,7 @@ DAILY_APPOINTMENTS = "daily-appointments"
 
 
 class MqttPersonMediator(MqttMediator):
-    def __init__(self, mqtt_client: MqttClient, person_service: PersonService, config: IotThingConfig,
+    def __init__(self, mqtt_client: MqttClient, person_service: PersonService, config: VirtualEntityConfig,
                  calendar_loader: CalendarLoader):
         super().__init__(mqtt_client)
         self.person_service = person_service

@@ -44,14 +44,16 @@
          data-bs-title="{{ tooltip }}" data-bs-toggle="tooltip">
         <img class="icon" src="{{ url_for('static', filename=icon) }}" alt="{{ text }}"/>
         <div>{{ text }}</div>
-        <div class="visually-hidden temperature-rating-{{ rating.value }}" role="status">{{ _(rating) }}</div>
     </div>
 {%- endif %}
+<span class="visually-hidden temperature-rating temperature-rating-{{ rating.value }}"
+      role="status">{{ _(rating) }}</span>
 <style>
     .temperature .icon {
         height: 50%;
         mix-blend-mode: multiply;
     }
+
     .temperature:has(.temperature-rating-unknown) .icon {
         filter: invert();
         mix-blend-mode: unset;
