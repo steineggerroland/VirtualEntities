@@ -5,8 +5,10 @@ import yamlenv
 from flask import Flask, request
 from flask_babel import Babel
 from flask_bootstrap import Bootstrap5
+from flask_socketio import SocketIO
 
 from flaskr.api.ApplianceDepot import appliance_depot_api
+from flaskr.api.ApplianceSocketNotifier import ApplianceSocketNotifier
 from flaskr.api.RoomCatalog import room_catalog_api
 from flaskr.options_controller import options_blueprint
 from flaskr.views import VirtualEntities, Room, Appliance, Person
@@ -29,6 +31,12 @@ def create_app(default_config_file_name: str, appliance_service: ApplianceServic
     app.secret_key = secrets.token_urlsafe(16)
     app.config.from_file(default_config_file_name, load=yamlenv.load)
     app.config.from_mapping(flask_config)
+
+    socketio = SocketIO(app)
+
+    @socketio.on('hello')
+    def handle_my_custom_event(json):
+        print('received json: ' + str(json))
 
     app.add_url_rule(
         "/",
@@ -88,6 +96,8 @@ def create_app(default_config_file_name: str, appliance_service: ApplianceServic
     app.config['BOOTSTRAP_SERVE_LOCAL'] = True
     app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = 'united'
     bootstrap = Bootstrap5(app)
+
+    appliance_socket_notifier = ApplianceSocketNotifier(socketio, appliance_service)
 
     # ensure the instance folder exists
     try:

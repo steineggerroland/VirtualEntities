@@ -346,10 +346,13 @@ def _extracted_value_matches(extracted_value_with_unit, value):
     if regex_match is None:
         return None
     extracted_float = float(regex_match.group(0)) if extracted_value_with_unit.find('?') < 0 else None
-    if extracted_float == value:
+    if abs((extracted_float / value) - 1) < 0.01:
         return value
-    else:
-        return None
+    if re.search(r'[-+]?[0-9]*\.?[0-9]+k\w*', extracted_value_with_unit) is not None:
+        extracted_float *= 1000
+        if abs((extracted_float / value) - 1) < 0.05:
+            return value
+    return None
 
 
 def _find_and_compare_property(value, entity_element, property_selector, values_not_matching):
