@@ -31,8 +31,8 @@ class TimeSeriesStorage(metaclass=ABCMeta):
     def get_power_consumptions_for_last_seconds(self, seconds: int, entity_name: str) -> [ConsumptionMeasurement]:
         return self.time_series_storage_strategy.get_power_consumptions_for_last_seconds(seconds, entity_name)
 
-    def append_room_climate(self, temperature: Temperature, humidity: float, entity_name):
-        return self.time_series_storage_strategy.append_room_climate(temperature, humidity, entity_name)
+    def append_room_climate(self, measure: TemperatureHumidityMeasurement, entity_name):
+        return self.time_series_storage_strategy.append_room_climate(measure, entity_name)
 
     def get_room_climate_for_last_seconds(self, seconds: int, name: str) -> List[TemperatureHumidityMeasurement]:
         return self.time_series_storage_strategy.get_room_climate_for_last_seconds(seconds, name)
