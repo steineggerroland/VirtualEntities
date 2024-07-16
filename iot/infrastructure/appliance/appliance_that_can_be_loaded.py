@@ -57,7 +57,7 @@ class ApplianceThatCanBeLoaded(Appliance):
     def to_dict(self):
         return super().to_dict() | {"is_loaded": self.is_loaded, "needs_unloading": self.needs_unloading,
                                     "started_run_at": self.started_run_at.isoformat() if self.started_run_at is not None else None,
-                                    "running_state": self.running_state,
+                                    "running_state": self.running_state if type(self.running_state) is str else self.running_state.value,
                                     "finished_last_run_at": self.finished_last_run_at.isoformat() if self.finished_last_run_at is not None else None, }
 
     @staticmethod
