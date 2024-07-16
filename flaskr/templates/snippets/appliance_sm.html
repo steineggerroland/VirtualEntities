@@ -27,68 +27,29 @@
                 </div>
             </div>
         </div>
-        <div class="col-4">
-            {%- if appliance.running_state=='running' %}
-                {%- set text=_('Running') %}
-                {%- set color='warning' %}
-                {% if appliance.entity_type=='dishwasher' %}
-                    {%- set icon='img/flaticon/clean-dishes.gif' %}
-                {% elif appliance.entity_type=='dryer' %}
-                    {%- set icon='img/flaticon/laundry.gif' %}
-                {% elif appliance.entity_type=='washing_machine' %}
-                    {%- set icon='img/flaticon/laundry.gif' %}
-                {% else %}
-                    {%- set icon='img/flaticon/home-appliance.gif' %}
-                {% endif %}
-            {%- elif appliance.needs_unloading %}
-                {%- set text=_('Loaded') %}
-                {%- set color='danger' %}
-                {% if appliance.entity_type=='dishwasher' %}
-                    {%- set icon='img/flaticon/dinnerware.gif' %}
-                {% elif appliance.entity_type=='dryer' %}
-                    {%- set icon='img/flaticon/smart-washing-machine.gif' %}
-                {% elif appliance.entity_type=='washing_machine' %}
-                    {%- set icon='img/flaticon/smart-washing-machine.gif' %}
-                {% else %}
-                    {%- set icon='img/flaticon/smart-washing-machine.gif' %}
-                {% endif %}
-            {%- else %}
-                {%- set text=_('Idling') %}
-                {%- set color='success' %}
-            {%- endif %}
-            <div class="running-state w-100 text-bg-{{ color }} bg-{{ color }} align-content-center text-center fs-4"
-                 style="aspect-ratio: 1" role="status"
-                 data-started-run-at="{{ appliance.started_run_at|datetimeformat("yyyy-MM-dd'T'HH:mm:ss") if appliance.started_run_at else '' }}">
-                {%- if appliance.running_state=='running' %}
-                    <div class="visually-hidden">{{ text }}</div>
-                    <img class="icon" src="{{ url_for('static', filename=icon) }}"
-                         alt="{{ _('Running since %(xMinutes)s', xMinutes=appliance.running_for_time_period()|timedeltaformat()) }}"/>
-                {%- elif appliance.needs_unloading %}
-                    <img class="icon" src="{{ url_for('static', filename=icon) }}"
-                         alt="{{ _('Finished last run %(xMinutesAgo)s', xMinutesAgo=appliance.finished_last_run_before_time_period()|timedeltaformat(add_direction=True)) }}"/>
-                    <div>{{ text }}</div>
-                {%- else %}
-                    {{ text }}
-                {%- endif %}
-            </div>
-        </div>
-        {%- if appliance.needs_unloading %}
-            <div class="col-4 d-flex flex-column align-items-center justify-content-center">
-                <form class="w-75" style="aspect-ratio: 1" method="get"
-                      action="#" data-api-url="{{ url_for('appliance-depot_api.unload', name=appliance.name ) }}">
-                    <button class="unload btn btn-outline-success p-0 w-100 h-100" disabled="disabled"
-                            type="submit" value="{{ _('Unload') }}">{{ _('Unload') }}</button>
-                </form>
-            </div>
-        {%- elif appliance.running_state!='running' %}
-            <div class="col-4 d-flex flex-column align-items-center justify-content-center">
-                <form class="w-75" style="aspect-ratio: 1" method="get"
-                      action="#" data-api-url="{{ url_for('appliance-depot_api.load', name=appliance.name ) }}">
-                    <button class="needs-unloading btn btn-outline-primary p-0 w-100 h-100" disabled="disabled"
-                            type="submit" value="{{ _('Needs unloading') }}">{{ _('Needs unloading') }}</button>
-                </form>
-            </div>
-        {%- endif %}
+        <lm-appliance-state class="col-4"
+                            data-appliance-json='{{ appliance.to_dict()|tojson }}'
+                            data-running-label="{{ _('Running') }}"
+                            data-running-dishwasher-icon-url="{{ url_for('static', filename='img/flaticon/clean-dishes.gif') }}"
+                            data-running-dryer-icon-url="{{ url_for('static', filename='img/flaticon/laundry.gif') }}"
+                            data-running-washing-machine-icon-url="{{ url_for('static', filename='img/flaticon/laundry.gif') }}"
+                            data-running-appliance-icon-url="{{ url_for('static', filename='img/flaticon/home-appliance.gif') }}"
+                            data-loaded-dishwasher-icon-url="{{ url_for('static', filename='img/flaticon/dinnerware.gif') }}"
+                            data-loaded-dryer-icon-url="{{ url_for('static', filename='img/flaticon/smart-washing-machine.gif') }}"
+                            data-loaded-washing-machine-icon-url="{{ url_for('static', filename='img/flaticon/smart-washing-machine.gif') }}"
+                            data-loaded-appliance-icon-url="{{ url_for('static', filename='img/flaticon/smart-washing-machine.gif') }}"
+                            data-loaded-label="{{ _('Loaded') }}"
+                            data-idling-label="{{ _('Idling') }}"
+                            data-started-run-at="{{ appliance.started_run_at|datetimeformat("yyyy-MM-dd'T'HH:mm:ss") if appliance.started_run_at else '' }}"
+                            data-running-since-label="{{ _('Running since %(xMinutes)s', xMinutes=appliance.running_for_time_period()|timedeltaformat()) }}"
+                            data-finished-last-run-before-label="{{ _('Finished last run %(xMinutesAgo)s', xMinutesAgo=appliance.finished_last_run_before_time_period()|timedeltaformat(add_direction=True)) }}"
+        ></lm-appliance-state>
+        <lm-appliance-action-buttons class="col-4 d-flex flex-column align-items-center justify-content-center"
+                                     data-appliance-json='{{ appliance.to_dict()|tojson }}'
+                                     data-unload-api-url="{{ url_for('appliance-depot_api.unload', name=appliance.name ) }}"
+                                     data-unload-label="{{ _('Unload') }}"
+                                     data-load-api-url="{{ url_for('appliance-depot_api.load', name=appliance.name ) }}"
+                                     data-load-label="{{ _('Needs unloading') }}"></lm-appliance-action-buttons>
     </div>
     {%- if debug %}{{ appliance.to_dict() }}{% endif %}
 </div>
