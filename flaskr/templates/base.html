@@ -116,8 +116,9 @@
 </footer>
 {% block scripts %}
     {{ bootstrap.load_js(with_popper=True) }}
+    <script language="JavaScript" src="{{ url_for('static', filename='javascript/lemonade.min.js') }}"></script>
     <script language="JavaScript" src="{{ url_for('static', filename='javascript/base.js') }}"
-            type="text/javascript"></script>
+            type="module"></script>
     {% block additional_scripts %}
     {% endblock %}
 {% endblock %}

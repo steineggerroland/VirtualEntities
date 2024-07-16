@@ -2,14 +2,14 @@ from typing import List
 
 from python_event_bus import EventBus
 
-from iot.core.configuration import IotThingConfig, CaldavConfig
+from iot.core.configuration import VirtualEntityConfig, CaldavConfig
 from iot.infrastructure.person import Person
 from iot.infrastructure.register_of_persons import RegisterOfPersons
 from iot.infrastructure.time.calendar import Calendar
 
 
 class PersonService:
-    def __init__(self, register_of_persons: RegisterOfPersons, config: IotThingConfig):
+    def __init__(self, register_of_persons: RegisterOfPersons, config: VirtualEntityConfig):
         self.register_of_persons = register_of_persons
         calendar_sources = filter(lambda source: type(source) is CaldavConfig and
                                                  source.application == "calendar", config.sources.list)
@@ -42,5 +42,5 @@ class PersonService:
     def get_person(self):
         return self.register_of_persons.locate(self.person_name)
 
-def supports_thing_type(thing_type) -> bool:
-    return thing_type in ['person']
+def supports_entity_type(entity_type) -> bool:
+    return entity_type in ['person']

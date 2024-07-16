@@ -1,6 +1,6 @@
 from python_event_bus import EventBus
 
-from iot.core.configuration import IotThingConfig
+from iot.core.configuration import VirtualEntityConfig
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.room import Room
@@ -9,7 +9,7 @@ from iot.infrastructure.units import TemperatureThresholds, Range, HumidityThres
 
 
 class RoomService:
-    def __init__(self, room_catalog: RoomCatalog, time_series_storage: TimeSeriesStorage, room_config: IotThingConfig):
+    def __init__(self, room_catalog: RoomCatalog, time_series_storage: TimeSeriesStorage, room_config: VirtualEntityConfig):
         self.room_catalog = room_catalog
         self.time_series_storage = time_series_storage
         self.room_name = room_config.name
@@ -65,5 +65,5 @@ class RoomService:
         return db_entry if db_entry is not None else Room(self.room_name)
 
 
-def supports_thing_type(thing_type) -> bool:
-    return thing_type in ['room']
+def supports_entity_type(entity_type) -> bool:
+    return entity_type in ['room']

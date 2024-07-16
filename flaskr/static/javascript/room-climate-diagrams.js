@@ -75,13 +75,13 @@
     }
 
     document.querySelectorAll('.room-climate.diagram').forEach(container => {
-        const thingName = container.dataset.thingName
+        const entityName = container.dataset.entityName
         const attribute = container.dataset.attribute
         const xAxisLabel = container.dataset.xAxisLabel
         const fullscreen = !!container.dataset.fullscreen
-        if (!container.id) container.id = attribute + "-diagram-container-" + makeSafeForCSS(thingName)
+        if (!container.id) container.id = attribute + "-diagram-container-" + makeSafeForCSS(entityName)
         const measurements = []
-        const fetchAndDrawDiagram = () => fetch(`/api/rooms/${thingName}/${attribute}s`)
+        const fetchAndDrawDiagram = () => fetch(`/api/rooms/${entityName}/${attribute}s`)
             .then(data => data.json())
             .then(data => {
                 measurements.splice(0, measurements.length)

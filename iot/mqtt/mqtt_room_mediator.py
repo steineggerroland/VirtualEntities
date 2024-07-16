@@ -1,4 +1,4 @@
-from iot.core.configuration import IotThingConfig, Measure
+from iot.core.configuration import VirtualEntityConfig, Measure
 from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.room_service import RoomService
 from iot.infrastructure.units import Temperature
@@ -7,13 +7,13 @@ from iot.mqtt.mqtt_mediator import MqttMediator
 
 
 class MqttRoomMediator(MqttMediator):
-    def __init__(self, mqtt_client: MqttClient, room_service: RoomService, thing_config: IotThingConfig):
+    def __init__(self, mqtt_client: MqttClient, room_service: RoomService, entity_config: VirtualEntityConfig):
         super().__init__(mqtt_client)
         self.room_service = room_service
-        for source in thing_config.sources.list if thing_config.sources else []:
+        for source in entity_config.sources.list if entity_config.sources else []:
             mqtt_client.subscribe(room_service.room_name, source.mqtt_topic, lambda msg: self._handle_message(msg, source.measures))
 
-        self.handle_destinations(thing_config.destinations.planned_notifications if thing_config.destinations else [],
+        self.handle_destinations(entity_config.destinations.planned_notifications if entity_config.destinations else [],
                                  lambda: self.room_service.get_room().to_dict())
 
     def temperature_update(self, msg, json_path=None):

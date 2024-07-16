@@ -38,11 +38,11 @@ It is tested on a unit test basis and with behavior tests using [selenium](https
 
 ## Possible setup
 
-I am using a [Raspberry Pi 3 B+](https://www.raspberrypi.com/products/raspberry-pi-3-model-b-plus/) to coordinate my sensors and power plugs and a [Raspberry Pi 4 B](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) running OpenHAB and [Virtual Entites](#).
+I am using a [Raspberry Pi 3 B+](https://www.raspberrypi.com/products/raspberry-pi-3-model-b-plus/) to coordinate my sensors and power plugs and a [Raspberry Pi 4 B](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) running OpenHAB and [Virtual entities](#).
 
 All my room climate sensors support the [Zigbee standard](https://en.wikipedia.org/wiki/Zigbee), thus, I am running [Zigbee2MQTT](https://github.com/Koenkk/zigbee2mqtt) which sends measurements of sensors as message to MQTT.
 Some of my power plugs support Zigbee and are connected using Zigbee2MQTT. On the other hand I have power plugs that just use Bluetooth. These plugs are connected to MQTT using [sem600 mqtt](https://github.com/steineggerroland/sem6000-mqtt).
 
 OpenHAB is used to read the new features / status of the now smart entities. The status messages send by this project are consumed by OpenHAB.
-Additionally, OpenHAB handles physical buttons in my home and converts their actions to MQTT messages which are consumed to manipulate the virtual entites. I have buttons attached to my dishwasher, washing machine etc.
+Additionally, OpenHAB handles physical buttons in my home and converts their actions to MQTT messages which are consumed to manipulate the virtual entities. I have buttons attached to my dishwasher, washing machine etc.
 For example, when I press the button on my washing machine, the virtual washing machine is triggered to be unloaded AND some lights in my home are triggered to celebrate the done house work.

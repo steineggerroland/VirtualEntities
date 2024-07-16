@@ -10,7 +10,7 @@ time_series:
   username: integration-test-user
   password: the-giant-pink-unicorn
   bucket_name: time_series
-things:
+entities:
   - name: Washing machine
     type: washing_machine
     sources:
@@ -78,6 +78,19 @@ things:
     destinations:
       planned_notifications:
         - mqtt_topic: home/things/washing_machine_kai
+          cron_expression: '* * * * *'
+  - name: Coffee machine
+    type: coffee_machine
+    sources:
+      - mqtt_topic: measurements/home/indoor/coffee_machine/power
+        type: consumption
+      - mqtt_topic: home/things/coffee_machine/load
+        type: loading
+      - mqtt_topic: home/things/coffee_machine/unload
+        type: unloading
+    destinations:
+      planned_notifications:
+        - mqtt_topic: home/things/coffee_machine
           cron_expression: '* * * * *'
   - name: Parents bedroom
     type: room
@@ -203,6 +216,56 @@ things:
     destinations:
       planned_notifications:
         - mqtt_topic: home/rooms/living-room
+          cron_expression: '* * * * *'
+  - name: Lobby
+    type: room
+    temperature_thresholds:
+      optimal:
+        lower: 20
+        upper: 23
+      critical_lower: 15
+      critical_upper: 30
+    humidity_thresholds:
+      optimal:
+        lower: 50
+        upper: 75
+      critical_lower: 40
+      critical_upper: 85
+    sources:
+      - mqtt_topic: zigbee/home/hallway/sensor01
+        measures:
+          - type: temperature
+            path: $.temperature
+          - type: humidity
+            path: $.humidity
+    destinations:
+      planned_notifications:
+        - mqtt_topic: home/rooms/hallway
+          cron_expression: '* * * * *'
+  - name: Storeroom
+    type: room
+    temperature_thresholds:
+      optimal:
+        lower: 21
+        upper: 24
+      critical_lower: 19
+      critical_upper: 30
+    humidity_thresholds:
+      optimal:
+        lower: 50
+        upper: 70
+      critical_lower: 40
+      critical_upper: 85
+    sources:
+      - mqtt_topic: zigbee/home/bathroom/sensor01
+        measures:
+          - type: temperature
+            path: $.temperature
+          - type: humidity
+            path: $.humidity
+    destinations:
+      planned_notifications:
+        - mqtt_topic: home/rooms/bathroom
           cron_expression: '* * * * *'
   - name: Terrace
     type: room

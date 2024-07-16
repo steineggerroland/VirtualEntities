@@ -9,12 +9,12 @@ class OnlineStatus(str, Enum):
     ONLINE = 'online'
 
 
-class Thing(metaclass=ABCMeta):
-    def __init__(self, name: str, thing_type: str, last_updated_at: datetime | None = None,
+class VirtualEntity(metaclass=ABCMeta):
+    def __init__(self, name: str, entity_type: str, last_updated_at: datetime | None = None,
                  last_seen_at: None | datetime = None,
                  online_delta_in_seconds=300):
         self.name = name
-        self.thing_type = thing_type
+        self.entity_type = entity_type
         self.last_updated_at = last_updated_at
         self.last_seen_at = last_seen_at
         self._online_delta_in_seconds = online_delta_in_seconds

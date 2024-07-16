@@ -12,8 +12,12 @@ Feature: The user can change the name of an appliance. The appliance is just ren
   Scenario: There is an appliance with a longer history. When renaming this appliance, the history is still there.
     Given 40000 power consumptions are created for the Toploader spread over the last 14 days
     And the user goes to the appliance page of the Toploader
-    Then the user sees a diagram with power consumption values
+    Then they see a diagram with power consumption values of the Toploader
+    And they see the power consumption of the Toploader
+    And they see the running state of the Toploader
     Given they go to the appliance configuration page of the Toploader
     When they successfully submit the change of the name to Machine with a hole at the top
     Given they go to the appliance page of Machine with a hole at the top
     Then they see a diagram with the previous power consumption values
+    And they see the power consumption of the Machine with a hole at the top
+    And they see the running state of the Machine with a hole at the top

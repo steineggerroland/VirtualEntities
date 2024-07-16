@@ -1,5 +1,5 @@
 mqtt:
-  url: my.machine.local
+  url: my.appliance.local
   port: 1337
   username: user
   password: my-secret
@@ -10,8 +10,8 @@ time_series:
   username: influxdb
   password: secret
   bucket_name: bucket_to_save_to
-things:
-  - name: super_thing
+entities:
+  - name: super_entity
     type: dryer
     run_complete_when:
       below_threshold_for: 5
@@ -29,6 +29,8 @@ things:
           cron_expression: "*/1 * * * * *"
         - mqtt_topic: update/every-15-minutes/topic
           cron_expression: "* */15 * * * *"
+  - name: Coffee machine
+    type: this_is_some_unknown_type #verify unknown types can be used
   - name: Kitchen
     type: room
     sources:

@@ -9,9 +9,9 @@ time_series:
   username: ${INFLUXDB_USERNAME:-user}
   password: ${INFLUXDB_PASSWORD:-password}
   bucket_name: ${INFLUXDB_BUCKET_NAME:-power-consumptions}
-things:
-  - name: ${THING_NAME:-washing_machine}
-    type: ${THING_TYPE:-washing_machine}
+entities:
+  - name: ${ENTITY_NAME:-washing_machine}
+    type: ${ENTITY_TYPE:-washing_machine}
     sources:
       - mqtt_topic: ${MQTT_INPUT_CONSUMPTION:-measurements/thing/power}
         type: consumption

@@ -8,7 +8,7 @@ import paho.mqtt.client as paho_mqtt
 from paho.mqtt.enums import CallbackAPIVersion
 
 from iot.core.configuration import MqttConfiguration
-from iot.infrastructure.machine.machine_service import DatabaseException
+from iot.infrastructure.appliance.appliance_service import DatabaseException
 
 
 class Subscription:

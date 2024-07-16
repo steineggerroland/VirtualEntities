@@ -1,6 +1,6 @@
 mqtt:
   url: mqtt.local
-things:
+entities:
   - name: super_washer
     type: washing_machine
   - name: Dining room
