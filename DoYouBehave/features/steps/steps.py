@@ -36,10 +36,10 @@ def load_page_for_entity(context, page_name: str, entity_name: str):
 
 @When(r'the power consumption of the (?P<appliance_name>\w+(?> \w+)*?) is updated(?> to (?P<value>\d+))?')
 def send_power_consumption(context, appliance_name: str = None, value: int = None):
-    setattr(context, f'prop_{to_class('power consumption')}',
+    setattr(context, f'prop_{to_class("power consumption")}',
             round(random.random() * 2400, 2) if value is None else float(value))
     context.appliances[appliance_name].send_power_consumption_update(
-        getattr(context, f'prop_{to_class('power consumption')}'))
+        getattr(context, f'prop_{to_class("power consumption")}'))
 
 
 @given(r'(?P<count>\d+) power consumptions are created for the (?P<appliance_name>\w+(?> \w+)*?)(?> '
