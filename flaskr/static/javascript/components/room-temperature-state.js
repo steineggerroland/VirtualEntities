@@ -1,22 +1,26 @@
 import {socket} from "../refresh.js";
 
-const RoomHumidityState = function () {
+const RoomTemperatureState = function () {
     const self = this
     const room = JSON.parse(self.dataset.roomJson)
     const socketHandler = event => {
         const oldState = JSON.parse(self.dataset.roomJson)
         self.dataset.roomJson = JSON.stringify(event.room)
-        if (oldState.humidity_rating !== event.room.humidity_rating) {
+        if (oldState.temperature_rating !== event.room.temperature_rating) {
             socket.off(`rooms/${room.name}/updated`, socketHandler);
             self.refresh()
         } else {
-            self.text = parseFloat(event.room.humidity).toPrecision(3) + "%"
+            if (!!event.room.temperature.value) {
+                self.text = parseFloat(event.room.temperature.value).toPrecision(3) + "°C"
+            } else {
+                self.text = "?°C"
+            }
         }
     };
     socket.on(`rooms/${room.name}/updated`, socketHandler);
-    self.rating = room.humidity_rating
-    if (!!room.humidity) {
-        self.text = parseFloat(room.humidity).toPrecision(3) + "%"
+    self.rating = room.temperature_rating
+    if (!!room.temperature) {
+        self.text = parseFloat(room.temperature.value).toPrecision(3) + "°C"
         switch (self.rating) {
             case 'unknown':
                 self.tooltip = self.dataset.defaultLabel
@@ -28,28 +32,28 @@ const RoomHumidityState = function () {
                 self.color = 'success'
                 self.iconUrl = self.dataset.optimalIconUrl
                 break
-            case 'dry':
-                self.tooltip = self.dataset.dryLabel
+            case 'hot':
+                self.tooltip = self.dataset.hotLabel
                 self.color = 'warning'
-                self.iconUrl = self.dataset.dryIconUrl
+                self.iconUrl = self.dataset.hotIconUrl
                 break
-            case 'critical_dry':
-                self.tooltip = self.dataset.criticalDryLabel
+            case 'critical_hot':
+                self.tooltip = self.dataset.criticalHotLabel
                 self.color = 'danger'
-                self.iconUrl = self.dataset.criticalDryIconUrl
+                self.iconUrl = self.dataset.criticalHotIconUrl
                 break
-            case 'wet':
-                self.tooltip = self.dataset.wetLabel
+            case 'cold':
+                self.tooltip = self.dataset.coldLabel
                 self.color = 'warning'
-                self.iconUrl = self.dataset.wetIconUrl
+                self.iconUrl = self.dataset.coldIconUrl
                 break
             default:
-                self.tooltip = self.dataset.criticalWetLabel
+                self.tooltip = self.dataset.criticalColdLabel
                 self.color = 'danger'
-                self.iconUrl = self.dataset.criticalWetIconUrl
+                self.iconUrl = self.dataset.criticalColdIconUrl
         }
     } else {
-        self.text = "?%"
+        self.text = "?°C"
         self.tooltip = self.dataset.unknwonLabel
         self.color = 'secondary'
         self.iconUrl = self.dataset.unknownIconUrl
@@ -58,26 +62,26 @@ const RoomHumidityState = function () {
     let template = '<div style="display: contents !important;">'
     if (!!self.dataset.asBadge) {
         template += `
-            <span class="humidity badge text-bg-light border border-{{ self.color }}"
+            <span class="badge temperature text-bg-light border border-{{ self.color }}"
                data-bs-title="{{ self.tooltip }}"
                data-bs-toggle="tooltip">{{ self.text }}</span>`
     } else {
         template += `
-            <div class="humidity h-100 w-100 text-center align-content-center text-bg-{{ self.color }} bg-{{ self.color }}"
+            <div class="temperature h-100 w-100 text-center align-content-center text-bg-{{ self.color }} bg-{{ self.color }}"
                 data-bs-title="{{ self.tooltip }}" data-bs-toggle="tooltip">
                  <img class="icon" src="{{ self.iconUrl }}" alt="{{ self.text }}"/>
                  <div>{{ self.text }}</div>
             </div>`
     }
     template += `
-            <span class="visually-hidden humidity-rating humidity-rating-{{ self.rating }}" role="status">{{self.rating}}</span>
+            <span class="visually-hidden temperature-rating temperature-rating-{{ self.rating }}" role="status">{{self.rating}}</span>
             <style>
-            .humidity .icon {
+            .temperature .icon {
                  height: 50%;
                  mix-blend-mode: multiply;
             }
             
-            .humidity:has(.humidity-rating-unknown) .icon {
+            .temperature:has(.temperature-rating-unknown) .icon {
                  filter: invert();
                  mix-blend-mode: unset;
             }
@@ -85,4 +89,4 @@ const RoomHumidityState = function () {
         </div>`
     return template
 }
-export {RoomHumidityState}
+export {RoomTemperatureState}
