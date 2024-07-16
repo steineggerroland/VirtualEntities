@@ -116,10 +116,46 @@
 </footer>
 {% block scripts %}
     {{ bootstrap.load_js(with_popper=True) }}
+    <script language="JavaScript" src="{{ url_for('static', filename='javascript/lemonade.min.js') }}"></script>
     <script language="JavaScript" src="{{ url_for('static', filename='javascript/base.js') }}"
-            type="text/javascript"></script>
+            type="module"></script>
     {% block additional_scripts %}
     {% endblock %}
 {% endblock %}
+<script type="module" lang="js" language="JavaScript">
+    import {socket} from "{{ url_for('static', filename='javascript/refresh.js') }}";
+    {% raw %}
+        const formatWatt = (watt) => {
+            watt = parseFloat(watt)
+            if (isNaN(watt)) return "?W"
+            let multiplier = ""
+            let value = watt
+            if(watt >= 1000) {
+                value = (watt / 1000).toPrecision(Math.max(2, Math.ceil(Math.log10(watt))))
+                multiplier = "k"
+            } else if (watt >= 10) {
+                value = watt.toPrecision(Math.max(1, Math.ceil(Math.log10(watt))))
+            } else {
+                value = watt.toPrecision(2)
+            }
+            return value + multiplier + "W"
+        }
+        const PowerConsumption = function () {
+            const self = this;
+            self.name = self.dataset.name
+            socket.on(`appliances/${self.name}/updated`, event => {
+                self.dataset.watt = event.appliance.watt
+                self.watt_formatted = formatWatt(self.dataset.watt)
+            });
+            self.watt_formatted = formatWatt(self.dataset.watt)
+            return `<>
+                <span>{{ self.watt_formatted }}</span>
+            </>`;
+        }
+        lemonade.createWebComponent('power-consumption', PowerConsumption, {
+            shadowRoot: false,
+        });
+    {% endraw %}
+</script>
 </body>
 </html>
