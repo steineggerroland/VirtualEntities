@@ -12,7 +12,6 @@ const ApplianceState = function () {
             if (self.interval) {
                 clearInterval(self.interval)
             }
-            console.log(`${new Date().getTime()}: state refresh`)
             socket.off(`appliances/${JSON.parse(self.dataset.applianceJson).name}/updated`, socketHandler);
             self.refresh()
         }
