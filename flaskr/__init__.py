@@ -10,6 +10,7 @@ from flask_socketio import SocketIO
 from flaskr.api.ApplianceDepot import appliance_depot_api
 from flaskr.api.ApplianceSocketNotifier import ApplianceSocketNotifier
 from flaskr.api.RoomCatalog import room_catalog_api
+from flaskr.api.RoomSocketNotifier import RoomSocketNotifier
 from flaskr.options_controller import options_blueprint
 from flaskr.views import VirtualEntities, Room, Appliance, Person
 from flaskr.views.Homepage import Homepage
@@ -98,6 +99,7 @@ def create_app(default_config_file_name: str, appliance_service: ApplianceServic
     bootstrap = Bootstrap5(app)
 
     appliance_socket_notifier = ApplianceSocketNotifier(socketio, appliance_service)
+    room_socket_notifier = RoomSocketNotifier(socketio)
 
     # ensure the instance folder exists
     try:
