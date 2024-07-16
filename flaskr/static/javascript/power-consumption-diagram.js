@@ -1,3 +1,5 @@
+import {socket} from "./refresh.js";
+
 (function () {
 
     function drawChart(measures, containerId, xAxisLabel, fullscreen) {
@@ -86,7 +88,12 @@
                     return {"date": new Date(d.time), "value": d.consumption}
                 }))
                 drawChart(measurements, container.id, xAxisLabel, fullscreen)
-            }).then(() => window.setTimeout(fetchAndDrawDiagram, 30 * 1000))
+            })
+        socket.on(`appliances/${entityName}/powerConsumptionUpdated`, event => {
+            const measure = event.measure
+            measurements.push({"date": new Date(measure.time), "value": measure.consumption})
+            drawChart(measurements, container.id, xAxisLabel, fullscreen)
+        });
         fetchAndDrawDiagram().then(() => window.addEventListener('resize', () => drawChart(measurements, container.id, xAxisLabel, fullscreen)))
     })
 
