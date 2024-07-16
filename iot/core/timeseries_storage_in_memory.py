@@ -11,10 +11,10 @@ class InMemoryTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
         self.power_consumption_values = {}
         self.climate_values = {}
 
-    def append_power_consumption(self, watt: float, entity_name: str):
+    def append_power_consumption(self, measure: ConsumptionMeasurement, entity_name: str):
         power_consumption_values = self.power_consumption_values[entity_name] \
             if entity_name in self.power_consumption_values else []
-        power_consumption_values.append({"watt": watt, "created_at": datetime.now().isoformat()})
+        power_consumption_values.append({"watt": measure.consumption, "created_at": measure.time.isoformat()})
         if len(power_consumption_values) > 10:
             power_consumption_values.reverse()
             power_consumption_values.pop()

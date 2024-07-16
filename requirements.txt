@@ -8,6 +8,7 @@ click==8.1.7
 croniter==2.0.5
 Flask==3.0.3
 flask-babel==4.0.0
+Flask-SocketIO==5.3.6
 Flask-WTF==1.2.1
 icalendar==5.0.13
 idna==3.7

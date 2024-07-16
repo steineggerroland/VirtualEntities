@@ -50,7 +50,9 @@ class Appliance(VirtualEntity):
             return timedelta(0)
 
     def to_dict(self):
-        return {"name": self.name, "type": self.entity_type, "watt": self.watt, "power_state": self.power_state,
+        return {"name": self.name, "type": self.entity_type, "watt": self.watt,
+                "power_state": self.power_state if type(self.power_state) is str else self.power_state.value,
                 "last_updated_at": self.last_updated_at.isoformat() if self.last_updated_at is not None else None,
-                "online_status": self.online_status(),
+                "online_status": self.online_status() if type(
+                    self.online_status()) is str else self.online_status().value,
                 "last_seen_at": self.last_seen_at.isoformat() if self.last_seen_at is not None else None}

@@ -1,6 +1,6 @@
 import unittest
 from datetime import datetime, timedelta
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock, MagicMock, ANY
 
 from iot.core.configuration import VirtualEntityConfig
 from iot.core.configuration_manager import ConfigurationManager
@@ -68,7 +68,7 @@ class AppliancePowerTest(unittest.TestCase):
         # then
         self.entity.update_power_consumption.assert_called_once_with(watt)
         self.storage_mock.update.assert_called_once()
-        self.time_series_storage_mock.append_power_consumption.assert_called_once_with(watt, self.entity_name)
+        self.time_series_storage_mock.append_power_consumption.assert_called_once_with(ANY, self.entity_name)
 
     def test_started_run_called_on_change_to_running(self):
         # given

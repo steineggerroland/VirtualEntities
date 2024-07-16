@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from unittest.mock import patch, Mock
 
 from iot.core.timeseries_storage_in_memory import InMemoryTimeSeriesStorageStrategy
+from iot.core.timeseries_types import ConsumptionMeasurement
 from iot.infrastructure.units import Temperature
 
 
@@ -13,7 +14,7 @@ class InMemoryStorageTest(unittest.TestCase):
         now = datetime.now()
         datetime_mock.now.return_value = now
         # when
-        db.append_power_consumption(14.12, "entity01")
+        db.append_power_consumption(ConsumptionMeasurement(now, 14.12), "entity01")
         # then
         # reset behavior of mock
         datetime_mock.now.return_value = datetime.now()
@@ -26,7 +27,7 @@ class InMemoryStorageTest(unittest.TestCase):
         db = InMemoryTimeSeriesStorageStrategy()
         now = datetime.now()
         # when
-        db.append_power_consumption(14.12, "entity01")
+        db.append_power_consumption(ConsumptionMeasurement(now, 14.12), "entity01")
         # then
         self.assertFalse(db.get_power_consumptions_for_last_seconds(60, "other entity"))
 
@@ -34,14 +35,10 @@ class InMemoryStorageTest(unittest.TestCase):
     def test_loading_consumption(self, datetime_mock: Mock):
         db = InMemoryTimeSeriesStorageStrategy()
         # when
-        datetime_mock.now.return_value = datetime.now() - timedelta(days=1)
-        db.append_power_consumption(1, "entity01")
-        datetime_mock.now.return_value = datetime.now() - timedelta(hours=1)
-        db.append_power_consumption(2, "entity01")
-        datetime_mock.now.return_value = datetime.now() - timedelta(minutes=1)
-        db.append_power_consumption(3, "entity01")
-        datetime_mock.now.return_value = datetime.now()
-        db.append_power_consumption(4, "entity01")
+        db.append_power_consumption(ConsumptionMeasurement(datetime.now() - timedelta(days=1), 1), "entity01")
+        db.append_power_consumption(ConsumptionMeasurement(datetime.now() - timedelta(hours=1), 2), "entity01")
+        db.append_power_consumption(ConsumptionMeasurement(datetime.now() - timedelta(minutes=1), 3), "entity01")
+        db.append_power_consumption(ConsumptionMeasurement(datetime.now(), 4), "entity01")
         # then
         # reset behavior of mock
         datetime_mock.now.return_value = datetime.now()
@@ -56,7 +53,7 @@ class InMemoryStorageTest(unittest.TestCase):
         # when
         datetime_mock.now.return_value = datetime.now()
         for watt in range(20):
-            db.append_power_consumption(watt, "entity01")
+            db.append_power_consumption(ConsumptionMeasurement(datetime.now(), watt), "entity01")
         # then
         # reset behavior of mock
         datetime_mock.now.return_value = datetime.now()

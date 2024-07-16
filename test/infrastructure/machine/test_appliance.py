@@ -36,8 +36,8 @@ class ConstructionTest(unittest.TestCase):
         last_seen_at = datetime.now() - timedelta(minutes=2)
         dryer = Appliance("test", "some type", 312.5, last_updated_at=last_updated_at, last_seen_at=last_seen_at)
         self.assertDictEqual(dryer.to_dict(),
-                             {"name": "test", "type": "some type", "watt": 312.5, "online_status": OnlineStatus.ONLINE,
-                              "power_state": PowerState.RUNNING, "last_updated_at": last_updated_at.isoformat(),
+                             {"name": "test", "type": "some type", "watt": 312.5, "online_status": 'online',
+                              "power_state": 'running', "last_updated_at": last_updated_at.isoformat(),
                               "last_seen_at": last_seen_at.isoformat()})
 
 
