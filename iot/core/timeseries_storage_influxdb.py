@@ -36,16 +36,16 @@ class InfluxDbTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
     def shutdown(self):
         self.influxdb.close()
 
-    def append_power_consumption(self, watt: float, entity_name):
+    def append_power_consumption(self, measurement: ConsumptionMeasurement, entity_name):
         point = {"measurement": POWER_CONSUMPTION_SERIES, "tags": {ENTITY_NAME_TAG: entity_name},
-                 "fields": {CONSUMPTION_FIELD: float(watt)}}
+                 "fields": {CONSUMPTION_FIELD: float(measurement.consumption)}, "time": measurement.time}
         try:
             self.influxdb.write_points([point])
         except InfluxDBClientError as e:
             self.logger.debug("Failed to write power consumption (%sW) for entity (%s) to influx db: %s",
-                              watt, entity_name, e, exc_info=True)
+                              measurement.consumption, entity_name, e, exc_info=True)
             raise DatabaseException("Failed to write power consumption (%sW) for entity (%s) to influx db: %s" %
-                                    (watt, entity_name, e), e) from e
+                                    (measurement.consumption, entity_name, e), e) from e
 
     def get_power_consumptions_for_last_seconds(self, seconds: int, entity_name) -> List[ConsumptionMeasurement]:
         rs = self.influxdb.query(f"SELECT * FROM {POWER_CONSUMPTION_SERIES} WHERE time >= now() - {seconds}s")

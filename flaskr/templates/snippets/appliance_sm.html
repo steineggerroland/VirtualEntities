@@ -6,7 +6,8 @@
                     {%- include "snippets/appliance_icon.html" %}
                 </div>
             {%- endwith %}
-            <a class="name me-1 overflow-hidden text-truncate" href="{{ url_for('appliance', name=appliance.name) }}"
+            <a class="name me-1 overflow-hidden text-truncate" id="appliance-{{ appliance.name|replace(' ', '-') }}"
+               href="{{ url_for('appliance', name=appliance.name) }}"
                data-bs-title="{{ appliance.name }}" data-bs-toggle="tooltip">{{ appliance.name }}</a>
             {%- with online_status=appliance.online_status(),time_delta=appliance.last_seen_time_delta() %}
                 <div class="ms-auto">{%- include "snippets/online_status_icon.html" %}</div>
@@ -20,7 +21,7 @@
                      data-entity-name="{{ appliance.name }}" data-fullscreen="true"
                      data-x-axis-label="{{ _('Watt') }}"></div>
                 <div class="position-absolute top-0 start-0 w-100 h-100 z-1 fs-4">
-                    {%- with power_consumption=appliance.watt %}
+                    {%- with name=appliance.name, power_consumption=appliance.watt %}
                         {%- include "snippets/power_consumption.html" %}
                     {%- endwith %}
                 </div>

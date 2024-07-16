@@ -1,3 +1,4 @@
+import enum
 import logging
 import time
 from threading import Thread
@@ -8,6 +9,8 @@ from python_event_bus import EventBus
 from iot.core.configuration import VirtualEntityConfig
 from iot.core.configuration_manager import ConfigurationManager
 from iot.core.time_series_storage import TimeSeriesStorage
+from iot.core.timeseries_types import ConsumptionMeasurement
+from iot.infrastructure.appliance.appliance_events import ApplianceEvents, ApplianceEvent, ApplianceConsumptionEvent
 from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
 from iot.infrastructure.appliance.appliance_builder import ApplianceBuilder
@@ -58,7 +61,7 @@ class ApplianceService:
         self.time_series_storage = time_series_storage
         self.config_manager = config_manager
         self.managed_appliances = ManagedAppliances()
-        EventBus.subscribe("appliance/changed_config_name", self.change_name, priority=0)
+        EventBus.subscribe(ApplianceEvents.CHANGED_CONFIG_NAME, self.change_name, priority=0)
 
     def add_appliance_by_config(self, entity_configs: List[VirtualEntityConfig]):
         for entity_config in entity_configs:
@@ -72,17 +75,19 @@ class ApplianceService:
                 self.appliance_depot.stock(appliance)
             if appliance.started_run_at is not None:
                 self.started_run(entity_config.name)
-            EventBus.call("appliance/added", appliance)
+            EventBus.call(ApplianceEvents.ADDED, ApplianceEvent(appliance))
 
     def update_power_consumption(self, appliance_name: str, new_power_consumption):
         try:
             appliance = self.appliance_depot.retrieve(appliance_name)
             appliance.update_power_consumption(new_power_consumption)
             self.appliance_depot.stock(appliance)
-            self.time_series_storage.append_power_consumption(new_power_consumption, appliance_name)
+            measurement = ConsumptionMeasurement(appliance.last_updated_at, new_power_consumption)
+            self.time_series_storage.append_power_consumption(
+                measurement, appliance_name)
             if appliance.started_run_at is None and appliance.power_state is PowerState.RUNNING:
                 self.started_run(appliance_name)
-            EventBus.call("appliance/updatedPowerConsumption", appliance)
+            EventBus.call(ApplianceEvents.UPDATED_POWER_CONSUMPTION, ApplianceConsumptionEvent(appliance, measurement))
         except ValueError as e:
             raise DatabaseException('Failed to save new power consumption because of database error.', e) from e
 
@@ -96,7 +101,7 @@ class ApplianceService:
             managed_appliance = self.managed_appliances.find(appliance_name)
             managed_appliance.init_check_if_run_completed_thread(
                 self._create_thread_for_is_running_check(managed_appliance))
-            EventBus.call("appliance/startedRun", appliance)
+            EventBus.call(ApplianceEvents.STARTED_RUN, ApplianceEvent(appliance))
         except ValueError as e:
             raise DatabaseException('Failed to save started run because of database error.', e) from e
 
@@ -116,7 +121,7 @@ class ApplianceService:
             appliance = self.appliance_depot.retrieve(name)
             appliance.finish_run()
             self.appliance_depot.stock(appliance)
-            EventBus.call("appliance/finishedRun", appliance)
+            EventBus.call(ApplianceEvents.FINISHED_RUN, ApplianceEvent(appliance))
         except ValueError as e:
             raise DatabaseException("Failed to finish run of '%s' because of database error." % name, e) from e
 
@@ -125,7 +130,7 @@ class ApplianceService:
             appliance = self.appliance_depot.retrieve(appliance_name)
             appliance.unload()
             self.appliance_depot.stock(appliance)
-            EventBus.call("appliance/unloaded", appliance)
+            EventBus.call(ApplianceEvents.UNLOADED, ApplianceEvent(appliance))
         except ValueError as e:
             raise DatabaseException('Failed to save unloading appliance because of database error.', e) from e
 
@@ -134,7 +139,7 @@ class ApplianceService:
             appliance = self.appliance_depot.retrieve(appliance_name)
             appliance.load(needs_unloading)
             self.appliance_depot.stock(appliance)
-            EventBus.call("appliance/loaded", appliance)
+            EventBus.call(ApplianceEvents.LOADED, ApplianceEvent(appliance))
         except ValueError as e:
             raise DatabaseException('Failed to save setting appliance to loaded.', e) from e
 
