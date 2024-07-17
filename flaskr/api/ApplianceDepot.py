@@ -30,17 +30,7 @@ def appliance_depot_api(appliance_service: ApplianceService, appliance_depot: Ap
     @api.get('/appliances/<name>/power-consumptions')
     def power_consumptions(name: str):
         measures = time_series_storage.get_power_consumptions_for_last_seconds(60 * 60 * 4, name)
-        appliance = appliance_depot.retrieve(name)
-        if appliance.watt is not None:
-            if len(measures) == 0:  # last update was before time interval
-                measures.append(
-                    ConsumptionMeasurement(
-                        max(datetime.now(pytz.timezone('Europe/Berlin')) - timedelta(seconds=60 * 60 * 4),
-                            appliance.last_seen_at),
-                        appliance.watt))
-            measures.append(ConsumptionMeasurement(datetime.now(pytz.timezone('Europe/Berlin')), appliance.watt))
-        return list(
-            map(lambda c: c.to_dict(), measures))
+        return list(            map(lambda c: c.to_dict(), measures))
 
     @api.post('/appliances/<name>/unload')
     def unload(name: str):
