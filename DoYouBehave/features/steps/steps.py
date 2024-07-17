@@ -5,6 +5,7 @@ from typing import Optional
 
 import pytz
 from behave import *
+from dateutil.tz import tzlocal
 from influxdb import InfluxDBClient
 from influxdb_client import Point, WritePrecision
 from selenium.webdriver import ActionChains
@@ -54,7 +55,7 @@ def send_bulk_power_consumptions(context, count: int, appliance_name: str, timep
     lines = '\n'.join(Point('power_consumption')
                       .tag('thing', appliance_name)
                       .field('consumption', round(min(2400.0, max(0.0, random.gauss() * i * 2400 / count)), 2))
-                      .time(datetime.now().astimezone(pytz.timezone("Europe/Berlin")) -
+                      .time(datetime.now(tzlocal()) -
                             timedelta(seconds=max(0, round(i * total_seconds / count))),
                             WritePrecision.NS)
                       .to_line_protocol(precision=WritePrecision.NS) for i in range(1, count + 1)) + '\n'
@@ -87,7 +88,7 @@ def send_bulk_room_climate(context, count: int, room_name: str, timeperiod_days:
                       .tag('thing', room_name)
                       .field('temperature', round(min(30.0, max(15.0, random.gauss() * i * 15 / count) + 15), 2))
                       .field('humidity', round(min(100.0, max(20.0, random.gauss() * i * 80 / count) + 20), 2))
-                      .time(datetime.now().astimezone(pytz.timezone("Europe/Berlin")) -
+                      .time(datetime.now(tzlocal()) -
                             timedelta(seconds=max(0, round(i * total_seconds / count))),
                             WritePrecision.NS)
                       .to_line_protocol(precision=WritePrecision.NS) for i in range(1, count + 1)) + '\n'

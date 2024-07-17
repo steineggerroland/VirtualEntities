@@ -5,6 +5,7 @@ from typing import List
 
 import caldav
 from croniter import croniter
+from dateutil.tz import tzlocal
 
 from iot.core.configuration import VirtualEntityConfig, CaldavConfig
 from iot.dav.calendar_reader import CalendarLoader
@@ -33,7 +34,7 @@ class MqttPersonMediator(MqttMediator):
         self._handle_calendar_sources(filter(lambda source: type(source) is CaldavConfig, config.sources.list))
 
     def _get_appointments_for_today(self):
-        start_of_today = datetime.combine(datetime.now(), datetime.min.time())
+        start_of_today = datetime.combine(datetime.now(tzlocal()), datetime.min.time())
         return {"appointments": list(map(lambda appointment: appointment.to_dict(),
                                          self.person_service.get_person().get_appointments_for(start_of_today,
                                                                                                timedelta(hours=23,
@@ -47,10 +48,10 @@ class MqttPersonMediator(MqttMediator):
             self.scheduled_update_threads.append(thread)
 
     def _scheduled_caldav_download(self, calendar_source: CaldavConfig):
-        cron = croniter(calendar_source.update_cron, datetime.now())
+        cron = croniter(calendar_source.update_cron, datetime.now(tzlocal()))
         while True:
             self._update_calendars_from_caldav(calendar_source)
-            delta = cron.get_next(datetime) - datetime.now()
+            delta = cron.get_next(datetime) - datetime.now(tzlocal())
             time.sleep(max(0, delta.total_seconds()))
 
     def _update_calendars_from_caldav(self, calendar_source: CaldavConfig):
@@ -62,8 +63,8 @@ class MqttPersonMediator(MqttMediator):
                   else caldav.DAVClient(url=calendar_source.url)
                   as client):
                 # load the next 7 days which are needed for the website
-                start = datetime.combine(datetime.now(), datetime.min.time())
-                end = datetime.combine(datetime.now() + timedelta(days=6), datetime.max.time())
+                start = datetime.combine(datetime.now(tzlocal()), datetime.min.time())
+                end = datetime.combine(datetime.now(tzlocal()) + timedelta(days=6), datetime.max.time())
                 caldav_calendar = client.calendar(url=calendar_source.url)
                 relevant_events = caldav_calendar.search(start=start,
                                                          end=end,

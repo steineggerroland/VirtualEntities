@@ -6,6 +6,7 @@ from threading import Thread
 from typing import List
 
 from croniter import croniter
+from dateutil.tz import tzlocal
 from jsonpath import JSONPath
 
 from iot.core.configuration import PlannedNotification
@@ -35,9 +36,10 @@ class MqttMediator:
             self.scheduled_update_threads.append(thread)
 
     def _scheduled_updates(self, planned_notification: PlannedNotification, get_dict_callback):
-        cron = croniter(planned_notification.cron_expression, datetime.now())
+        now = datetime.now(tzlocal())
+        cron = croniter(planned_notification.cron_expression, now)
         while True:
-            delta = cron.get_next(datetime) - datetime.now()
+            delta = cron.get_next(datetime, now) - datetime.now(tzlocal())
             time.sleep(max(0, delta.total_seconds()))
             try:
                 self.mqtt_client.publish(planned_notification.mqtt_topic, get_dict_callback())

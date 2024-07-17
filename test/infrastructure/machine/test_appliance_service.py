@@ -2,6 +2,8 @@ import unittest
 from datetime import datetime, timedelta
 from unittest.mock import Mock, MagicMock, ANY
 
+from dateutil.tz import tzlocal
+
 from iot.core.configuration import VirtualEntityConfig
 from iot.core.configuration_manager import ConfigurationManager
 from iot.core.storage import Storage
@@ -32,7 +34,7 @@ class InitTest(unittest.TestCase):
         dryer_mock = Mock()
         storage_mock = Mock()
         storage_mock.load_appliance = Mock(return_value=dryer_mock)
-        dryer_mock.started_run_at = datetime.now()
+        dryer_mock.started_run_at = datetime.now(tzlocal())
         time_series_storage_mock = TimeSeriesStorage()
         configuration_manager_mock = ConfigurationManager()
         # when
@@ -83,7 +85,7 @@ class AppliancePowerTest(unittest.TestCase):
     def test_started_run_not_called_when_already_running(self):
         # given
         self.entity.start_run = Mock()
-        self.entity.started_run_at = datetime.now()
+        self.entity.started_run_at = datetime.now(tzlocal())
         self.entity.start_run = Mock()
         watt_indicating_run = 1898
         # when
@@ -99,7 +101,7 @@ class AppliancePowerTest(unittest.TestCase):
         # when
         self.appliance_service.started_run(self.entity_name)
         # then
-        self.assertAlmostEqual(self.entity.started_run_at, datetime.now(), delta=timedelta(seconds=0.1))
+        self.assertAlmostEqual(self.entity.started_run_at, datetime.now(tzlocal()), delta=timedelta(seconds=0.1))
         self.storage_mock.update.assert_called_once_with(self.entity)
 
     def test_start_run_schedules_finish_check(self):

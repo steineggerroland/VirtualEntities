@@ -4,6 +4,8 @@ from datetime import datetime
 from urllib import parse, request
 from urllib.request import Request
 
+from dateutil.tz import tzlocal
+
 
 class CaldavTestClient:
     def __init__(self, host: str, port: int, user: str, password: str):
@@ -23,7 +25,7 @@ class CaldavTestClient:
     def create_event(self, person_name: str, calendar_name: str, summary: str, start: datetime, end: datetime,
                      description: str):
         uid = str(uuid.uuid4())
-        dtstamp = datetime.now().strftime("%Y%m%dT%H%M%SZ")
+        dtstamp = datetime.now(tzlocal()).strftime("%Y%m%dT%H%M%SZ")
         dtstart = start.strftime("%Y%m%dT%H%M%SZ")
         dtend = end.strftime("%Y%m%dT%H%M%SZ")
         event_data = create_event_data % (uid, dtstamp, dtstart, dtend, summary, description)

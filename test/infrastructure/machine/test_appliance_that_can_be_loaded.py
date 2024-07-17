@@ -1,6 +1,8 @@
 import unittest
 from datetime import datetime, timedelta
 
+from dateutil.tz import tzlocal
+
 from iot.infrastructure.appliance.appliance_that_can_be_loaded import ApplianceThatCanBeLoaded, RunningState
 from iot.infrastructure.appliance.power_state_decorator import PowerState
 from iot.infrastructure.virtual_entity import OnlineStatus
@@ -21,11 +23,11 @@ class ApplianceThatCanBeLoadedInitTest(unittest.TestCase):
         self.assertEqual(dishwasher.last_updated_at, None)
 
     def test_complete_dict(self):
-        last_updated_at = datetime.now()
-        started_run_at = datetime.now()
+        last_updated_at = datetime.now(tzlocal())
+        started_run_at = datetime.now(tzlocal())
         running_state = RunningState.IDLE
-        finished_last_run_at = datetime.now()
-        last_seen_at = datetime.now() - timedelta(seconds=5)
+        finished_last_run_at = datetime.now(tzlocal())
+        last_seen_at = datetime.now(tzlocal()) - timedelta(seconds=5)
         name = 'my super washing_machine'
         watt = 255
         is_loaded = True
@@ -95,7 +97,8 @@ class ApplianceThatCanBeLoadedTest(unittest.TestCase):
         # when
         self.appliance.start_run()
         # then
-        self.assertAlmostEqual(self.appliance.started_run_at, datetime.now(), delta=timedelta(milliseconds=100))
+        self.assertAlmostEqual(self.appliance.started_run_at, datetime.now(tzlocal()),
+                               delta=timedelta(milliseconds=100))
 
     def test_sets_appliance_loaded_when_starting_run(self):
         # given
@@ -128,7 +131,8 @@ class ApplianceThatCanBeLoadedTest(unittest.TestCase):
         # when
         self.appliance.finish_run()
         # then
-        self.assertAlmostEqual(self.appliance.finished_last_run_at, datetime.now(), delta=timedelta(milliseconds=100))
+        self.assertAlmostEqual(self.appliance.finished_last_run_at, datetime.now(tzlocal()),
+                               delta=timedelta(milliseconds=100))
         self.assertIsNone(self.appliance.started_run_at)
 
     def test_running_state_idle_when_finishing_run(self):
@@ -223,8 +227,8 @@ class ApplianceThatCanBeLoadedTest(unittest.TestCase):
         self.assertNotEqual(self.appliance.online_status(), OnlineStatus.ONLINE)
 
     def test_to_dict_has_mandatory_fields(self):
-        last_updated_at = datetime.now()
-        last_seen_at = datetime.now() - timedelta(seconds=5)
+        last_updated_at = datetime.now(tzlocal())
+        last_seen_at = datetime.now(tzlocal()) - timedelta(seconds=5)
         power_state_appliance = ApplianceThatCanBeLoaded("test", "some appliance", 312.5,
                                                          last_updated_at=last_updated_at,
                                                          last_seen_at=last_seen_at)

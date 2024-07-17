@@ -2,6 +2,8 @@ import unittest
 from datetime import datetime
 from pathlib import Path
 
+from dateutil.tz import tzlocal
+
 from iot.core.storage import Storage
 from iot.infrastructure.room import Room
 
@@ -13,7 +15,7 @@ class StorageTest(unittest.TestCase):
         db = Storage(Path(DIR / "test.json"), ['entity01'])
         room = Room("entity01")
         room.humidity = 15.1
-        room.last_updated_at = datetime.now()
+        room.last_updated_at = datetime.now(tzlocal())
         # when
         db.update(room)
         # then

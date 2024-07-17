@@ -1,6 +1,8 @@
 import unittest
 from datetime import datetime
 
+from dateutil.tz import tzlocal
+
 from iot.infrastructure.person import Person
 from iot.infrastructure.register_of_persons import RegisterOfPersons
 
@@ -20,7 +22,7 @@ class TestRegisterOfPersons(unittest.TestCase):
     def test_enlist_existing_person_updates_info(self):
         """Test updating an existing person's details."""
         self.register.enlist(self.sample_person)
-        updated_person = Person("John Doe", last_seen_at=datetime.now())
+        updated_person = Person("John Doe", last_seen_at=datetime.now(tzlocal()))
         self.register.enlist(updated_person)
         self.assertIn(updated_person, self.register._persons)
         self.assertEqual(len(self.register._persons), 1)  # Ensure no duplicate entries

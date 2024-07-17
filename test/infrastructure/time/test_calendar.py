@@ -2,6 +2,7 @@ import unittest
 from datetime import datetime, timedelta
 
 import pytz
+from dateutil.tz import tzlocal
 
 from iot.infrastructure.virtual_entity import OnlineStatus
 from iot.infrastructure.time.calendar import Appointment, Calendar
@@ -9,7 +10,7 @@ from iot.infrastructure.time.calendar import Appointment, Calendar
 
 class CalendarTest(unittest.TestCase):
     def test_get_appointments(self):
-        now = datetime.now().astimezone(pytz.timezone("Europe/Berlin"))
+        now = datetime.now(tzlocal()).astimezone(pytz.timezone("Europe/Berlin"))
         start = now
         appointments = [Appointment("", now - timedelta(days=1, hours=1), now - timedelta(days=1), "123123"),
                         Appointment("", now + timedelta(days=1), now + timedelta(days=1, hours=1), "123123"),
@@ -28,8 +29,8 @@ class CalendarTest(unittest.TestCase):
         name = "nextcloud"
         url = "url"
         color = "ff0000"
-        last_updated_at = datetime.now() - timedelta(minutes=23)
-        last_seen_at = datetime.now()
+        last_updated_at = datetime.now(tzlocal()) - timedelta(minutes=23)
+        last_seen_at = datetime.now(tzlocal())
         calendar = Calendar(name, url, color, appointments, last_updated_at, last_seen_at)
         # then
         self.assertIn("appointments", calendar.to_dict())
@@ -55,7 +56,7 @@ class AppointmentTest(unittest.TestCase):
         self.assertEqual(appointment.color, "123123")
 
     def test_covers_testcases(self):
-        now = datetime.now()
+        now = datetime.now(tzlocal())
         start = now
         end = now + timedelta(hours=1)
         tests = [{"description": "is_before_time_interval",

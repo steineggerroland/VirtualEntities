@@ -3,6 +3,7 @@ from datetime import datetime
 from unittest.mock import Mock
 
 import pytz
+from dateutil.tz import tzlocal
 
 from iot.core.configuration import CalendarsConfig, CategoryConfig, CaldavConfig, UrlConf
 from iot.dav.calendar_reader import CalendarLoader
@@ -55,8 +56,8 @@ class TestCalendarLoader(unittest.TestCase):
     def test_from_caldav_events(self):
         calendar_loader = CalendarLoader(CalendarsConfig([], []))
         summary = "meeting 93284"
-        start_date = datetime.now().astimezone(pytz.timezone("Europe/Berlin"))
-        end_date = datetime.now().astimezone(pytz.timezone("Europe/Berlin"))
+        start_date = datetime.now(tzlocal()).astimezone(pytz.timezone("Europe/Berlin"))
+        end_date = datetime.now(tzlocal()).astimezone(pytz.timezone("Europe/Berlin"))
         icalendar_component = {"SUMMARY": summary, "DTSTART": Mock(dt=start_date), "DTEND": Mock(dt=end_date)}
         dav_object = Mock(icalendar_component=icalendar_component)
         color = "ffffff"
@@ -72,8 +73,8 @@ class TestCalendarLoader(unittest.TestCase):
         work_color = "ff0000"
         calendar_loader = CalendarLoader(CalendarsConfig([CategoryConfig("work", work_color)], []))
         summary = "meeting 93284"
-        start_date = datetime.now().astimezone(pytz.timezone("Europe/Berlin"))
-        end_date = datetime.now().astimezone(pytz.timezone("Europe/Berlin"))
+        start_date = datetime.now(tzlocal()).astimezone(pytz.timezone("Europe/Berlin"))
+        end_date = datetime.now(tzlocal()).astimezone(pytz.timezone("Europe/Berlin"))
         icalendar_component = {"SUMMARY": summary, "DTSTART": Mock(dt=start_date), "DTEND": Mock(dt=end_date),
                                "CATEGORIES": Mock(cats=["Work", "Meeting"])}
         dav_object = Mock(icalendar_component=icalendar_component)

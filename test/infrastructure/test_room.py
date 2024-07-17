@@ -3,10 +3,12 @@ from _datetime import timedelta
 from datetime import datetime
 from random import Random
 
+from dateutil.tz import tzlocal
+
 from iot.infrastructure.room import Room, from_dict
-from iot.infrastructure.virtual_entity import OnlineStatus
 from iot.infrastructure.units import TemperatureUnit, Temperature, TemperatureThresholds, Range, HumidityThresholds, \
     TemperatureRating, HumidityRating
+from iot.infrastructure.virtual_entity import OnlineStatus
 
 
 class InitTest(unittest.TestCase):
@@ -15,11 +17,11 @@ class InitTest(unittest.TestCase):
         self.assertEqual(Room(name=room_name).name, room_name)
 
     def test_last_updated_at(self):
-        last_updated_at = datetime.now()
+        last_updated_at = datetime.now(tzlocal())
         self.assertEqual(Room(name="room_name", last_updated_at=last_updated_at).last_updated_at, last_updated_at)
 
     def test_last_seen_at(self):
-        last_seen_at = datetime.now()
+        last_seen_at = datetime.now(tzlocal())
         self.assertEqual(Room(name="room_name", last_seen_at=last_seen_at).last_seen_at, last_seen_at)
 
     def test_temperature(self):
@@ -44,8 +46,8 @@ class InitTest(unittest.TestCase):
 class RoomTest(unittest.TestCase):
     def setUp(self):
         self.room = Room(f"Toilette {Random().randint(0, 99)}", Temperature(Random().randint(-4, 28)),
-                         last_updated_at=datetime.now() - timedelta(minutes=4),
-                         last_seen_at=datetime.now() - timedelta(minutes=10))
+                         last_updated_at=datetime.now(tzlocal()) - timedelta(minutes=4),
+                         last_seen_at=datetime.now(tzlocal()) - timedelta(minutes=10))
 
     def test_update_temperature(self):
         self.room.temperature = Temperature(12, TemperatureUnit.DEGREE_CELSIUS)
@@ -54,8 +56,8 @@ class RoomTest(unittest.TestCase):
         room = self.room.update_temperature(new_temperature)
         # then
         self.assertEqual(room.temperature, new_temperature)
-        self.assertAlmostEqual(room.last_updated_at, datetime.now(), delta=timedelta(seconds=1))
-        self.assertAlmostEqual(room.last_seen_at, datetime.now(), delta=timedelta(seconds=1))
+        self.assertAlmostEqual(room.last_updated_at, datetime.now(tzlocal()), delta=timedelta(seconds=1))
+        self.assertAlmostEqual(room.last_seen_at, datetime.now(tzlocal()), delta=timedelta(seconds=1))
 
     def test_rate_temperature(self):
         temperature_thresholds = TemperatureThresholds(Range(20, 23), 15, 30)
@@ -82,8 +84,8 @@ class RoomTest(unittest.TestCase):
         room = self.room.update_humidity(new_humidity)
         # then
         self.assertEqual(room.humidity, new_humidity)
-        self.assertAlmostEqual(room.last_updated_at, datetime.now(), delta=timedelta(seconds=1))
-        self.assertAlmostEqual(room.last_seen_at, datetime.now(), delta=timedelta(seconds=1))
+        self.assertAlmostEqual(room.last_updated_at, datetime.now(tzlocal()), delta=timedelta(seconds=1))
+        self.assertAlmostEqual(room.last_seen_at, datetime.now(tzlocal()), delta=timedelta(seconds=1))
 
     def test_rate_humidity(self):
         humidity_thresholds = HumidityThresholds(Range(60, 70), 45, 85)
@@ -104,8 +106,8 @@ class RoomTest(unittest.TestCase):
         humidity = 69.12
         temperature_thresholds = TemperatureThresholds(Range(20, 23), 15, 30)
         humidity_thresholds = HumidityThresholds(Range(60, 70), 45, 85)
-        last_updated_at = datetime.now() - timedelta(minutes=2)
-        last_seen_at = datetime.now() - timedelta(minutes=4)
+        last_updated_at = datetime.now(tzlocal()) - timedelta(minutes=2)
+        last_seen_at = datetime.now(tzlocal()) - timedelta(minutes=4)
         # when
         room = Room(name, Temperature(temperature), humidity, temperature_thresholds, humidity_thresholds,
                     last_updated_at, last_seen_at)
@@ -132,8 +134,8 @@ class RoomTest(unittest.TestCase):
         humidity = 77.12
         temperature_thresholds = TemperatureThresholds(Range(20, 23), 15, 30)
         humidity_thresholds = HumidityThresholds(Range(60, 70), 45, 85)
-        last_updated_at = datetime.now() - timedelta(minutes=2)
-        last_seen_at = datetime.now() - timedelta(minutes=4)
+        last_updated_at = datetime.now(tzlocal()) - timedelta(minutes=2)
+        last_seen_at = datetime.now(tzlocal()) - timedelta(minutes=4)
         # when
         reconstructed_room = from_dict(
             Room(name, temperature, humidity, temperature_thresholds, humidity_thresholds,

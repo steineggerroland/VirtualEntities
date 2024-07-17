@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from dateutil.tz import tzlocal
+
 from iot.infrastructure.virtual_entity import VirtualEntity, _datetime_from_dict_key
 from iot.infrastructure.units import Temperature, from_dict as temperature_from_dict, TemperatureThresholds, \
     HumidityThresholds, TemperatureRating, HumidityRating, temperature_thresholds_from_dict, \
@@ -9,7 +11,7 @@ from iot.infrastructure.units import Temperature, from_dict as temperature_from_
 class Room(VirtualEntity):
     def __init__(self, name: str, temperature: None | Temperature = None, humidity: None | float = None,
                  temperature_thresholds: TemperatureThresholds = None, humidity_thresholds: HumidityThresholds = None,
-                 last_updated_at: datetime = datetime.now(), last_seen_at: None | datetime = None):
+                 last_updated_at: datetime = datetime.now(tzlocal()), last_seen_at: None | datetime = None):
         super().__init__(name, 'room', last_updated_at, last_seen_at, 60 * 10)
         self.temperature = temperature
         self.humidity = humidity
@@ -17,18 +19,18 @@ class Room(VirtualEntity):
         self.humidity_thresholds = humidity_thresholds
 
     def update_temperature(self, new_temperature: Temperature) -> 'Room':
-        now = datetime.now()
+        now = datetime.now(tzlocal())
         return Room(self.name, new_temperature, self.humidity, self.temperature_thresholds, self.humidity_thresholds,
                     now, now)
 
     def update_humidity(self, humidity) -> 'Room':
-        now = datetime.now()
+        now = datetime.now(tzlocal())
         return Room(self.name, self.temperature, humidity, self.temperature_thresholds, self.humidity_thresholds,
                     now, now)
 
     def change_name(self, name) -> 'Room':
         return Room(name, self.temperature, self.humidity, self.temperature_thresholds, self.humidity_thresholds,
-                    datetime.now(), self.last_seen_at)
+                    datetime.now(tzlocal()), self.last_seen_at)
 
     def rate_temperature(self) -> TemperatureRating:
         if not self.temperature or not self.temperature_thresholds:
@@ -58,7 +60,7 @@ class Room(VirtualEntity):
 
     def last_seen_time_delta(self):
         if self.last_seen_at:
-            return self.last_seen_at - datetime.now()
+            return self.last_seen_at - datetime.now(tzlocal())
 
     def to_dict(self):
         return {"name": self.name,

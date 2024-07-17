@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from typing import List
 
 import pytz
+from dateutil.tz import tzlocal
 
 from iot.core.time_series_storage_strategy import TimeSeriesStorageStrategy
 from iot.core.timeseries_types import ConsumptionMeasurement, TemperatureHumidityMeasurement
@@ -27,7 +28,7 @@ class InMemoryTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
     def get_power_consumptions_for_last_seconds(self, seconds: int, entity_name: str) -> List[ConsumptionMeasurement]:
         power_consumption_values = self.power_consumption_values[entity_name] \
             if entity_name in self.power_consumption_values else []
-        time_boundary = datetime.now(pytz.timezone("Europe/Berlin")) - timedelta(seconds=seconds)
+        time_boundary = datetime.now(tzlocal()) - timedelta(seconds=seconds)
         return [ConsumptionMeasurement(datetime.fromisoformat(power_consumption["created_at"]),
                                        power_consumption["watt"]) for power_consumption in power_consumption_values if
                 datetime.fromisoformat(power_consumption["created_at"]) > time_boundary]
@@ -50,7 +51,7 @@ class InMemoryTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
                 lambda measurement: TemperatureHumidityMeasurement(datetime.fromisoformat(measurement['created_at']),
                                                                    measurement['temperature'], measurement['humidity']),
                 filter(
-                    lambda measurement: datetime.now(pytz.timezone("Europe/Berlin")) - datetime.fromisoformat(
+                    lambda measurement: datetime.now(tzlocal()) - datetime.fromisoformat(
                         measurement['created_at']) < timedelta(
                         seconds=seconds), self.climate_values[name])))
         else:

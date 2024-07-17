@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List
 
 from caldav import CalendarObjectResource
+from dateutil.tz import tzlocal
 from icalendar.prop import vCategory
 
 from iot.core.configuration import CategoryConfig, CalendarsConfig, CaldavConfig
@@ -40,7 +41,7 @@ class CalendarLoader:
             end_at = ical_component['DTEND'].dt
             color = self.search_color_for_category(default_color, ical_component)
             appointments.append(Appointment(summary, start_at, end_at, color, description))
-        return Calendar(name, url, default_color, appointments, last_seen_at=datetime.now())
+        return Calendar(name, url, default_color, appointments, last_seen_at=datetime.now(tzlocal()))
 
     def search_color_for_category(self, default_color: str, ical_component) -> str:
         try:
