@@ -9,16 +9,16 @@
         diagramContainer.childNodes.forEach(function (child) {
             diagramContainer.removeChild(child)
         })
-        let yDomain, yTickFormat
+        let yDomain, attributeUnitFormat
         if (attribute === 'temperature') {
             yDomain = [Math.min(...measures.map(m => m[attribute])) - 5, Math.max(...measures.map(m => m[attribute])) + 5]
-            yTickFormat = v => v + "°C"
+            attributeUnitFormat = v => v + "°C"
         } else if (attribute === 'humidity') {
             yDomain = [Math.min(...measures.map(m => m[attribute])) - 10, Math.max(...measures.map(m => m[attribute])) + 10]
-            yTickFormat = v => v + "%"
+            attributeUnitFormat = v => v + "%"
         } else {
             yDomain = [0, Math.min(2400, Math.max(...measures.map(m => m[attribute])) + 10)]
-            yTickFormat = v => v + "W"
+            attributeUnitFormat = v => v + "W"
         }
         const marks = []
         if (strategy && strategy.name === 'simple_history_run_complete_strategy') {
@@ -91,6 +91,11 @@
                 return new Intl.DateTimeFormat(locale, {hour: "numeric", minute: "numeric"}).format(date)
             }
         };
+        const dateTipFormat = new Intl.DateTimeFormat(locale, {
+            hour: "numeric",
+            minute: "numeric",
+            second: "numeric"
+        }).format
         let plot = Plot.plot({
             y: {
                 domain: yDomain,
@@ -106,13 +111,17 @@
                     marker: 'dot',
                     className: `data-${attribute}`
                 }),
-                Plot.crosshairX(measures, {x: "time", y: attribute}),
                 Plot.axisX({
                     tickFormat: dateTickFormat
                 }),
                 Plot.axisY({
-                    tickFormat: yTickFormat
-                })
+                    tickFormat: attributeUnitFormat
+                }),
+                Plot.tip(measures, Plot.pointer({
+                    x: "time",
+                    y: attribute,
+                    title: d => `${dateTipFormat(d.time)}\n${attributeUnitFormat(d[attribute])}`
+                }))
             ]
         });
         diagramContainer.append(plot)
