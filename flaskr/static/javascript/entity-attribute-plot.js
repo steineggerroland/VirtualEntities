@@ -1,7 +1,6 @@
 (function () {
 
-    function drawChart(measures, containerId, attribute, thresholds, strategy, xAxisLabel, fullscreen) {
-        console.log(measures)
+    function drawChart(measures, containerId, attribute, thresholds, strategy, xAxisLabel, fullscreen, locale) {
         if (attribute === 'power-consumption') {
             measures.forEach(m => m[attribute] = m['consumption'])
         }
@@ -10,13 +9,16 @@
         diagramContainer.childNodes.forEach(function (child) {
             diagramContainer.removeChild(child)
         })
-        let yDomain
+        let yDomain, yTickFormat
         if (attribute === 'temperature') {
             yDomain = [Math.min(...measures.map(m => m[attribute])) - 5, Math.max(...measures.map(m => m[attribute])) + 5]
+            yTickFormat = v => v + "°C"
         } else if (attribute === 'humidity') {
             yDomain = [Math.min(...measures.map(m => m[attribute])) - 10, Math.max(...measures.map(m => m[attribute])) + 10]
+            yTickFormat = v => v + "%"
         } else {
             yDomain = [0, Math.min(2400, Math.max(...measures.map(m => m[attribute])) + 10)]
+            yTickFormat = v => v + "W"
         }
         const marks = []
         if (strategy && strategy.name === 'simple_history_run_complete_strategy') {
@@ -81,6 +83,14 @@
                 }))
             }
         }
+        const dateTickFormat = (date) => {
+            if (!date || !date.getMinutes) return date
+            if (date.getMinutes() === 0) {
+                return new Intl.DateTimeFormat(locale, {hour: "numeric"}).format(date)
+            } else {
+                return new Intl.DateTimeFormat(locale, {hour: "numeric", minute: "numeric"}).format(date)
+            }
+        };
         let plot = Plot.plot({
             y: {
                 domain: yDomain,
@@ -96,7 +106,14 @@
                     marker: 'dot',
                     className: `data-${attribute}`
                 }),
-                Plot.crosshairX(measures, {x: "time", y: attribute})
+                Plot.crosshairX(measures, {x: "time", y: attribute}),
+                Plot.axisX({
+                    ticks: '5 minute',
+                    tickFormat: dateTickFormat
+                }),
+                Plot.axisY({
+                    tickFormat: yTickFormat
+                })
             ]
         });
         diagramContainer.append(plot)
@@ -109,6 +126,7 @@
         const attribute = container.dataset.attribute
         const xAxisLabel = container.dataset.xAxisLabel
         const fullscreen = !!container.dataset.fullscreen
+        const locale = container.dataset.locale || 'en-GB'
         if (!container.id) container.id = `${makeSafeForCSS(entityType)}-${makeSafeForCSS(entityName)}-${makeSafeForCSS(attribute)}-diagram-container`
         const measures = []
         let thresholds
@@ -131,24 +149,26 @@
                 }
                 return measures
             })
-            .then(measurements => drawChart(measurements, container.id, attribute, thresholds, strategy, xAxisLabel, fullscreen))
+            .then(measurements => drawChart(measurements, container.id, attribute, thresholds, strategy, xAxisLabel, fullscreen, locale))
             .then(() => fetch(`/api/${entityType}s/${entityName}`))
             .then(data => data.json())
             .then(data => {
-                const value = data[attribute] ? typeof(data[attribute]) === 'object' ? data[attribute].value : data[attribute] : null
+                const value = data[attribute] ? typeof (data[attribute]) === 'object' ? data[attribute].value : data[attribute] : null
                 if (!!value) {
-                    const lastSeenAt = new Date(data['last_seen_at'])
                     if (measures.length > 0) {
                         measures.pop()
                     } else {
-                        const m = {time: lastSeenAt}
-                        m[attribute] = value
-                        measures.push(m)
+                        const lastSeenAt = new Date(data['last_seen_at'])
+                        if (lastSeenAt) {
+                            const m = {time: lastSeenAt}
+                            m[attribute] = value
+                            measures.push(m)
+                        }
                     }
                     const m = {time: new Date()}
                     m[attribute] = value
                     measures.push(m)
-                    drawChart(measures, container.id, attribute, thresholds, strategy, xAxisLabel, fullscreen)
+                    drawChart(measures, container.id, attribute, thresholds, strategy, xAxisLabel, fullscreen, locale)
                 }
             })
             .then(() => window.setTimeout(fetchAndDrawDiagram, 30 * 1000))
@@ -168,7 +188,7 @@
                 }))
         }
         Promise.all(promisesBeforeDrawing).then(() => fetchAndDrawDiagram())
-            .then(() => window.addEventListener('resize', () => drawChart(measures, container.id, attribute, thresholds, strategy, xAxisLabel, fullscreen)))
+            .then(() => window.addEventListener('resize', () => drawChart(measures, container.id, attribute, thresholds, strategy, xAxisLabel, fullscreen, locale)))
     })
 
     // Thanks to PleaseStand at StackOverflow: https://stackoverflow.com/a/7627603
