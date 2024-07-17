@@ -15,6 +15,7 @@ const ActionButtons = function () {
     self.submitUnload = function (event) {
         if (event.preventDefault) event.preventDefault();
         fetch(self.dataset.unloadApiUrl, {method: "POST"})
+        socket.emit('celebrate')
         return false;
     }
     self.submitLoad = function (event) {
