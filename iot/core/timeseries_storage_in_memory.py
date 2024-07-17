@@ -29,24 +29,16 @@ class InMemoryTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
                                        power_consumption["watt"]) for power_consumption in power_consumption_values if
                 datetime.fromisoformat(power_consumption["created_at"]) > time_boundary]
 
-    def append_room_climate(self, temperature: Temperature, humidity: float, room_name):
+    def append_room_climate(self, measure: TemperatureHumidityMeasurement, room_name: str):
         climate_values = self.climate_values[room_name] \
             if room_name in self.climate_values else []
         climate_values.append(
-            {"humidity": humidity, "temperature": temperature.value, "created_at": datetime.now().isoformat()})
+            {"humidity": measure.humidity, "temperature": measure.temperature, "created_at": measure.time.isoformat()})
         if len(climate_values) > 10:
             climate_values.reverse()
             climate_values.pop()
             climate_values.reverse()
         self.climate_values[room_name] = climate_values
-
-    def rename(self, old_name, new_name):
-        if old_name in self.power_consumption_values:
-            self.power_consumption_values[new_name] = self.power_consumption_values[old_name]
-            del self.power_consumption_values[old_name]
-        if old_name in self.climate_values:
-            self.climate_values[new_name] = self.climate_values[old_name]
-            del self.climate_values[old_name]
 
     def get_room_climate_for_last_seconds(self, seconds: int, name: str) -> List[TemperatureHumidityMeasurement]:
         if name in self.climate_values:
@@ -58,6 +50,14 @@ class InMemoryTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
                         seconds=seconds), self.climate_values[name])))
         else:
             return list()
+
+    def rename(self, old_name, new_name):
+        if old_name in self.power_consumption_values:
+            self.power_consumption_values[new_name] = self.power_consumption_values[old_name]
+            del self.power_consumption_values[old_name]
+        if old_name in self.climate_values:
+            self.climate_values[new_name] = self.climate_values[old_name]
+            del self.climate_values[old_name]
 
     def start(self):
         pass

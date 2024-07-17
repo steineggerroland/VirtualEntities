@@ -26,7 +26,7 @@ import {socket} from "./refresh.js";
             .append("svg")
             .attr("width", width)
             .attr("height", height)
-        diagram = svg.append("g")
+        const diagram = svg.append("g")
             .attr("transform",
                 "translate(" + margin.left + "," + margin.top + ")");
         const x = d3.scaleTime()

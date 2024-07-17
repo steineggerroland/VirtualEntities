@@ -1,15 +1,21 @@
+from datetime import datetime
+
+import pytz
 from python_event_bus import EventBus
 
 from iot.core.configuration import VirtualEntityConfig
 from iot.core.time_series_storage import TimeSeriesStorage
+from iot.core.timeseries_types import TemperatureHumidityMeasurement
 from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.room import Room
 from iot.infrastructure.room_catalog import RoomCatalog
+from iot.infrastructure.room_events import RoomEvents, RoomEvent, RoomClimateEvent
 from iot.infrastructure.units import TemperatureThresholds, Range, HumidityThresholds, Temperature
 
 
 class RoomService:
-    def __init__(self, room_catalog: RoomCatalog, time_series_storage: TimeSeriesStorage, room_config: VirtualEntityConfig):
+    def __init__(self, room_catalog: RoomCatalog, time_series_storage: TimeSeriesStorage,
+                 room_config: VirtualEntityConfig):
         self.room_catalog = room_catalog
         self.time_series_storage = time_series_storage
         self.room_name = room_config.name
@@ -24,13 +30,15 @@ class RoomService:
                 Range(room_config.humidity_thresholds.optimal.lower, room_config.humidity_thresholds.optimal.upper),
                 room_config.humidity_thresholds.critical_lower, room_config.humidity_thresholds.critical_upper)
         self.room_catalog.catalog(room)
-        EventBus.subscribe("room/changed_config_name", self.change_name, priority=0)
+        EventBus.subscribe(RoomEvents.CHANGED_CONFIG_NAME, self.change_name, priority=0)
+        EventBus.call(RoomEvents.ADDED, RoomEvent(room))
 
     def update_temperature(self, new_temperature: Temperature):
         try:
             room: Room = self.room_catalog.find_room(self.room_name)
             room = room.update_temperature(new_temperature)
             self.room_catalog.catalog(room)
+            EventBus.call(RoomEvents.UPDATED_ROOM_CLIMATE, RoomEvent(room))
         except ValueError as e:
             raise DatabaseException('Failed to save updated temperature.', e) from e
 
@@ -39,6 +47,7 @@ class RoomService:
             room: Room = self.room_catalog.find_room(self.room_name)
             room = room.update_humidity(humidity)
             self.room_catalog.catalog(room)
+            EventBus.call(RoomEvents.UPDATED_ROOM_CLIMATE, RoomEvent(room))
         except ValueError as e:
             raise DatabaseException('Failed to save updated humidity.', e) from e
 
@@ -48,7 +57,9 @@ class RoomService:
             room = room.update_temperature(temperature)
             room = room.update_humidity(humidity)
             self.room_catalog.catalog(room)
-            self.time_series_storage.append_room_climate(temperature, humidity, self.room_name)
+            measure = TemperatureHumidityMeasurement(room.last_updated_at, temperature.value, humidity)
+            self.time_series_storage.append_room_climate(measure, self.room_name)
+            EventBus.call(RoomEvents.UPDATED_ROOM_CLIMATE, RoomClimateEvent(room, measure))
         except ValueError as e:
             raise DatabaseException('Failed to save room climate.', e) from e
 

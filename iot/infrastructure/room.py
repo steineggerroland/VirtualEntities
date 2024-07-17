@@ -67,9 +67,12 @@ class Room(VirtualEntity):
                 "humidity": self.humidity,
                 "temperature_thresholds": self.temperature_thresholds.to_dict() if self.temperature_thresholds else None,
                 "humidity_thresholds": self.humidity_thresholds.to_dict() if self.humidity_thresholds else None,
-                "temperature_rating": self.rate_temperature(),
-                "humidity_rating": self.rate_humidity(),
-                "online_status": self.online_status(),
+                "temperature_rating": self.rate_temperature() if type(
+                    self.rate_temperature()) is str else self.rate_temperature().value,
+                "humidity_rating": self.rate_humidity() if type(
+                    self.rate_humidity()) is str else self.rate_humidity().value,
+                "online_status": self.online_status() if type(
+                    self.online_status()) is str else self.online_status().value,
                 "last_updated_at": self.last_updated_at.isoformat() if self.last_updated_at is not None else None,
                 "last_seen_at": self.last_seen_at.isoformat() if self.last_seen_at is not None else None}
 

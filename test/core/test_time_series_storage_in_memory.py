@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from unittest.mock import patch, Mock
 
 from iot.core.timeseries_storage_in_memory import InMemoryTimeSeriesStorageStrategy
-from iot.core.timeseries_types import ConsumptionMeasurement
+from iot.core.timeseries_types import ConsumptionMeasurement, TemperatureHumidityMeasurement
 from iot.infrastructure.units import Temperature
 
 
@@ -66,9 +66,8 @@ class InMemoryStorageTest(unittest.TestCase):
     def test_storing_climate(self, datetime_mock: Mock):
         db = InMemoryTimeSeriesStorageStrategy()
         now = datetime.now()
-        datetime_mock.now.return_value = now
         # when
-        db.append_room_climate(Temperature(23.1), 14.12, "entity01")
+        db.append_room_climate(TemperatureHumidityMeasurement(now, 23.1, 14.12), "entity01")
         # then
         # reset behavior of mock
         datetime_mock.now.return_value = datetime.now()
@@ -81,7 +80,7 @@ class InMemoryStorageTest(unittest.TestCase):
     def test_only_returns_for_entity_climate(self):
         db = InMemoryTimeSeriesStorageStrategy()
         # when
-        db.append_room_climate(Temperature(23.1), 14.12, "entity01")
+        db.append_room_climate(TemperatureHumidityMeasurement(datetime.now(), 23.1, 14.12), "entity01")
         # then
         self.assertFalse(db.get_room_climate_for_last_seconds(60, "other entity"))
 
@@ -89,14 +88,10 @@ class InMemoryStorageTest(unittest.TestCase):
     def test_getting_in_time_range_consumption(self, datetime_mock: Mock):
         db = InMemoryTimeSeriesStorageStrategy()
         # when
-        datetime_mock.now.return_value = datetime.now() - timedelta(days=1)
-        db.append_room_climate(Temperature(21), 1, "entity01")
-        datetime_mock.now.return_value = datetime.now() - timedelta(hours=1)
-        db.append_room_climate(Temperature(22), 2, "entity01")
-        datetime_mock.now.return_value = datetime.now() - timedelta(minutes=1)
-        db.append_room_climate(Temperature(23), 3, "entity01")
-        datetime_mock.now.return_value = datetime.now()
-        db.append_room_climate(Temperature(24), 4, "entity01")
+        db.append_room_climate(TemperatureHumidityMeasurement(datetime.now() - timedelta(days=1), 21, 1), "entity01")
+        db.append_room_climate(TemperatureHumidityMeasurement(datetime.now() - timedelta(hours=1), 22, 2), "entity01")
+        db.append_room_climate(TemperatureHumidityMeasurement(datetime.now() - timedelta(minutes=1), 23, 3), "entity01")
+        db.append_room_climate(TemperatureHumidityMeasurement(datetime.now(), 24, 4), "entity01")
         # then
         # reset behavior of mock
         datetime_mock.now.return_value = datetime.now()
@@ -109,9 +104,8 @@ class InMemoryStorageTest(unittest.TestCase):
     def test_just_keeps_ten_climates(self, datetime_mock: Mock):
         db = InMemoryTimeSeriesStorageStrategy()
         # when
-        datetime_mock.now.return_value = datetime.now()
         for index in range(20):
-            db.append_room_climate(Temperature(index), index, "entity01")
+            db.append_room_climate(TemperatureHumidityMeasurement(datetime.now(), index, index), "entity01")
         # then
         # reset behavior of mock
         datetime_mock.now.return_value = datetime.now()

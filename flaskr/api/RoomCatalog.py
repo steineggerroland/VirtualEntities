@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import datetime, timedelta
 
@@ -23,13 +24,11 @@ def room_catalog_api(room_catalog: RoomCatalog, time_series_storage: TimeSeriesS
     @api.get('/rooms/<name>/temperatures')
     def temperature_time_line(name: str):
         time_series = _get_time_series(name)
-        logger.debug(f'{name}s` temperature: {time_series}')
         return list(map(lambda c: c.to_dict(), time_series))
 
     @api.get('/rooms/<name>/humiditys')
     def humidity_time_line(name: str):
         time_series = _get_time_series(name)
-        logger.debug(f'{name}s` humidity: {time_series}')
         return list(map(lambda c: c.to_dict(), time_series))
 
     def _get_time_series(name):
