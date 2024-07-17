@@ -3,6 +3,8 @@ import unittest
 from datetime import datetime, timedelta
 from unittest.mock import Mock
 
+from dateutil.tz import tzlocal
+
 from iot.core.storage import Storage
 from iot.core.timeseries_types import ConsumptionMeasurement
 from iot.infrastructure.appliance.run_complete_strategy import SimpleHistoryRunCompleteStrategy
@@ -41,7 +43,7 @@ class TestSimpleHistoryRunCompleteStrategy(unittest.TestCase):
         self.assertTrue(self.strategy.is_run_completed(Mock()))
 
     def generate_measurement(self, is_below_threshold=True) -> ConsumptionMeasurement:
-        time = datetime.now() - timedelta(seconds=random.randint(0, self.duration_to_be_blow_threshold - 1))
+        time = datetime.now(tzlocal()) - timedelta(seconds=random.randint(0, self.duration_to_be_blow_threshold - 1))
         return ConsumptionMeasurement(time,
                                       _below_threshold(self.threshold) if is_below_threshold else _above_threshold(
                                           self.threshold))

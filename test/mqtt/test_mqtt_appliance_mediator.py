@@ -4,16 +4,17 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch, Mock, call, ANY
 
+from dateutil.tz import tzlocal
 from waiting import wait
 
 from iot.core.configuration import PlannedNotification, Destinations, Sources, MqttMeasureSource, Measure
-from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.appliance.appliance_service import ApplianceService
 from iot.infrastructure.appliance.appliance_that_can_be_loaded import RunningState, ApplianceThatCanBeLoaded
 from iot.infrastructure.appliance.power_state_decorator import PowerState
+from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.virtual_entity import OnlineStatus
-from iot.mqtt.mqtt_client import MqttClient
 from iot.mqtt.mqtt_appliance_mediator import MqttApplianceMediator
+from iot.mqtt.mqtt_client import MqttClient
 
 DIR = Path(__file__).parent
 
@@ -46,7 +47,8 @@ class MqttMediatorTest(unittest.TestCase):
         destinations = Destinations(list([PlannedNotification("some/topic", "* * * * * *")]))
         mqtt_mediator = MqttApplianceMediator(self.appliance_service_mock, self.mqtt_client_mock)
         mqtt_mediator.add_appliance_by_config(self.appliance_name, self.sources_mock, destinations)
-        _set_up_croniter(responses=[datetime.now(), datetime.now(), datetime.now() + timedelta(weeks=1)])
+        _set_up_croniter(
+            responses=[datetime.now(tzlocal()), datetime.now(tzlocal()), datetime.now(tzlocal()) + timedelta(weeks=1)])
         # when
         mqtt_mediator.start()
         # then
@@ -60,7 +62,7 @@ class MqttMediatorTest(unittest.TestCase):
         mqtt_mediator = MqttApplianceMediator(self.appliance_service_mock, self.mqtt_client_mock)
         mqtt_mediator.add_appliance_by_config(self.appliance_name, self.sources_mock, destinations)
         self._set_up_thing_matching_json_file()
-        _set_up_croniter(responses=[datetime.now(), datetime.now() + timedelta(weeks=1)])
+        _set_up_croniter(responses=[datetime.now(tzlocal()), datetime.now(tzlocal()) + timedelta(weeks=1)])
         # when
         mqtt_mediator.start()
         # then
@@ -69,6 +71,15 @@ class MqttMediatorTest(unittest.TestCase):
         expected_json['online_status'] = OnlineStatus(expected_json['online_status'])
         expected_json['power_state'] = PowerState(expected_json['power_state'])
         expected_json['running_state'] = RunningState(expected_json['running_state'])
+        # all times are expected to be local timezone
+        expected_json['started_run_at'] = datetime.fromisoformat(expected_json['started_run_at']).astimezone(
+            tzlocal()).isoformat()
+        expected_json['finished_last_run_at'] = datetime.fromisoformat(
+            expected_json['finished_last_run_at']).astimezone(tzlocal()).isoformat()
+        expected_json['last_seen_at'] = datetime.fromisoformat(expected_json['last_seen_at']).astimezone(
+            tzlocal()).isoformat()
+        expected_json['last_updated_at'] = datetime.fromisoformat(expected_json['last_updated_at']).astimezone(
+            tzlocal()).isoformat()
         wait(lambda: sum(publish_args == call(ANY, ANY) for publish_args in
                          self.mqtt_client_mock.publish.call_args_list) >= 1, timeout_seconds=1,
              waiting_for="mqtt.publish called several times")
@@ -83,12 +94,12 @@ class MqttMediatorTest(unittest.TestCase):
                                                       "2024-01-02T03:04:05.678910"),
                                                   False, True,
                                                   datetime.fromisoformat(
-                                                      "2024-01-02T01:01:01.111111"),
+                                                      "2024-01-02T01:01:01.111111").astimezone(tzlocal()),
                                                   RunningState.RUNNING,
                                                   datetime.fromisoformat(
-                                                      "2023-12-31T23:59:02.133742"),
+                                                      "2023-12-31T23:59:02.133742").astimezone(tzlocal()),
                                                   datetime.fromisoformat(
-                                                      "2024-01-02T03:04:05.678910")))
+                                                      "2024-01-02T03:04:05.678910").astimezone(tzlocal())))
 
     def test_subscribes_for_consumption_on_start(self):
         # given

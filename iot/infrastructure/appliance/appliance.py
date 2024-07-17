@@ -1,51 +1,56 @@
 from datetime import datetime, timedelta
 
+from dateutil.tz import tzlocal
+
 from iot.infrastructure.appliance.power_state_decorator import PowerState, SimplePowerStateDecorator
 from iot.infrastructure.virtual_entity import VirtualEntity
 
 
 class Appliance(VirtualEntity):
-    def __init__(self, name, entity_type: str, watt: float | None = None, last_updated_at: datetime = datetime.now(),
+    def __init__(self, name, entity_type: str, watt: float | None = None,
+                 last_updated_at: datetime = datetime.now(tzlocal()),
                  online_delta_in_seconds=300, started_last_run_at=None, finished_last_run_at=None,
                  last_seen_at: None | datetime = None):
         super().__init__(name, entity_type, last_updated_at, last_seen_at, online_delta_in_seconds)
         self.watt = watt
         self.power_state = PowerState.UNKNOWN
         self._power_state_decoration = SimplePowerStateDecorator(self)
-        self.started_run_at: datetime | None = started_last_run_at
-        self.finished_last_run_at: datetime | None = finished_last_run_at
+        self.started_run_at: datetime | None = started_last_run_at.astimezone(
+            tzlocal()) if started_last_run_at else None
+        self.finished_last_run_at: datetime | None = finished_last_run_at.astimezone(
+            tzlocal()) if finished_last_run_at else None
 
     def update_power_consumption(self, watt):
         self._power_state_decoration.update_power_consumption(watt)
-        now = datetime.now()
+        now = datetime.now(tzlocal())
         self.last_updated_at = now
         self.last_seen_at = now
 
     def start_run(self):
-        now = datetime.now()
+        now = datetime.now(tzlocal())
         self.started_run_at = now
         self.last_updated_at = now
 
     def finish_run(self):
         self.started_run_at = None
-        now = datetime.now()
+        now = datetime.now(tzlocal())
         self.finished_last_run_at = now
         self.last_updated_at = now
 
     def rename(self, name: str):
         self.name = name
-        now = datetime.now()
+        now = datetime.now(tzlocal())
         self.last_updated_at = now
 
     def running_for_time_period(self) -> timedelta:
         if self.started_run_at is not None:
-            return self.started_run_at - datetime.now()
+            return self.started_run_at - datetime.now(tzlocal())
         else:
             return timedelta(0)
 
     def finished_last_run_before_time_period(self) -> timedelta:
         if self.finished_last_run_at is not None:
-            return self.finished_last_run_at - datetime.now()
+            return self.finished_last_run_at - datetime.now(tzlocal())
         else:
             return timedelta(0)
 

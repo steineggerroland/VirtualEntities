@@ -2,6 +2,8 @@ import random
 import unittest
 from datetime import datetime, timedelta
 
+from dateutil.tz import tzlocal
+
 from iot.infrastructure.appliance.appliance import Appliance
 from iot.infrastructure.appliance.power_state_decorator import PowerState
 from iot.infrastructure.virtual_entity import OnlineStatus
@@ -25,15 +27,15 @@ class ConstructionTest(unittest.TestCase):
     def test_online_status(self):
         self.assertEqual(Appliance('appliance', "some type").online_status(), OnlineStatus.UNKNOWN)
         appliance_updated_now_and_online_delta_ten_seconds = Appliance('appliance', "some type",
-                                                                     last_seen_at=datetime.now())
+                                                                       last_seen_at=datetime.now(tzlocal()))
         self.assertEqual(appliance_updated_now_and_online_delta_ten_seconds.online_status(), OnlineStatus.ONLINE)
         appliance_without_online_delta = Appliance('appliance', "some type", online_delta_in_seconds=20,
-                                                 last_seen_at=datetime.now() - timedelta(seconds=20 + 1))
+                                                   last_seen_at=datetime.now(tzlocal()) - timedelta(seconds=20 + 1))
         self.assertEqual(appliance_without_online_delta.online_status(), OnlineStatus.OFFLINE)
 
     def test_to_dict_has_mandatory_fields(self):
-        last_updated_at = datetime.now()
-        last_seen_at = datetime.now() - timedelta(minutes=2)
+        last_updated_at = datetime.now(tzlocal())
+        last_seen_at = datetime.now(tzlocal()) - timedelta(minutes=2)
         dryer = Appliance("test", "some type", 312.5, last_updated_at=last_updated_at, last_seen_at=last_seen_at)
         self.assertDictEqual(dryer.to_dict(),
                              {"name": "test", "type": "some type", "watt": 312.5, "online_status": 'online',

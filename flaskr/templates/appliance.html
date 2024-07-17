@@ -103,7 +103,8 @@
                 </div>
                 <div class="power-consumption diagram" data-entity-type="appliance"
                      data-attribute="power-consumption" data-use-run-complete-strategy="true"
-                     data-entity-name="{{ appliance.name }}" data-x-axis-label="{{ _('Watt') }}"></div>
+                     data-entity-name="{{ appliance.name }}" data-x-axis-label="{{ _('Watt') }}"
+                data-locale="{{ lang }}"></div>
             </div>
         </div>
         {% if debug %}{{ appliance.to_dict() }}{% endif %}

@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, date
 from typing import List
 
 import pytz
+from dateutil.tz import tzlocal
 
 from iot.infrastructure.virtual_entity import VirtualEntity
 
@@ -13,7 +14,7 @@ class Appointment:
         self.end_at = end_at.astimezone(pytz.timezone("Europe/Berlin"))
         self.color = color.lower()
         self.description = description
-        self.last_updated_at = datetime.now()
+        self.last_updated_at = datetime.now(tzlocal())
 
     def covers_interval(self, start: datetime, end: datetime):
         if (type(self.start_at) is not datetime and type(self.start_at) is not date) or \
@@ -37,7 +38,7 @@ class Appointment:
 
 class Calendar(VirtualEntity):
     def __init__(self, name: str, url: str, color: str, appointments: List[Appointment] = [],
-                 last_updated_at: datetime = datetime.now(),
+                 last_updated_at: datetime = datetime.now(tzlocal()),
                  last_seen_at: None | datetime = None):
         super().__init__(name, "calendar", last_updated_at, last_seen_at, online_delta_in_seconds=60 * 30)
         self.url = url

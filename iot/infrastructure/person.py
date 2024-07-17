@@ -2,22 +2,24 @@ from datetime import datetime, timedelta
 from functools import reduce
 from typing import List
 
-from iot.infrastructure.virtual_entity import VirtualEntity
+from dateutil.tz import tzlocal
+
 from iot.infrastructure.time.calendar import Calendar, Appointment
+from iot.infrastructure.virtual_entity import VirtualEntity
 
 
 class Person(VirtualEntity):
-    def __init__(self, name: str, calendars: List[Calendar] = (), last_updated_at: datetime = datetime.now(),
+    def __init__(self, name: str, calendars: List[Calendar] = (), last_updated_at: datetime = datetime.now(tzlocal()),
                  last_seen_at: None | datetime = None):
         super().__init__(name, "person", last_updated_at, last_seen_at, online_delta_in_seconds=60 * 10)
         self.calendars = calendars
 
     def set_calendars(self, calendars) -> 'Person':
-        now = datetime.now()
+        now = datetime.now(tzlocal())
         return Person(self.name, calendars, now, now)
 
     def change_name(self, name) -> 'Person':
-        return Person(name, self.calendars, datetime.now(), self.last_seen_at)
+        return Person(name, self.calendars, datetime.now(tzlocal()), self.last_seen_at)
 
     def get_appointments_for(self, start: datetime, delta: timedelta) -> List[Appointment]:
         return list(reduce(lambda a, b: a + b, map(lambda c: c.find_appointments(start, delta), self.calendars), []))

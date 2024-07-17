@@ -1,16 +1,18 @@
 import unittest
 from datetime import datetime, timedelta
 
+from dateutil.tz import tzlocal
+
 from iot.infrastructure.person import Person
-from iot.infrastructure.virtual_entity import OnlineStatus
 from iot.infrastructure.time.calendar import Calendar
+from iot.infrastructure.virtual_entity import OnlineStatus
 
 
 class PersonTest(unittest.TestCase):
     def test_to_dict(self):
         name = "Harry"
-        last_updated_at = datetime.now() - timedelta(minutes=23)
-        last_seen_at = datetime.now()
+        last_updated_at = datetime.now(tzlocal()) - timedelta(minutes=23)
+        last_seen_at = datetime.now(tzlocal())
         calendars = [Calendar("nextcloud", "nextcloud.url", "#FFFFF0"), Calendar("dav", "dav://url", "#F9F898")]
         person = Person(name, calendars, last_updated_at, last_seen_at)
         # when

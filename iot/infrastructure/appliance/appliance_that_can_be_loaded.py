@@ -1,6 +1,7 @@
-import logging
 from datetime import datetime
 from enum import Enum
+
+from dateutil.tz import tzlocal
 
 from iot.infrastructure.appliance.appliance import Appliance
 from iot.infrastructure.appliance.power_state_decorator import PowerState
@@ -35,12 +36,12 @@ class ApplianceThatCanBeLoaded(Appliance):
     def unload(self):
         self.needs_unloading = False
         self.is_loaded = False
-        self.last_updated_at = datetime.now()
+        self.last_updated_at = datetime.now(tzlocal())
 
     def load(self, needs_unloading=False):
         self.is_loaded = True
         self.needs_unloading = needs_unloading if not self.running_state == RunningState.RUNNING else False
-        self.last_updated_at = datetime.now()
+        self.last_updated_at = datetime.now(tzlocal())
 
     def start_run(self):
         super().start_run()
@@ -57,7 +58,8 @@ class ApplianceThatCanBeLoaded(Appliance):
     def to_dict(self):
         return super().to_dict() | {"is_loaded": self.is_loaded, "needs_unloading": self.needs_unloading,
                                     "started_run_at": self.started_run_at.isoformat() if self.started_run_at is not None else None,
-                                    "running_state": self.running_state if type(self.running_state) is str else self.running_state.value,
+                                    "running_state": self.running_state if type(
+                                        self.running_state) is str else self.running_state.value,
                                     "finished_last_run_at": self.finished_last_run_at.isoformat() if self.finished_last_run_at is not None else None, }
 
     @staticmethod
