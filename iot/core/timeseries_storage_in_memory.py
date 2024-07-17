@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from typing import List
 
+import pytz
+
 from iot.core.time_series_storage_strategy import TimeSeriesStorageStrategy
 from iot.core.timeseries_types import ConsumptionMeasurement, TemperatureHumidityMeasurement
 from iot.infrastructure.units import Temperature
@@ -14,7 +16,8 @@ class InMemoryTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
     def append_power_consumption(self, measure: ConsumptionMeasurement, entity_name: str):
         power_consumption_values = self.power_consumption_values[entity_name] \
             if entity_name in self.power_consumption_values else []
-        power_consumption_values.append({"watt": measure.consumption, "created_at": measure.time.isoformat()})
+        power_consumption_values.append({"watt": measure.consumption, "created_at": measure.time.astimezone(
+            pytz.timezone("Europe/Berlin")).isoformat()})
         if len(power_consumption_values) > 10:
             power_consumption_values.reverse()
             power_consumption_values.pop()
@@ -24,7 +27,7 @@ class InMemoryTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
     def get_power_consumptions_for_last_seconds(self, seconds: int, entity_name: str) -> List[ConsumptionMeasurement]:
         power_consumption_values = self.power_consumption_values[entity_name] \
             if entity_name in self.power_consumption_values else []
-        time_boundary = datetime.now() - timedelta(seconds=seconds)
+        time_boundary = datetime.now(pytz.timezone("Europe/Berlin")) - timedelta(seconds=seconds)
         return [ConsumptionMeasurement(datetime.fromisoformat(power_consumption["created_at"]),
                                        power_consumption["watt"]) for power_consumption in power_consumption_values if
                 datetime.fromisoformat(power_consumption["created_at"]) > time_boundary]
@@ -33,7 +36,8 @@ class InMemoryTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
         climate_values = self.climate_values[room_name] \
             if room_name in self.climate_values else []
         climate_values.append(
-            {"humidity": measure.humidity, "temperature": measure.temperature, "created_at": measure.time.isoformat()})
+            {"humidity": measure.humidity, "temperature": measure.temperature,
+             "created_at": measure.time.astimezone(pytz.timezone("Europe/Berlin")).isoformat()})
         if len(climate_values) > 10:
             climate_values.reverse()
             climate_values.pop()
@@ -46,7 +50,8 @@ class InMemoryTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
                 lambda measurement: TemperatureHumidityMeasurement(datetime.fromisoformat(measurement['created_at']),
                                                                    measurement['temperature'], measurement['humidity']),
                 filter(
-                    lambda measurement: datetime.now() - datetime.fromisoformat(measurement['created_at']) < timedelta(
+                    lambda measurement: datetime.now(pytz.timezone("Europe/Berlin")) - datetime.fromisoformat(
+                        measurement['created_at']) < timedelta(
                         seconds=seconds), self.climate_values[name])))
         else:
             return list()
