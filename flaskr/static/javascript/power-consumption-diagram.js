@@ -87,11 +87,33 @@ import {socket} from "./refresh.js";
                 measurements.push(...data.map(d => {
                     return {"date": new Date(d.time), "value": d.consumption}
                 }))
+                if (measurements.length > 0) {
+                    const newest = measurements.pop()
+                    measurements.push(newest)
+                    measurements.push({date: new Date(), value: newest.value})
+                }
                 drawChart(measurements, container.id, xAxisLabel, fullscreen)
+            })
+            .then(() => fetch(`/api/appliances/${entityName}`))
+            .then(data => data.json())
+            .then(data => {
+                const value = data.watt
+                if (value !== null) {
+                    const lastSeenAt = new Date(data['last_seen_at'])
+                    if (measurements.length > 0) {
+                        measurements.pop()
+                    } else {
+                        measurements.push({date: lastSeenAt, value})
+                    }
+                    measurements.push({date: new Date(), value})
+                    drawChart(measurements, container.id, xAxisLabel, fullscreen)
+                }
             })
         socket.on(`appliances/${entityName}/powerConsumptionUpdated`, event => {
             const measure = event.measure
+            measurements.pop()
             measurements.push({"date": new Date(measure.time), "value": measure.consumption})
+            measurements.push({"date": new Date(), "value": measure.consumption})
             drawChart(measurements, container.id, xAxisLabel, fullscreen)
         });
         fetchAndDrawDiagram().then(() => window.addEventListener('resize', () => drawChart(measurements, container.id, xAxisLabel, fullscreen)))

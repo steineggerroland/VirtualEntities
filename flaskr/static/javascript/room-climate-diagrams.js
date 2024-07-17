@@ -90,11 +90,33 @@ import {socket} from "./refresh.js";
                 measurements.push(...data.map(d => {
                     return {"date": new Date(d.time), "value": d[attribute]}
                 }))
+                if (measurements.length > 0) {
+                    const newest = measurements.pop()
+                    measurements.push(newest)
+                    measurements.push({date: new Date(), value: newest.value})
+                }
                 drawChart(measurements, container.id, xAxisLabel, fullscreen)
+            })
+            .then(() => fetch(`/api/rooms/${entityName}`))
+            .then(data => data.json())
+            .then(data => {
+                const value = data[attribute] ? typeof(data[attribute]) === 'object' ? data[attribute].value : data[attribute] : null
+                if (!!value) {
+                    const lastSeenAt = new Date(data['last_seen_at'])
+                    if (measurements.length > 0) {
+                        measurements.pop()
+                    } else {
+                        measurements.push({date: lastSeenAt, value})
+                    }
+                    measurements.push({date: new Date(), value})
+                    drawChart(measurements, container.id, xAxisLabel, fullscreen)
+                }
             })
         socket.on(`rooms/${entityName}/indorClimateUpdated`, event => {
             const measure = event.measure
+            measurements.pop()
             measurements.push({"date": new Date(measure.time), "value": measure[attribute]})
+            measurements.push({"date": new Date(), "value": measure[attribute]})
             drawChart(measurements, container.id, xAxisLabel, fullscreen)
         });
         fetchAndDrawDiagram().then(() => window.addEventListener('resize', () => drawChart(measurements, container.id, xAxisLabel, fullscreen)))

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from http import HTTPStatus
 
+import pytz
 from flask import Blueprint, Response, make_response
 
 from iot.core.configuration_manager import ConfigurationManager
@@ -33,9 +34,11 @@ def appliance_depot_api(appliance_service: ApplianceService, appliance_depot: Ap
         if appliance.watt is not None:
             if len(measures) == 0:  # last update was before time interval
                 measures.append(
-                    ConsumptionMeasurement(max(datetime.now() - timedelta(seconds=60 * 60 * 4), appliance.last_seen_at),
-                                           appliance.watt))
-            measures.append(ConsumptionMeasurement(datetime.now(), appliance.watt))
+                    ConsumptionMeasurement(
+                        max(datetime.now(pytz.timezone('Europe/Berlin')) - timedelta(seconds=60 * 60 * 4),
+                            appliance.last_seen_at),
+                        appliance.watt))
+            measures.append(ConsumptionMeasurement(datetime.now(pytz.timezone('Europe/Berlin')), appliance.watt))
         return list(
             map(lambda c: c.to_dict(), measures))
 

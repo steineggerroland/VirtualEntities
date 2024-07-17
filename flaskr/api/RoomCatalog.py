@@ -1,7 +1,7 @@
-import json
 import logging
 from datetime import datetime, timedelta
 
+import pytz
 from flask import Blueprint
 
 from iot.core.time_series_storage import TimeSeriesStorage
@@ -32,15 +32,6 @@ def room_catalog_api(room_catalog: RoomCatalog, time_series_storage: TimeSeriesS
         return list(map(lambda c: c.to_dict(), time_series))
 
     def _get_time_series(name):
-        time_series = time_series_storage.get_room_climate_for_last_seconds(60 * 60 * 4, name)
-        room = room_catalog.find_room(name)
-        if room.humidity is not None and room.temperature is not None:
-            if len(time_series) == 0:  # last update was before time interval
-                time_series.append(
-                    TemperatureHumidityMeasurement(
-                        max(datetime.now() - timedelta(seconds=60 * 60 * 4), room.last_seen_at),
-                        room.temperature.value, room.humidity))
-            time_series.append(TemperatureHumidityMeasurement(datetime.now(), room.temperature.value, room.humidity))
-        return time_series
+        return time_series_storage.get_room_climate_for_last_seconds(60 * 60 * 4, name)
 
     return api
