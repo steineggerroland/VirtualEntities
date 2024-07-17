@@ -1,6 +1,7 @@
 (function () {
 
     function drawChart(measures, containerId, attribute, thresholds, strategy, xAxisLabel, fullscreen) {
+        console.log(measures)
         if (attribute === 'power-consumption') {
             measures.forEach(m => m[attribute] = m['consumption'])
         }
@@ -121,9 +122,35 @@
                 }) // convert isoformat to date
                 data = data.filter(d => !(measures.map(m => m.time.toISOString()).includes(d.time.toISOString())))
                 measures.push(...data)
+                if (measures.length > 0) {
+                    const newest = measures.pop()
+                    measures.push(newest)
+                    const m = {...newest}
+                    m.time = new Date()
+                    measures.push(m)
+                }
                 return measures
             })
             .then(measurements => drawChart(measurements, container.id, attribute, thresholds, strategy, xAxisLabel, fullscreen))
+            .then(() => fetch(`/api/${entityType}s/${entityName}`))
+            .then(data => data.json())
+            .then(data => {
+                const value = data[attribute] ? typeof(data[attribute]) === 'object' ? data[attribute].value : data[attribute] : null
+                if (!!value) {
+                    const lastSeenAt = new Date(data['last_seen_at'])
+                    if (measures.length > 0) {
+                        measures.pop()
+                    } else {
+                        const m = {time: lastSeenAt}
+                        m[attribute] = value
+                        measures.push(m)
+                    }
+                    const m = {time: new Date()}
+                    m[attribute] = value
+                    measures.push(m)
+                    drawChart(measures, container.id, attribute, thresholds, strategy, xAxisLabel, fullscreen)
+                }
+            })
             .then(() => window.setTimeout(fetchAndDrawDiagram, 30 * 1000))
         let promisesBeforeDrawing = []
         if (!!container.dataset.useRunCompleteStrategy) {
