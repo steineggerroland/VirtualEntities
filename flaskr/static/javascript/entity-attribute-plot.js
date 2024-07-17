@@ -108,7 +108,6 @@
                 }),
                 Plot.crosshairX(measures, {x: "time", y: attribute}),
                 Plot.axisX({
-                    ticks: '5 minute',
                     tickFormat: dateTickFormat
                 }),
                 Plot.axisY({
