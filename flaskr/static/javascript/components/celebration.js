@@ -125,7 +125,7 @@ const ConfettiWall = function () {
         this.size = 5.0;
         this.oscillationSpeed = Math.random() * 1.5 + 0.5;
         this.xSpeed = 40.0;
-        this.ySpeed = Math.random() * 60 + 50.0;
+        this.ySpeed = Math.random() * 70 + 70.0;
         this.corners = new Array();
         this.time = Math.random();
         var ci = Math.round(Math.random() * (colors.length - 1));
@@ -182,7 +182,7 @@ const ConfettiWall = function () {
         this.time = Math.random() * 100;
         this.oscillationSpeed = Math.random() * 2 + 2;
         this.oscillationDistance = Math.random() * 40 + 40;
-        this.ySpeed = Math.random() * 40 + 80;
+        this.ySpeed = Math.random() * 50 + 100;
         for (var i = 0; i < this.particleCount; i++) {
             this.particles[i] = new EulerMass(_x, _y - i * this.particleDist, this.particleMass, this.particleDrag);
         }
@@ -309,15 +309,18 @@ const ConfettiWall = function () {
         var rpThick = 8.0;
         var confettiRibbons = new Array();
         ConfettiRibbon.bounds = new Vector2(canvas.width, canvas.height);
-        for (i = 0; i < confettiRibbonCount; i++) {
-            confettiRibbons[i] = new ConfettiRibbon(Math.random() * canvas.width, -Math.random() * canvas.height * 2, rpCount, rpDist, rpThick, 45, 1, 0.05);
-        }
         var confettiPaperCount = 50;
         var confettiPapers = new Array();
         ConfettiPaper.bounds = new Vector2(canvas.width, canvas.height);
-        for (i = 0; i < confettiPaperCount; i++) {
-            confettiPapers[i] = new ConfettiPaper(Math.random() * canvas.width, Math.random() * canvas.height);
+        this.init = function () {
+            for (i = 0; i < confettiRibbonCount; i++) {
+                confettiRibbons[i] = new ConfettiRibbon(Math.random() * canvas.width, -Math.random() * canvas.height, rpCount, rpDist, rpThick, 45, 1, 0.05);
+            }
+            for (i = 0; i < confettiPaperCount; i++) {
+                confettiPapers[i] = new ConfettiPaper(Math.random() * canvas.width, Math.random() * canvas.height);
+            }
         }
+        this.init()
         this.resize = function () {
             canvas.width = canvasParent.offsetWidth;
             canvas.height = canvasParent.offsetHeight;
@@ -349,10 +352,12 @@ const ConfettiWall = function () {
     }
     self.id = `confetti-wall-${Math.round(Math.random() * 9999)}`
     self.classList.add('d-none')
+    const c = new confetti.Context(self.id)
     self.onload = () => {
         socket.on('celebrate', () => {
             self.classList.remove('d-none')
-            const c = new confetti.Context(self.id)
+            c.resize()
+            c.init()
             c.start()
             setTimeout(() => {
                 c.stop()
