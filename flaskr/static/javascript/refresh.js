@@ -5,7 +5,7 @@ socket.on('connect', function () {
     console.log('Connected to socket')
 });
 socket.onAny((event) => {
-    // console.log(`${new Date().getTime()}: ${event}`)
+    console.log(`${new Date().getTime()}: ${event}`)
 });
 
 

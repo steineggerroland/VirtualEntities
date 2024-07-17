@@ -1,3 +1,5 @@
+import {socket} from "./refresh.js";
+
 (function () {
 
     function drawChart(measures, containerId, xAxisLabel, fullscreen) {
@@ -24,7 +26,7 @@
             .append("svg")
             .attr("width", width)
             .attr("height", height)
-        diagram = svg.append("g")
+        const diagram = svg.append("g")
             .attr("transform",
                 "translate(" + margin.left + "," + margin.top + ")");
         const x = d3.scaleTime()
@@ -89,7 +91,12 @@
                     return {"date": new Date(d.time), "value": d[attribute]}
                 }))
                 drawChart(measurements, container.id, xAxisLabel, fullscreen)
-            }).then(() => window.setTimeout(fetchAndDrawDiagram, 30 * 1000))
+            })
+        socket.on(`rooms/${entityName}/indorClimateUpdated`, event => {
+            const measure = event.measure
+            measurements.push({"date": new Date(measure.time), "value": measure[attribute]})
+            drawChart(measurements, container.id, xAxisLabel, fullscreen)
+        });
         fetchAndDrawDiagram().then(() => window.addEventListener('resize', () => drawChart(measurements, container.id, xAxisLabel, fullscreen)))
     })
 

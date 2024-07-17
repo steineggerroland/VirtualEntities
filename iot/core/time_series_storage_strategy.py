@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import List
 
-from iot.core.timeseries_types import ConsumptionMeasurement
+from iot.core.timeseries_types import ConsumptionMeasurement, TemperatureHumidityMeasurement
 from iot.infrastructure.units import Temperature
 
 
@@ -15,7 +15,7 @@ class TimeSeriesStorageStrategy(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def append_power_consumption(self, watt: float, entity_name: str):
+    def append_power_consumption(self, measure: ConsumptionMeasurement, entity_name: str):
         pass
 
     @abstractmethod
@@ -23,7 +23,11 @@ class TimeSeriesStorageStrategy(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def append_room_climate(self, temperature: Temperature, humidity: float, entity_name: str):
+    def append_room_climate(self, measure: TemperatureHumidityMeasurement, entity_name: str):
+        pass
+
+    @abstractmethod
+    def get_room_climate_for_last_seconds(self, seconds: int, name: str) -> List[TemperatureHumidityMeasurement]:
         pass
 
     @abstractmethod

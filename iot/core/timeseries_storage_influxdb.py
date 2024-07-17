@@ -55,16 +55,17 @@ class InfluxDbTimeSeriesStorageStrategy(TimeSeriesStorageStrategy):
             measurements.append(ConsumptionMeasurement(datetime.fromisoformat(point['time']), point[CONSUMPTION_FIELD]))
         return measurements
 
-    def append_room_climate(self, temperature: Temperature, humidity: float, entity_name):
+    def append_room_climate(self, measure: TemperatureHumidityMeasurement, entity_name: str):
         point = {"measurement": INDOOR_CLIMATE_SERIES, "tags": {ENTITY_NAME_TAG: entity_name},
-                 "fields": {TEMPERATURE_FIELD: float(temperature.value), HUMIDITY_FIELD: float(humidity)}}
+                 "fields": {TEMPERATURE_FIELD: float(measure.temperature), HUMIDITY_FIELD: float(measure.humidity)},
+                 "time": measure.time}
         try:
             self.influxdb.write_points([point])
         except InfluxDBClientError as e:
             self.logger.debug("Failed to write room climate (%s, %s%) for entity (%s) to influx db: %s",
-                              temperature, humidity, entity_name, e, exc_info=True)
+                              measure.temperature, measure.humidity, entity_name, e, exc_info=True)
             raise DatabaseException("Failed to write room climate (%s, %d%%) for entity '%s' to influx db: %s" %
-                                    (temperature, humidity, entity_name, e), e) from e
+                                    (measure.temperature, measure.humidity, entity_name, e), e) from e
 
     def get_room_climate_for_last_seconds(self, seconds: int, room_name: str) -> List[TemperatureHumidityMeasurement]:
         rs = self.influxdb.query(f"SELECT * FROM {INDOOR_CLIMATE_SERIES} WHERE time >= now() - {seconds}s")
