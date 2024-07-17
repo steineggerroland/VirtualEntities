@@ -35,9 +35,9 @@ def create_app(default_config_file_name: str, appliance_service: ApplianceServic
 
     socketio = SocketIO(app)
 
-    @socketio.on('hello')
-    def handle_my_custom_event(json):
-        print('received json: ' + str(json))
+    @socketio.on('celebrate')
+    def handle_celebrate():
+        socketio.emit('celebrate')
 
     app.add_url_rule(
         "/",
