@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  0.1\n"
 "Report-Msgid-Bugs-To: roland@steinegger.one\n"
-"POT-Creation-Date: 2024-07-17 17:05+0200\n"
+"POT-Creation-Date: 2024-07-18 23:24+0200\n"
 "PO-Revision-Date: 2024-05-24 21:54+0200\n"
 "Last-Translator: Roland Steinegger <roland@steinegger.one>\n"
 "Language: de\n"
@@ -34,9 +34,9 @@ msgid "May just contain digits, letters and symbols of _-,.()"
 msgstr "Nur Zahlen, Buchstaben und die folgenden Symbole _-,.( ) sind erlaubt"
 
 #: flaskr/templates/appliance.html:2
-#, fuzzy, python-format
+#, python-format
 msgid "Appliance %(name)s"
-msgstr "Gerätelager"
+msgstr "Gerät %(name)s"
 
 #: flaskr/templates/appliance.html:8
 #: flaskr/templates/appliance_configuration.html:8
@@ -84,13 +84,12 @@ msgid "Washing machine"
 msgstr "Waschmaschine"
 
 #: flaskr/templates/appliance.html:56
-#, fuzzy
 msgid "Unknown entity"
 msgstr "Unbekanntes Ding"
 
 #: flaskr/templates/appliance.html:76
 #: flaskr/templates/snippets/appliance_sm.html:44
-#, fuzzy, python-format
+#, python-format
 msgid "Running since %(xMinutes)s"
 msgstr "Läuft seit %(xMinutes)s"
 
@@ -104,12 +103,11 @@ msgstr "Derzeit im Ruhezustand"
 
 #: flaskr/templates/appliance.html:88
 #: flaskr/templates/snippets/appliance_sm.html:45
-#, fuzzy, python-format
+#, python-format
 msgid "Finished last run %(xMinutesAgo)s"
 msgstr "Letzter Lauf beendet %(xMinutesAgo)s"
 
 #: flaskr/templates/appliance.html:97
-#, fuzzy
 msgid "Power consumption (Watt)"
 msgstr "Stromverbrauch (Watt)"
 
@@ -119,7 +117,6 @@ msgid "Watt"
 msgstr "Watt"
 
 #: flaskr/templates/appliance_configuration.html:2
-#, fuzzy
 msgid "Appliance"
 msgstr "Gerät"
 
@@ -179,27 +176,25 @@ msgid "No rooms in catalog"
 msgstr "Das Verzeichnis ist leer"
 
 #: flaskr/templates/person.html:2 flaskr/templates/person_configuration.html:2
-#, fuzzy, python-format
+#, python-format
 msgid "Person %(name)s"
-msgstr "Raum %(name)s"
+msgstr "Person %(name)s"
 
 #: flaskr/templates/person.html:9 flaskr/templates/person_configuration.html:9
-#, fuzzy
 msgid "Register of persons"
 msgstr "Personenverzeichnis"
 
 #: flaskr/templates/person.html:26
-#, fuzzy, python-format
+#, python-format
 msgid "Edit %(person_name)s"
 msgstr "%(person_name) bearbeiten"
 
 #: flaskr/templates/person.html:29
-#, fuzzy, python-format
+#, python-format
 msgid "Configure %(person_name)s"
 msgstr "Konfiguration von %(person_name)s"
 
 #: flaskr/templates/person.html:51
-#, fuzzy
 msgid "Calendars"
 msgstr "Kalender"
 
@@ -244,19 +239,17 @@ msgid "Humidity"
 msgstr "Luftfeuchte"
 
 #: flaskr/templates/room.html:67 flaskr/templates/snippets/room_sm.html:16
-#, fuzzy
 msgid "Temperature [°C]"
 msgstr "Temperatur [°C]"
 
 #: flaskr/templates/room.html:73 flaskr/templates/snippets/room_sm.html:39
-#, fuzzy, python-format
+#, python-format
 msgid "Humidity [%%]"
 msgstr "Luftfeuchte [%%]"
 
 #: flaskr/templates/room_configuration.html:57
-#, fuzzy
 msgid "Temperature thresholds"
-msgstr "Temperatur optimal"
+msgstr "Temperaturgrenzbereiche"
 
 #: flaskr/templates/room_configuration.html:59
 #, python-format
@@ -275,9 +268,8 @@ msgstr ""
 "%(critical_upper_degree)s°C"
 
 #: flaskr/templates/room_configuration.html:66
-#, fuzzy
 msgid "Humidity thresholds"
-msgstr "Luftfeuchte optimal"
+msgstr "Luftfeuchtegrenzbereiche"
 
 #: flaskr/templates/room_configuration.html:68
 #, python-format
@@ -310,7 +302,6 @@ msgid "Unknown type: %(type)s"
 msgstr "Unbekannter Typ: %(type)s"
 
 #: flaskr/templates/snippets/appliance_sm.html:32
-#, fuzzy
 msgid "Running"
 msgstr "Läuft"
 
@@ -323,12 +314,10 @@ msgid "Idling"
 msgstr "Untätig"
 
 #: flaskr/templates/snippets/appliance_sm.html:50
-#, fuzzy
 msgid "Unload"
 msgstr "Entladen"
 
 #: flaskr/templates/snippets/appliance_sm.html:52
-#, fuzzy
 msgid "Needs unloading"
 msgstr "Muss entladen werden"
 
@@ -336,7 +325,7 @@ msgstr "Muss entladen werden"
 #: flaskr/templates/snippets/attribution_footer.html:7
 #: flaskr/templates/snippets/attribution_footer.html:12
 #: flaskr/templates/snippets/attribution_footer.html:32
-#, fuzzy, python-format
+#, python-format
 msgid "Icons made by %(author)s from %(url)s"
 msgstr "Icons erstellt von %(author)s von %(url)s"
 
@@ -460,24 +449,21 @@ msgid "Failed to change appliance, see errors in the form"
 msgstr "Gerät nicht geändert, siehe Fehler im Formular"
 
 #: flaskr/views/Person.py:32
-#, fuzzy, python-format
+#, python-format
 msgid "No person found with name '%(name)s'"
-msgstr "Kein Raum mit Namen '%(name)s' gefunden"
+msgstr "Keine Person mit Namen '%(name)s' gefunden"
 
 #: flaskr/views/Person.py:48 flaskr/views/Person.py:59
-#, fuzzy
 msgid "No person found with that name"
-msgstr "Kein Raum mit diesem namen gefunden"
+msgstr "Keine Person mit diesem Namen gefunden"
 
 #: flaskr/views/Person.py:66
-#, fuzzy
 msgid "Person successfully updated"
-msgstr "Raumdaten erfolgreich aktualisiert"
+msgstr "Personendaten erfolgreich aktualisiert"
 
 #: flaskr/views/Person.py:73
-#, fuzzy
 msgid "Failed to change person, see errors in the form"
-msgstr "Raumdaten nicht aktualisiert, siehe Fehler im Formular"
+msgstr "Personendaten nicht aktualisiert, siehe Fehler im Formular"
 
 #: flaskr/views/Room.py:21
 #, python-format
@@ -495,34 +481,4 @@ msgstr "Raumdaten erfolgreich aktualisiert"
 #: flaskr/views/Room.py:62
 msgid "Failed to change room, see errors in the form"
 msgstr "Raumdaten nicht aktualisiert, siehe Fehler im Formular"
-
-#~ msgid "Things"
-#~ msgstr "Dinge"
-
-#~ msgid "Rooms"
-#~ msgstr "Räume"
-
-#~ msgid "Persons"
-#~ msgstr "Personen"
-
-#~ msgid ""
-#~ "Icons\n"
-#~ "    made\n"
-#~ "    by %(author)s from %(url)s"
-#~ msgstr ""
-#~ "Icons\n"
-#~ "erstellt\n"
-#~ "von %(author)s unter %(url)s"
-
-#~ msgid "Last seen:"
-#~ msgstr "Zuletzt gesehen:"
-
-#~ msgid "Online?"
-#~ msgstr "Online?"
-
-#~ msgid "No appliance found with that name"
-#~ msgstr "Kein Gerät mit dem Namen gefunden"
-
-#~ msgid "Options"
-#~ msgstr "Optionen"
 
