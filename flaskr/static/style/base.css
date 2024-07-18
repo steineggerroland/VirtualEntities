@@ -32,6 +32,20 @@ body.fullscreen > .navbar {
     display: none;
 }
 
+.diagram-area {
+    color: rgba(255, 189, 122, 0.25);
+}
+
+[data-bs-theme=dark] {
+    .diagram-tip text {
+        color: black !important;
+    }
+
+    .diagram-area {
+        color: rgba(255, 189, 122, 0.25);
+    }
+}
+
 [data-bs-theme=dark] .icon {
     filter: invert(100%);
 }
@@ -53,6 +67,7 @@ body.fullscreen > .navbar {
     .btn {
         font-size: 1rem !important;
     }
+
     .fs-5 {
         font-size: 1.15rem !important;
     }
