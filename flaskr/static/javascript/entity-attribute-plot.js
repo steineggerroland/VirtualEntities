@@ -25,7 +25,7 @@
             marks.push(Plot.areaY(measures, {
                 x: 'time',
                 y: strategy.power_consumption_threshold,
-                fill: '#ececec',
+                className: "diagram-area"
             }))
         }
         if (thresholds) {
@@ -120,6 +120,7 @@
                 Plot.tip(measures, Plot.pointer({
                     x: "time",
                     y: attribute,
+                    className: 'diagram-tip',
                     title: d => `${dateTipFormat(d.time)}\n${attributeUnitFormat(d[attribute])}`
                 }))
             ]
