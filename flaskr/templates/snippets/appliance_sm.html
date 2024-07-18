@@ -20,14 +20,14 @@
                 <div class="power-consumption diagram position-absolute top-0 start-0 w-100 h-100"
                      data-entity-name="{{ appliance.name }}" data-fullscreen="true"
                      data-x-axis-label="{{ _('Watt') }}"></div>
-                <div class="position-absolute top-0 start-0 w-100 h-100 fs-4">
+                <div class="position-absolute top-0 start-0 w-100 h-100 fs-5">
                     {%- with name=appliance.name, power_consumption=appliance.watt %}
                         {%- include "snippets/power_consumption.html" %}
                     {%- endwith %}
                 </div>
             </div>
         </div>
-        <lm-appliance-state class="col-4"
+        <lm-appliance-state class="col-4 fs-5"
                             data-appliance-json='{{ appliance.to_dict()|tojson }}'
                             data-running-label="{{ _('Running') }}"
                             data-running-dishwasher-icon-url="{{ url_for('static', filename='img/flaticon/clean-dishes.gif') }}"

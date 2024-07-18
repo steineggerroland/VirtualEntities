@@ -27,12 +27,12 @@ const ActionButtons = function () {
     self.unloadLabel = self.dataset.unloadLabel
     self.loadLabel = self.dataset.loadLabel
     const appliance = JSON.parse(self.dataset.applianceJson)
-    const unloadButtonHtml = `<form class="w-75 overflow-hidden" style="aspect-ratio: 1" method="get"
+    const unloadButtonHtml = `<form class="w-100 w-sm-75 overflow-hidden" style="aspect-ratio: 1" method="get"
                       action="#" onsubmit="self.submitUnload">
                     <button class="unload btn btn-outline-success p-0 w-100 h-100"
                             type="submit" value="{{ self.unloadLabel }}">{{ self.unloadLabel }}</button>
                 </form>`
-    const loadButtonHtml = `<form class="w-75 overflow-hidden" style="aspect-ratio: 1" method="get"
+    const loadButtonHtml = `<form class="w-100 w-sm-75 overflow-hidden" style="aspect-ratio: 1" method="get"
                       action="#" onsubmit="self.submitLoad">
                     <button class="needs-unloading btn btn-outline-primary p-0 w-100 h-100"
                             type="submit" value="{{ self.loadLabel }}">{{ self.loadLabel }}</button>

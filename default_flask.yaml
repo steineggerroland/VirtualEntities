@@ -1,4 +1,4 @@
 LANGUAGES:
   en: English
   de: Deutsch
-DEBUG: false
+DEBUG: true

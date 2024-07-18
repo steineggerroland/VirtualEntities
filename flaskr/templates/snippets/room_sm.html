@@ -10,7 +10,7 @@
     </div>
     <div class="row g-1">
         <div class="col-4">
-            <div class="w-100 position-relative" style="aspect-ratio: 1">
+            <div class="w-100 position-relative overflow-hidden" style="aspect-ratio: 1">
                 <div class="temperature room-climate diagram position-absolute top-0 start-0 w-100 h-100 z-2"
                      data-entity-name="{{ room.name }}" data-fullscreen="true"
                      data-x-axis-label="{{ _('Temperature [°C]') }}" data-attribute="temperature"></div>
@@ -34,7 +34,7 @@
             </div>
         </div>
         <div class="col-4">
-            <div class="w-100 position-relative" style="aspect-ratio: 1">
+            <div class="w-100 position-relative overflow-hidden" style="aspect-ratio: 1">
                 <div class="humidity room-climate diagram position-absolute top-0 start-0 w-100 h-100 z-2"
                      data-x-axis-label="{{ _('Humidity [%%]') }}" data-attribute="humidity"
                      data-entity-name="{{ room.name }}" data-fullscreen="true"></div>

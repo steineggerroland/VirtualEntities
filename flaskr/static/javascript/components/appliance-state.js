@@ -81,7 +81,7 @@ const ApplianceState = function () {
         self.color = 'success'
     }
     self.runningSinceLabel = self.dataset.runningSinceLabel
-    let template = `<div class="running-state w-100 text-bg-{{ self.color }} bg-{{ self.color }} align-content-center text-center fs-4"
+    let template = `<div class="running-state w-100 overflow-hidden text-bg-{{ self.color }} bg-{{ self.color }} align-content-center text-center"
              style="aspect-ratio: 1" role="status">`
     if (appliance.running_state == 'running') {
         template += `<div class="visually-hidden">{{self.text}}</div>
