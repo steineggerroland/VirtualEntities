@@ -22,6 +22,7 @@ body.fullscreen > footer {
     max-height: 0.5rem;
     overflow: hidden;
 }
+
 body.fullscreen > footer:hover, body.fullscreen > footer:focus-within {
     max-height: unset;
     overflow: unset;
@@ -40,3 +41,80 @@ body.fullscreen > .navbar {
 [data-bs-theme=dark] .icon-primary {
     filter: unset;
 }
+
+
+@media (min-width: 1400px) {
+}
+
+@media (min-width: 1200px) {
+}
+
+@media (max-width: 992px) {
+    .btn {
+        font-size: 1rem !important;
+    }
+    .fs-5 {
+        font-size: 1.15rem !important;
+    }
+
+    .fs-4 {
+        font-size: 1.25rem !important;
+    }
+
+    .fs-3 {
+        font-size: 1.45rem !important;
+    }
+
+    .fs-2 {
+        font-size: 1.65rem !important;
+    }
+
+    .fs-1 {
+        font-size: 1.85rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .btn {
+        font-size: 1rem !important;
+    }
+
+    .fs-5, .fs-4 {
+        font-size: 1.1rem !important;
+    }
+
+    .fs-3 {
+        font-size: 1.25rem !important;
+    }
+
+    .fs-2 {
+        font-size: 1.45rem !important;
+    }
+
+    .fs-1 {
+        font-size: 1.75rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .btn {
+        font-size: 12px !important;
+    }
+
+    .fs-5, .fs-4 {
+        font-size: 12px !important;
+    }
+
+    .fs-3 {
+        font-size: 1.15rem !important;
+    }
+
+    .fs-2 {
+        font-size: 1.25rem !important;
+    }
+
+    .fs-1 {
+        font-size: 1.5rem !important;
+    }
+}
+
