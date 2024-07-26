@@ -8,8 +8,9 @@ from dateutil.tz import tzlocal
 from waiting import wait
 
 from iot.core.configuration import PlannedNotification, Destinations, Sources, MqttMeasureSource, Measure
+from iot.infrastructure.appliance.appliance import RunningState
+from iot.infrastructure.appliance.appliance_builder import ApplianceBuilder
 from iot.infrastructure.appliance.appliance_service import ApplianceService
-from iot.infrastructure.appliance.appliance_that_can_be_loaded import RunningState, ApplianceThatCanBeLoaded
 from iot.infrastructure.appliance.power_state_decorator import PowerState
 from iot.infrastructure.exceptions import DatabaseException
 from iot.infrastructure.virtual_entity import OnlineStatus
@@ -80,6 +81,7 @@ class MqttMediatorTest(unittest.TestCase):
             tzlocal()).isoformat()
         expected_json['last_updated_at'] = datetime.fromisoformat(expected_json['last_updated_at']).astimezone(
             tzlocal()).isoformat()
+        expected_json['is_loadable'] = True
         wait(lambda: sum(publish_args == call(ANY, ANY) for publish_args in
                          self.mqtt_client_mock.publish.call_args_list) >= 1, timeout_seconds=1,
              waiting_for="mqtt.publish called several times")
@@ -89,17 +91,18 @@ class MqttMediatorTest(unittest.TestCase):
     def _set_up_thing_matching_json_file(self):
         # matches the values of the json file
         self.appliance_service_mock.get_appliance = Mock(
-            return_value=ApplianceThatCanBeLoaded("dryer", "dryer", 2400.121,
-                                                  datetime.fromisoformat(
-                                                      "2024-01-02T03:04:05.678910"),
-                                                  False, True,
-                                                  datetime.fromisoformat(
-                                                      "2024-01-02T01:01:01.111111").astimezone(tzlocal()),
-                                                  RunningState.RUNNING,
-                                                  datetime.fromisoformat(
-                                                      "2023-12-31T23:59:02.133742").astimezone(tzlocal()),
-                                                  datetime.fromisoformat(
-                                                      "2024-01-02T03:04:05.678910").astimezone(tzlocal())))
+            return_value=ApplianceBuilder.build_with(name="dryer", type="dryer", watt=2400.121,
+                                                     last_seen_at=datetime.fromisoformat(
+                                                         "2024-01-02T03:04:05.678910"),
+                                                     needs_unloading=False, is_loaded=True,
+                                                     is_loadable=True,
+                                                     started_run_at=datetime.fromisoformat(
+                                                         "2024-01-02T01:01:01.111111").astimezone(tzlocal()),
+                                                     running_state=RunningState.RUNNING,
+                                                     finished_last_run_at=datetime.fromisoformat(
+                                                         "2023-12-31T23:59:02.133742").astimezone(tzlocal()),
+                                                     last_updated_at=datetime.fromisoformat(
+                                                         "2024-01-02T03:04:05.678910").astimezone(tzlocal())))
 
     def test_subscribes_for_consumption_on_start(self):
         # given

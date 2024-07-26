@@ -1,4 +1,3 @@
-import enum
 import logging
 import time
 from threading import Thread
@@ -10,13 +9,15 @@ from iot.core.configuration import VirtualEntityConfig
 from iot.core.configuration_manager import ConfigurationManager
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.core.timeseries_types import ConsumptionMeasurement
-from iot.infrastructure.appliance.appliance_events import ApplianceEvents, ApplianceEvent, ApplianceConsumptionEvent
-from iot.infrastructure.exceptions import DatabaseException
-from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
+from iot.infrastructure.appliance.appliance import Appliance
 from iot.infrastructure.appliance.appliance_builder import ApplianceBuilder
-from iot.infrastructure.appliance.appliance_that_can_be_loaded import ApplianceThatCanBeLoaded
+from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
+from iot.infrastructure.appliance.appliance_enhancements import LoadableAppliance
+from iot.infrastructure.appliance.appliance_events import ApplianceEvents, ApplianceEvent, ApplianceConsumptionEvent
 from iot.infrastructure.appliance.power_state_decorator import PowerState
-from iot.infrastructure.appliance.run_complete_strategy import SimpleHistoryRunCompleteStrategy
+from iot.infrastructure.appliance.run_complete_strategy import SimpleHistoryRunCompleteStrategy, \
+    FinishedWhenLoadingStrategy
+from iot.infrastructure.exceptions import DatabaseException
 
 
 class ManagedAppliance:
@@ -66,12 +67,19 @@ class ApplianceService:
     def add_appliance_by_config(self, entity_configs: List[VirtualEntityConfig]):
         for entity_config in entity_configs:
             appliance = self.appliance_depot.retrieve(entity_config.name)
+            if entity_config.power_consumption_indicates_loading:
+                run_complete_strategy = FinishedWhenLoadingStrategy()
+            else:
+                run_complete_strategy = SimpleHistoryRunCompleteStrategy(self.time_series_storage,
+                                                                         entity_config.run_complete_when.below_threshold_for_seconds,
+                                                                         entity_config.run_complete_when.watt_threshold)
             self.managed_appliances.add(
-                ManagedAppliance(entity_config.name, SimpleHistoryRunCompleteStrategy(self.time_series_storage,
-                                                                                      entity_config.run_complete_when.below_threshold_for,
-                                                                                      entity_config.run_complete_when.threshold)))
+                ManagedAppliance(entity_config.name, run_complete_strategy))
             if appliance is None:
                 appliance = ApplianceBuilder.from_dict(entity_config.__dict__)
+                self.appliance_depot.stock(appliance)
+            elif entity_config.is_loadable and not issubclass(type(appliance), LoadableAppliance):
+                appliance = ApplianceBuilder.make_loadable(appliance)
                 self.appliance_depot.stock(appliance)
             if appliance.started_run_at is not None:
                 self.started_run(entity_config.name)
@@ -127,7 +135,7 @@ class ApplianceService:
 
     def unloaded(self, appliance_name: str):
         try:
-            appliance = self.appliance_depot.retrieve(appliance_name)
+            appliance: LoadableAppliance = self.appliance_depot.retrieve(appliance_name)
             appliance.unload()
             self.appliance_depot.stock(appliance)
             EventBus.call(ApplianceEvents.UNLOADED, ApplianceEvent(appliance))
@@ -136,7 +144,7 @@ class ApplianceService:
 
     def loaded(self, appliance_name: str, needs_unloading=False):
         try:
-            appliance = self.appliance_depot.retrieve(appliance_name)
+            appliance: LoadableAppliance = self.appliance_depot.retrieve(appliance_name)
             appliance.load(needs_unloading)
             self.appliance_depot.stock(appliance)
             EventBus.call(ApplianceEvents.LOADED, ApplianceEvent(appliance))
@@ -155,7 +163,7 @@ class ApplianceService:
         self.appliance_depot.stock(appliance)
         self.time_series_storage.rename(name, old_name)
 
-    def get_appliance(self, appliance_name: str) -> ApplianceThatCanBeLoaded:
+    def get_appliance(self, appliance_name: str) -> Appliance:
         return self.appliance_depot.retrieve(appliance_name)
 
 
