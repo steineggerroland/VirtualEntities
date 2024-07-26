@@ -6,13 +6,11 @@ from pathlib import Path
 from threading import Thread
 from typing import List
 
-from python_event_bus import EventBus
-
-from iot.infrastructure.exceptions import InvalidEntityType
+from iot.infrastructure.appliance.appliance import Appliance
 from iot.infrastructure.appliance.appliance_builder import ApplianceBuilder
-from iot.infrastructure.appliance.appliance_that_can_be_loaded import ApplianceThatCanBeLoaded
+from iot.infrastructure.exceptions import InvalidEntityType
 from iot.infrastructure.room import from_dict as r_from_dict, Room
-from iot.infrastructure.virtual_entity import VirtualEntity
+from iot.infrastructure.virtual_entity import BaseVirtualEntity
 
 
 class Storage:
@@ -52,7 +50,7 @@ class Storage:
         with open(self.db_name, 'w') as db_file:
             json.dump(self.entities, db_file)
 
-    def load_appliance(self, entity_name: str) -> ApplianceThatCanBeLoaded | None:
+    def load_appliance(self, entity_name: str) -> Appliance | None:
         if entity_name not in self.entities:
             return None
         try:
@@ -67,7 +65,7 @@ class Storage:
         db_entry = self.entities[name]
         return r_from_dict(db_entry)
 
-    def update(self, entity: VirtualEntity) -> bool:
+    def update(self, entity: BaseVirtualEntity) -> bool:
         is_update = entity.name in self.entities.keys()
         self.entities[entity.name] = entity.to_dict()
         return is_update
@@ -78,7 +76,7 @@ class Storage:
             return True
         return False
 
-    def load_all_appliances(self) -> List[ApplianceThatCanBeLoaded]:
+    def load_all_appliances(self) -> List[Appliance]:
         return list(map(ApplianceBuilder.from_dict,
                         filter(lambda t: ApplianceBuilder.can_build(t['type']), self.entities.values())))
 

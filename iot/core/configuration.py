@@ -144,9 +144,9 @@ class ThresholdsConfig:
 
 
 class RunCompleteWhen:
-    def __init__(self, below_threshold_for: int = None, threshold: int = None):
-        self.below_threshold_for = below_threshold_for if below_threshold_for is not None else 180
-        self.threshold = threshold if threshold is not None else 10
+    def __init__(self, below_threshold_for_seconds: int = None, watt_threshold: int = None):
+        self.below_threshold_for_seconds = below_threshold_for_seconds if below_threshold_for_seconds is not None else 180
+        self.watt_threshold = watt_threshold if watt_threshold is not None else 10
 
 
 class VirtualEntityConfig:
@@ -154,7 +154,8 @@ class VirtualEntityConfig:
                  temperature_thresholds: None | ThresholdsConfig = None,
                  humidity_thresholds: None | ThresholdsConfig = None,
                  sources: None | Sources = None,
-                 destinations: None | Destinations = None, run_complete_when=RunCompleteWhen()):
+                 destinations: None | Destinations = None, run_complete_when=RunCompleteWhen(),
+                 power_consumption_indicates_loading=None, is_loadable=None):
         self.name = name
         self.type = entity_type
         self.temperature_thresholds = temperature_thresholds
@@ -162,6 +163,8 @@ class VirtualEntityConfig:
         self.sources = sources
         self.destinations = destinations
         self.run_complete_when = run_complete_when
+        self.power_consumption_indicates_loading = power_consumption_indicates_loading if power_consumption_indicates_loading is not None else False
+        self.is_loadable = is_loadable
 
     def __str__(self):
         return f"{self.name} ({self.type}, {self.sources}, {self.destinations})"

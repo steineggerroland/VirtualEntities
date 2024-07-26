@@ -3,7 +3,9 @@ from datetime import datetime, timedelta
 
 from dateutil.tz import tzlocal
 
-from iot.infrastructure.appliance.appliance_that_can_be_loaded import ApplianceThatCanBeLoaded, RunningState
+from iot.infrastructure.appliance.appliance import RunningState
+from iot.infrastructure.appliance.appliance_builder import ApplianceBuilder
+from iot.infrastructure.appliance.appliance_enhancements import LoadableAppliance
 from iot.infrastructure.appliance.power_state_decorator import PowerState
 from iot.infrastructure.virtual_entity import OnlineStatus
 
@@ -11,7 +13,7 @@ from iot.infrastructure.virtual_entity import OnlineStatus
 class ApplianceThatCanBeLoadedInitTest(unittest.TestCase):
     def test_minimal_dict(self):
         name = "my super dishwasher"
-        dishwasher = ApplianceThatCanBeLoaded.from_dict({"name": name, "type": "dishwasher"})
+        dishwasher: LoadableAppliance = ApplianceBuilder.build_with(name=name, type="dishwasher", is_loadable=True)
         self.assertEqual(dishwasher.name, name)
         self.assertEqual(dishwasher.started_run_at, None)
         self.assertEqual(dishwasher.finished_last_run_at, None)
@@ -32,11 +34,16 @@ class ApplianceThatCanBeLoadedInitTest(unittest.TestCase):
         watt = 255
         is_loaded = True
         needs_unloading = False
-        washing_machine = ApplianceThatCanBeLoaded.from_dict(
-            {'name': name, "type": "washing_machine", 'watt': watt, 'last_updated_at': last_updated_at.isoformat(),
-             'started_run_at': started_run_at.isoformat(), 'running_state': running_state,
-             'finished_last_run_at': finished_last_run_at.isoformat(), 'is_loaded': is_loaded,
-             'needs_unloading': needs_unloading, "last_seen_at": last_seen_at.isoformat()})
+        washing_machine: LoadableAppliance = ApplianceBuilder.build_with(name=name, type="washing_machine",
+                                                                         watt=watt,
+                                                                         last_updated_at=last_updated_at,
+                                                                         started_run_at=started_run_at,
+                                                                         running_state=running_state,
+                                                                         finished_last_run_at=finished_last_run_at,
+                                                                         is_loaded=is_loaded,
+                                                                         needs_unloading=needs_unloading,
+                                                                         last_seen_at=last_seen_at,
+                                                                         is_loadable=True)
         self.assertEqual(washing_machine.name, name)
         self.assertEqual(washing_machine.is_loaded, is_loaded)
         self.assertEqual(washing_machine.needs_unloading, needs_unloading)
@@ -51,33 +58,40 @@ class ApplianceThatCanBeLoadedInitTest(unittest.TestCase):
 
 class InitTest(unittest.TestCase):
     def test_name(self):
-        power_state_appliance = ApplianceThatCanBeLoaded('super_power_state_appliance', "some appliance")
+        power_state_appliance: LoadableAppliance = ApplianceBuilder.build_with(name='super_power_state_appliance',
+                                                                               type="some appliance")
         self.assertEqual(power_state_appliance.name, 'super_power_state_appliance')
 
     def test_unknown_watt(self):
-        power_state_appliance = ApplianceThatCanBeLoaded('power_state_appliance', "some appliance")
+        power_state_appliance: LoadableAppliance = ApplianceBuilder.build_with(name='power_state_appliance',
+                                                                               type="some appliance")
         self.assertEqual(power_state_appliance.power_state, PowerState.UNKNOWN)
 
     def test_zero_watt_is_off(self):
-        power_state_appliance = ApplianceThatCanBeLoaded('power_state_appliance', "some appliance", 0)
+        power_state_appliance: LoadableAppliance = ApplianceBuilder.build_with(name='power_state_appliance',
+                                                                               type="some appliance", watt=0)
         self.assertEqual(power_state_appliance.power_state, PowerState.OFF)
 
     def test_low_watt_is_idle(self):
-        power_state_appliance = ApplianceThatCanBeLoaded('power_state_appliance', "some appliance", 4)
+        power_state_appliance: LoadableAppliance = ApplianceBuilder.build_with(name='power_state_appliance',
+                                                                               type="some appliance", watt=4)
         self.assertEqual(power_state_appliance.power_state, PowerState.IDLE)
 
     def test_high_watt_is_running(self):
-        power_state_appliance = ApplianceThatCanBeLoaded('power_state_appliance', "some appliance", 400)
+        power_state_appliance: LoadableAppliance = ApplianceBuilder.build_with(name='power_state_appliance',
+                                                                               type="some appliance", watt=400)
         self.assertEqual(power_state_appliance.power_state, PowerState.RUNNING)
 
 
 class ApplianceThatCanBeLoadedTest(unittest.TestCase):
     def setUp(self):
-        self.appliance = ApplianceThatCanBeLoaded('my-power_state_appliance', "some appliance", 0)
+        self.appliance: LoadableAppliance = ApplianceBuilder.build_with(name='my-power_state_appliance',
+                                                                        type="some appliance", watt=0, is_loadable=True)
 
     def test_sets_running_state_idle_when_off_after_updating_power_consumption(self):
         # given
-        appliance = ApplianceThatCanBeLoaded('unknown appliance', "some appliance", running_state=RunningState.UNKNOWN)
+        appliance: LoadableAppliance = ApplianceBuilder.build_with(name='unknown appliance', type="some appliance",
+                                                                   running_state=RunningState.UNKNOWN)
         # when
         appliance.update_power_consumption(0)
         # then
@@ -85,7 +99,8 @@ class ApplianceThatCanBeLoadedTest(unittest.TestCase):
 
     def test_sets_running_state_run_when_running_after_updating_power_consumption(self):
         # given
-        appliance = ApplianceThatCanBeLoaded('unknown appliance', "some appliance", running_state=RunningState.UNKNOWN)
+        appliance: LoadableAppliance = ApplianceBuilder.build_with(name='unknown appliance', type="some appliance",
+                                                                   running_state=RunningState.UNKNOWN)
         # when
         appliance.update_power_consumption(2000)
         # then
@@ -229,16 +244,20 @@ class ApplianceThatCanBeLoadedTest(unittest.TestCase):
     def test_to_dict_has_mandatory_fields(self):
         last_updated_at = datetime.now(tzlocal())
         last_seen_at = datetime.now(tzlocal()) - timedelta(seconds=5)
-        power_state_appliance = ApplianceThatCanBeLoaded("test", "some appliance", 312.5,
-                                                         last_updated_at=last_updated_at,
-                                                         last_seen_at=last_seen_at)
+        power_state_appliance: LoadableAppliance = ApplianceBuilder.build_with(name="test", type="some appliance",
+                                                                               watt=312.5,
+                                                                               is_loadable=True,
+                                                                               last_updated_at=last_updated_at,
+                                                                               last_seen_at=last_seen_at)
         self.assertDictEqual(power_state_appliance.to_dict(),
                              {"name": "test", "type": "some appliance", "watt": 312.5,
                               "power_state": PowerState.RUNNING,
                               "needs_unloading": False, "is_loaded": False,
                               "started_run_at": None, "running_state": RunningState.UNKNOWN,
                               "finished_last_run_at": None, "online_status": OnlineStatus.ONLINE,
-                              "last_updated_at": last_updated_at.isoformat(), "last_seen_at": last_seen_at.isoformat()})
+                              "last_updated_at": last_updated_at.isoformat(),
+                              "last_seen_at": last_seen_at.isoformat(),
+                              "is_loadable": True})
 
 
 if __name__ == '__main__':
