@@ -40,7 +40,7 @@ class MqttMediator:
         cron = croniter(planned_notification.cron_expression, now)
         while True:
             delta = cron.get_next(datetime) - datetime.now(tzlocal())
-            time.sleep(max(0, delta.total_seconds())):
+            time.sleep(max(0, delta.total_seconds()))
             try:
                 self.mqtt_client.publish(planned_notification.mqtt_topic, get_dict_callback())
                 self.logger.debug("Sent update to '%s'", planned_notification.mqtt_topic)
