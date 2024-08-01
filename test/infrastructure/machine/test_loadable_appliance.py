@@ -255,6 +255,7 @@ class ApplianceThatCanBeLoadedTest(unittest.TestCase):
                               "needs_unloading": False, "is_loaded": False,
                               "started_run_at": None, "running_state": RunningState.UNKNOWN,
                               "finished_last_run_at": None, "online_status": OnlineStatus.ONLINE,
+                              "power_consumption_indicates_charging": False,
                               "last_updated_at": last_updated_at.isoformat(),
                               "last_seen_at": last_seen_at.isoformat(),
                               "is_loadable": True})

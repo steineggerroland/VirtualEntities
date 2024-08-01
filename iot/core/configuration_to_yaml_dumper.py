@@ -121,11 +121,11 @@ class ConfigDumpers:
             to_dict['humidity_thresholds'] = o.humidity_thresholds
         if o.temperature_thresholds:
             to_dict['temperature_thresholds'] = o.temperature_thresholds
-        if o.power_consumption_indicates_loading:
-            to_dict['power_consumption_indicates_loading'] = o.power_consumption_indicates_loading
+        if o.power_consumption_indicates_charging:
+            to_dict['power_consumption_indicates_charging'] = o.power_consumption_indicates_charging
         return dumper.represent_dict(_sort_keys(to_dict,
                                                 ['name', 'type', 'run_complete_when', 'temperature_thresholds',
-                                                 'humidity_thresholds', 'sources', 'destinations', 'power_consumption_indicates_loading']).items())
+                                                 'humidity_thresholds', 'sources', 'destinations', 'power_consumption_indicates_charging']).items())
 
     def run_complete_when_dumper(dumper: Dumper, o: RunCompleteWhen) -> Node:
         return dumper.represent_dict({'below_threshold_for': o.below_threshold_for_seconds, 'threshold': o.watt_threshold})

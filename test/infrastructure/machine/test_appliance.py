@@ -42,6 +42,7 @@ class ConstructionTest(unittest.TestCase):
         dryer = BasicAppliance("test", "some type", 312.5, last_updated_at=last_updated_at, last_seen_at=last_seen_at)
         self.assertDictEqual(dryer.to_dict(),
                              {"name": "test", "type": "some type", "watt": 312.5, "online_status": 'online',
+                              "power_consumption_indicates_charging": False,
                               "power_state": 'running', "last_updated_at": last_updated_at.isoformat(),
                               "last_seen_at": last_seen_at.isoformat(), 'finished_last_run_at': None,
                               'running_state': 'unknown', 'started_run_at': None})

@@ -155,7 +155,7 @@ class VirtualEntityConfig:
                  humidity_thresholds: None | ThresholdsConfig = None,
                  sources: None | Sources = None,
                  destinations: None | Destinations = None, run_complete_when=RunCompleteWhen(),
-                 power_consumption_indicates_loading=None, is_loadable=None):
+                 power_consumption_indicates_charging=None, is_loadable=None):
         self.name = name
         self.type = entity_type
         self.temperature_thresholds = temperature_thresholds
@@ -163,7 +163,7 @@ class VirtualEntityConfig:
         self.sources = sources
         self.destinations = destinations
         self.run_complete_when = run_complete_when
-        self.power_consumption_indicates_loading = power_consumption_indicates_loading if power_consumption_indicates_loading is not None else False
+        self.power_consumption_indicates_charging = power_consumption_indicates_charging if power_consumption_indicates_charging is not None else False
         self.is_loadable = is_loadable
 
     def __str__(self):

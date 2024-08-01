@@ -5,12 +5,7 @@
     {%- set text = _('?W') %}
     {%- set tooltip = _('Power consumption unknown') %}
 {%- endif %}
-{%- if as_badge == True %}
-    <span class="badge power-consumption" data-bs-title="{{ tooltip }}"
-          data-bs-toggle="tooltip"><lm-power-consumption data-name="{{ name }}" data-watt="{{ power_consumption }}"></lm-power-consumption></span>
-{%- else %}
-    <div class="h-100 w-100 d-flex justify-content-center align-items-center power-consumption text-bg-secondary bg-secondary"
-         data-bs-title="{{ tooltip }}" data-bs-toggle="tooltip" >
-        <lm-power-consumption data-name="{{ name }}" data-watt="{{ power_consumption }}"></lm-power-consumption>
-    </div>
-{%- endif %}
+<lm-power-consumption data-name="{{ name }}" data-watt="{{ power_consumption }}"
+                      data-power-state="{{ power_state }}" data-tooltip="{{ tooltip }}"
+                      data-as-badge="{{ as_badge }}"
+                      data-charging-icon-url="{{ url_for('static', filename='img/flaticon/charging.png') }}"></lm-power-consumption>

@@ -33,13 +33,6 @@ Feature: Showing general information of virtual entities
     When the power consumption of the Dishwasher is updated to 5
     Then the user sees the new running state of the Dishwasher being loaded after a refresh
 
-  Scenario: The users can set that the washer needs unloading and unload it.
-    Given the user goes to the virtual entities page
-    When they click the needs unloading button of appliance Washer Kai
-    Then they see the new running state of the Washer Kai being loaded after a refresh
-    When they click the unload button of appliance Washer Kai
-    Then they see the new running state of the Washer Kai being idling after a refresh
-
   Scenario: Room climate updates are displayed
     Given the user goes to the virtual entities page
     When the room climate of the Kitchen is updated

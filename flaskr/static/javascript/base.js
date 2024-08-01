@@ -1,9 +1,6 @@
 import "./refresh.js";
 import "./components.js";
 
-const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-
 (function () {
     const params = new URLSearchParams(window.location.search)
     if (params.has('refresh_interval')) {
@@ -59,4 +56,8 @@ const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstra
             submitElement.removeAttribute('disabled')
         })
     })
+
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
 })()
