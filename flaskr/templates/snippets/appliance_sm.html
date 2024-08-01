@@ -12,16 +12,17 @@
             {%- with online_status=appliance.online_status(),time_delta=appliance.last_seen_time_delta() %}
                 <div class="ms-auto">{%- include "snippets/online_status_icon.html" %}</div>
             {%- endwith %}
+            <div class="visually-hidden power-state">{{ _(appliance.power_state) }}</div>
         </h4>
     </div>
     <div class="row g-1">
         <div class="col-4">
-            <div class="w-100 position-relative text-bg-light border border-secondary" style="aspect-ratio: 1">
+            <div class="w-100 position-relative text-bg-light border border-secondary bg-secondary" style="aspect-ratio: 1">
                 <div class="power-consumption diagram position-absolute top-0 start-0 w-100 h-100"
                      data-entity-name="{{ appliance.name }}" data-fullscreen="true"
                      data-x-axis-label="{{ _('Watt') }}"></div>
                 <div class="position-absolute top-0 start-0 w-100 h-100 fs-5">
-                    {%- with name=appliance.name, power_consumption=appliance.watt %}
+                    {%- with name=appliance.name, power_consumption=appliance.watt, power_state=appliance.to_dict().power_state %}
                         {%- include "snippets/power_consumption.html" %}
                     {%- endwith %}
                 </div>

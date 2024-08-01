@@ -98,6 +98,20 @@ entities:
       planned_notifications:
         - mqtt_topic: home/things/coffee_machine
           cron_expression: '* * * * *'
+  - name: Floor cleaner droelf thousand
+    type: vacuum
+    power_consumption_indicates_charging: true
+    sources:
+      - mqtt_topic: measurements/home/indoor/droelf/power
+        type: consumption
+      - mqtt_topic: home/things/droelf/load
+        type: loading
+      - mqtt_topic: home/things/droelf/unload
+        type: unloading
+    destinations:
+      planned_notifications:
+        - mqtt_topic: home/things/droelf
+          cron_expression: '0 * * * *'
   - name: Parents bedroom
     type: room
     temperature_thresholds:

@@ -44,7 +44,7 @@ class ConfigurationTest(unittest.TestCase):
 
         self.assertEqual("Coffee machine", config.entities[1].name)
         self.assertEqual("this_is_some_unknown_type", config.entities[1].type)
-        self.assertEqual(True, config.entities[1].power_consumption_indicates_loading)
+        self.assertEqual(True, config.entities[1].power_consumption_indicates_charging)
 
         self.assertEqual("Kitchen", config.entities[2].name)
         self.assertEqual("room", config.entities[2].type)

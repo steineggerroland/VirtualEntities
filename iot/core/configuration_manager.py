@@ -164,7 +164,7 @@ def _read_entity(entity_config:dict, calendars) -> VirtualEntityConfig:
                                _read_sources_configuration(entity_config, calendars),
                                _read_destination_configuration(entity_config),
                                _read_run_complete_threshold(entity_config),
-                               entity_config.get('power_consumption_indicates_loading', None),
+                               entity_config.get('power_consumption_indicates_charging', None),
                                entity_config.get('is_loadable', None))
 
 

@@ -96,7 +96,7 @@
                 <div class="d-flex align-items-center mb-2">
                     <h3 class="mb-0">{{ _('Power consumption (Watt)') }}</h3>
                     <div class="ms-2">
-                        {%- with power_consumption=appliance.watt,as_badge=True %}
+                        {%- with power_consumption=appliance.watt,as_badge=True, running_state=appliance.running_state %}
                             {%- include "snippets/power_consumption.html" %}
                         {%- endwith %}
                     </div>

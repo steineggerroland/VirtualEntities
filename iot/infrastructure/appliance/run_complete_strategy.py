@@ -46,7 +46,7 @@ class SimpleHistoryRunCompleteStrategy(RunCompleteStrategy):
         }
 
 
-class FinishedWhenLoadingStrategy(RunCompleteStrategy):
+class FinishedWhenChargingStrategy(RunCompleteStrategy):
     def __init__(self):
         super().__init__()
 

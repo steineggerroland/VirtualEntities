@@ -49,8 +49,8 @@ class ApplianceEnhancement(Appliance, metaclass=abc.ABCMeta):
         return self.wrapped_appliance.finished_last_run_at
 
     @property
-    def power_consumption_indicates_loading(self):
-        return self.wrapped_appliance.power_consumption_indicates_loading
+    def power_consumption_indicates_charging(self):
+        return self.wrapped_appliance.power_consumption_indicates_charging
 
     @entity_type.setter
     def entity_type(self, value):
@@ -84,24 +84,28 @@ class ApplianceEnhancement(Appliance, metaclass=abc.ABCMeta):
     def finished_last_run_at(self, value):
         self.wrapped_appliance.finished_last_run_at = value
 
-    @power_consumption_indicates_loading.setter
-    def power_consumption_indicates_loading(self, value):
-        self.wrapped_appliance.power_consumption_indicates_loading = value
+    @power_consumption_indicates_charging.setter
+    def power_consumption_indicates_charging(self, value):
+        self.wrapped_appliance.power_consumption_indicates_charging = value
 
     def wrapped_appliance(self):
         return self.wrapped_appliance
 
-    def update_power_consumption(self, watt) -> None:
+    def update_power_consumption(self, watt) -> 'Appliance':
         self.wrapped_appliance.update_power_consumption(watt)
+        return self
 
-    def start_run(self) -> None:
+    def start_run(self) -> 'Appliance':
         self.wrapped_appliance.start_run()
+        return self
 
-    def finish_run(self) -> None:
+    def finish_run(self) -> 'Appliance':
         self.wrapped_appliance.finish_run()
+        return self
 
-    def rename(self, name) -> None:
+    def rename(self, name) -> 'Appliance':
         self.wrapped_appliance.rename(name)
+        return self
 
     def running_for_time_period(self) -> timedelta:
         return self.wrapped_appliance.running_for_time_period()
@@ -134,28 +138,33 @@ class LoadableAppliance(ApplianceEnhancement):
         super().__init__(appliance_to_enhance)
         self.is_loaded = is_loaded if is_loaded is not None else False
         self.needs_unloading = needs_unloading if needs_unloading is not None else False
+        self.is_loadable = True
 
     def unload(self):
         self.needs_unloading = False
         self.is_loaded = False
         ApplianceEnhancement.wrapped_appliance(self).last_updated_at = datetime.now(tzlocal())
+        return self
 
     def load(self, needs_unloading=False):
         self.is_loaded = True
         self.needs_unloading = needs_unloading if not ApplianceEnhancement.wrapped_appliance(
             self).running_state == RunningState.RUNNING else False
         ApplianceEnhancement.wrapped_appliance(self).last_updated_at = datetime.now(tzlocal())
+        return self
 
     def start_run(self):
         super().start_run()
         self.is_loaded = True
         self.needs_unloading = False
         ApplianceEnhancement.wrapped_appliance(self).running_state = RunningState.RUNNING
+        return self
 
     def finish_run(self):
         super().finish_run()
         if self.is_loaded:
             self.needs_unloading = True
+        return self
 
     def to_dict(self):
         return super().to_dict() | {"is_loaded": self.is_loaded, "needs_unloading": self.needs_unloading,

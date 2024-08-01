@@ -16,7 +16,7 @@ from iot.infrastructure.appliance.appliance_enhancements import LoadableApplianc
 from iot.infrastructure.appliance.appliance_events import ApplianceEvents, ApplianceEvent, ApplianceConsumptionEvent
 from iot.infrastructure.appliance.power_state_decorator import PowerState
 from iot.infrastructure.appliance.run_complete_strategy import SimpleHistoryRunCompleteStrategy, \
-    FinishedWhenLoadingStrategy
+    FinishedWhenChargingStrategy
 from iot.infrastructure.exceptions import DatabaseException
 
 
@@ -66,68 +66,73 @@ class ApplianceService:
 
     def add_appliance_by_config(self, entity_configs: List[VirtualEntityConfig]):
         for entity_config in entity_configs:
-            appliance = self.appliance_depot.retrieve(entity_config.name)
-            if entity_config.power_consumption_indicates_loading:
-                run_complete_strategy = FinishedWhenLoadingStrategy()
-            else:
-                run_complete_strategy = SimpleHistoryRunCompleteStrategy(self.time_series_storage,
-                                                                         entity_config.run_complete_when.below_threshold_for_seconds,
-                                                                         entity_config.run_complete_when.watt_threshold)
-            self.managed_appliances.add(
-                ManagedAppliance(entity_config.name, run_complete_strategy))
-            if appliance is None:
-                appliance = ApplianceBuilder.from_dict(entity_config.__dict__)
-                self.appliance_depot.stock(appliance)
-            elif entity_config.is_loadable and not issubclass(type(appliance), LoadableAppliance):
-                appliance = ApplianceBuilder.make_loadable(appliance)
-                self.appliance_depot.stock(appliance)
-            if appliance.started_run_at is not None:
-                self.started_run(entity_config.name)
+            self._setup_managed_appliance(entity_config)
+            appliance = self._ensure_appliance_according_to_config_exists(entity_config)
             EventBus.call(ApplianceEvents.ADDED, ApplianceEvent(appliance))
+
+            if appliance.started_run_at is not None:
+                self.start_run(entity_config.name)
+
+    def _setup_managed_appliance(self, entity_config):
+        if entity_config.power_consumption_indicates_charging:
+            run_complete_strategy = FinishedWhenChargingStrategy()
+        else:
+            run_complete_strategy = SimpleHistoryRunCompleteStrategy(self.time_series_storage,
+                                                                     entity_config.run_complete_when.below_threshold_for_seconds,
+                                                                     entity_config.run_complete_when.watt_threshold)
+        self.managed_appliances.add(ManagedAppliance(entity_config.name, run_complete_strategy))
+
+    def _ensure_appliance_according_to_config_exists(self, entity_config):
+        appliance = self.appliance_depot.retrieve(entity_config.name)
+        # apply config settings to appliance
+        if appliance is None:
+            appliance = ApplianceBuilder.from_dict(entity_config.__dict__)
+        else:
+            appliance = ApplianceBuilder.from_dict(appliance.to_dict() | entity_config.__dict__)
+        self.appliance_depot.stock(appliance)
+        return appliance
 
     def update_power_consumption(self, appliance_name: str, new_power_consumption):
         try:
             appliance = self.appliance_depot.retrieve(appliance_name)
-            appliance.update_power_consumption(new_power_consumption)
+            previous_run_finished_at = appliance.finished_last_run_at
+            appliance = appliance.update_power_consumption(new_power_consumption)
             self.appliance_depot.stock(appliance)
             measurement = ConsumptionMeasurement(appliance.last_updated_at, new_power_consumption)
-            self.time_series_storage.append_power_consumption(
-                measurement, appliance_name)
-            if appliance.started_run_at is None and appliance.power_state is PowerState.RUNNING:
-                self.started_run(appliance_name)
+            self.time_series_storage.append_power_consumption(measurement, appliance_name)
             EventBus.call(ApplianceEvents.UPDATED_POWER_CONSUMPTION, ApplianceConsumptionEvent(appliance, measurement))
-        except ValueError as e:
-            raise DatabaseException('Failed to save new power consumption because of database error.', e) from e
+            # Verify if run started or finished
+            if appliance.started_run_at is None and appliance.power_state is PowerState.RUNNING:
+                self.start_run(appliance_name)
+            elif previous_run_finished_at != appliance.finished_last_run_at:
+                self.finish_run(appliance_name)
+        except (ValueError, AttributeError) as e:
+            raise DatabaseException(
+                'Failed to save new power consumption for %s because of database error.' % appliance_name, e) from e
 
-    def started_run(self, appliance_name: str):
+    def start_run(self, appliance_name: str):
         try:
-            appliance = self.appliance_depot.retrieve(appliance_name)
-            if not appliance.start_run:
-                return
-            appliance.start_run()
+            appliance = self.appliance_depot.retrieve(appliance_name).start_run()
             self.appliance_depot.stock(appliance)
-            managed_appliance = self.managed_appliances.find(appliance_name)
-            managed_appliance.init_check_if_run_completed_thread(
-                self._create_thread_for_is_running_check(managed_appliance))
+            self.managed_appliances.find(appliance_name).init_check_if_run_completed_thread(
+                self._create_thread_for_is_running_check(self.managed_appliances.find(appliance_name)))
             EventBus.call(ApplianceEvents.STARTED_RUN, ApplianceEvent(appliance))
         except ValueError as e:
             raise DatabaseException('Failed to save started run because of database error.', e) from e
 
     def _create_thread_for_is_running_check(self, managed_appliance):
-        return Thread(target=self._scheduled_check, daemon=True,
-                      args=[managed_appliance])
+        return Thread(target=self._scheduled_check, daemon=True, args=[managed_appliance])
 
     def _scheduled_check(self, managed_appliance: ManagedAppliance):
         appliance = self.appliance_depot.retrieve(managed_appliance.name)
         while not managed_appliance.run_complete_strategy.is_run_completed(appliance):
             time.sleep(10)
             appliance = self.appliance_depot.retrieve(managed_appliance.name)
-        self.finished_run(managed_appliance.name)
+        self.finish_run(managed_appliance.name)
 
-    def finished_run(self, name: str):
+    def finish_run(self, name: str):
         try:
-            appliance = self.appliance_depot.retrieve(name)
-            appliance.finish_run()
+            appliance = self.appliance_depot.retrieve(name).finish_run()
             self.appliance_depot.stock(appliance)
             EventBus.call(ApplianceEvents.FINISHED_RUN, ApplianceEvent(appliance))
         except ValueError as e:
@@ -135,8 +140,7 @@ class ApplianceService:
 
     def unloaded(self, appliance_name: str):
         try:
-            appliance: LoadableAppliance = self.appliance_depot.retrieve(appliance_name)
-            appliance.unload()
+            appliance: LoadableAppliance = self.appliance_depot.retrieve(appliance_name).unload()
             self.appliance_depot.stock(appliance)
             EventBus.call(ApplianceEvents.UNLOADED, ApplianceEvent(appliance))
         except ValueError as e:
@@ -144,8 +148,7 @@ class ApplianceService:
 
     def loaded(self, appliance_name: str, needs_unloading=False):
         try:
-            appliance: LoadableAppliance = self.appliance_depot.retrieve(appliance_name)
-            appliance.load(needs_unloading)
+            appliance: LoadableAppliance = self.appliance_depot.retrieve(appliance_name).load(needs_unloading)
             self.appliance_depot.stock(appliance)
             EventBus.call(ApplianceEvents.LOADED, ApplianceEvent(appliance))
         except ValueError as e:
@@ -157,8 +160,7 @@ class ApplianceService:
             managed_appliance.change_name(name, self._create_thread_for_is_running_check(managed_appliance))
         else:
             managed_appliance.change_name(name)
-        appliance = self.appliance_depot.retrieve(old_name)
-        appliance.rename(name)
+        appliance = self.appliance_depot.retrieve(old_name).rename(name)
         self.appliance_depot.deplete(old_name)
         self.appliance_depot.stock(appliance)
         self.time_series_storage.rename(name, old_name)

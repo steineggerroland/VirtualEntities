@@ -6,6 +6,7 @@ class PowerState(str, Enum):
     OFF = 'offline'
     IDLE = 'idle'
     RUNNING = 'running'
+    CHARGING = 'charging'
 
 
 class SimplePowerStateDecorator:
@@ -26,6 +27,6 @@ class SimplePowerStateDecorator:
         elif self.component.watt < self.watt_threshold:
             self.component.power_state = PowerState.IDLE
         elif self.component.watt >= self.watt_threshold:
-            self.component.power_state = PowerState.RUNNING
+            self.component.power_state = PowerState.CHARGING if self.component.power_consumption_indicates_charging else PowerState.RUNNING
         else:
             self.component.power_state = PowerState.UNKNOWN
