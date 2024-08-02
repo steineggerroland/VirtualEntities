@@ -31,6 +31,7 @@ entities:
           cron_expression: "* */15 * * * *"
   - name: Coffee machine
     type: this_is_some_unknown_type #verify unknown types can be used
+    power_consumption_indicates_charging: True
   - name: Kitchen
     type: room
     sources:

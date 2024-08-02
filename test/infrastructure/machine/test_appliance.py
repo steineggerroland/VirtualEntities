@@ -4,14 +4,16 @@ from datetime import datetime, timedelta
 
 from dateutil.tz import tzlocal
 
-from iot.infrastructure.appliance.appliance import Appliance
+from iot.infrastructure.appliance.appliance import BasicAppliance, Appliance
+from iot.infrastructure.appliance.appliance_builder import ApplianceBuilder
+from iot.infrastructure.appliance.appliance_enhancements import LoadableAppliance
 from iot.infrastructure.appliance.power_state_decorator import PowerState
 from iot.infrastructure.virtual_entity import OnlineStatus
 
 
 class ConstructionTest(unittest.TestCase):
     def test_name(self):
-        self.assertEqual(Appliance('super appliance', "some type").name, 'super appliance')
+        self.assertEqual(BasicAppliance('super appliance', "some type").name, 'super appliance')
 
     def test_watt_parameters(self):
         test_cases = [(None, PowerState.UNKNOWN), (0, PowerState.OFF), (1.3, PowerState.IDLE),
@@ -20,32 +22,48 @@ class ConstructionTest(unittest.TestCase):
             self._test_watt(parameters[0], parameters[1])
 
     def _test_watt(self, watt, state):
-        appliance = Appliance('appliance', "some type", watt)
+        appliance = BasicAppliance('appliance', "some type", watt)
         self.assertEqual(appliance.watt, watt)
         self.assertEqual(appliance.power_state, state)
 
     def test_online_status(self):
-        self.assertEqual(Appliance('appliance', "some type").online_status(), OnlineStatus.UNKNOWN)
-        appliance_updated_now_and_online_delta_ten_seconds = Appliance('appliance', "some type",
-                                                                       last_seen_at=datetime.now(tzlocal()))
+        self.assertEqual(BasicAppliance('appliance', "some type").online_status(), OnlineStatus.UNKNOWN)
+        appliance_updated_now_and_online_delta_ten_seconds = BasicAppliance('appliance', "some type",
+                                                                            last_seen_at=datetime.now(tzlocal()))
         self.assertEqual(appliance_updated_now_and_online_delta_ten_seconds.online_status(), OnlineStatus.ONLINE)
-        appliance_without_online_delta = Appliance('appliance', "some type", online_delta_in_seconds=20,
-                                                   last_seen_at=datetime.now(tzlocal()) - timedelta(seconds=20 + 1))
+        appliance_without_online_delta = BasicAppliance('appliance', "some type", online_delta_in_seconds=20,
+                                                        last_seen_at=datetime.now(tzlocal()) - timedelta(
+                                                            seconds=20 + 1))
         self.assertEqual(appliance_without_online_delta.online_status(), OnlineStatus.OFFLINE)
 
     def test_to_dict_has_mandatory_fields(self):
         last_updated_at = datetime.now(tzlocal())
         last_seen_at = datetime.now(tzlocal()) - timedelta(minutes=2)
-        dryer = Appliance("test", "some type", 312.5, last_updated_at=last_updated_at, last_seen_at=last_seen_at)
+        dryer = BasicAppliance("test", "some type", 312.5, last_updated_at=last_updated_at, last_seen_at=last_seen_at)
         self.assertDictEqual(dryer.to_dict(),
                              {"name": "test", "type": "some type", "watt": 312.5, "online_status": 'online',
+                              "power_consumption_indicates_charging": False,
                               "power_state": 'running', "last_updated_at": last_updated_at.isoformat(),
-                              "last_seen_at": last_seen_at.isoformat()})
+                              "last_seen_at": last_seen_at.isoformat(), 'finished_last_run_at': None,
+                              'running_state': 'unknown', 'started_run_at': None})
+
+    def test_loaded_attributes_and_methods_exist(self):
+        appliance = ApplianceBuilder.build_with(name='appliance', type="some type", is_loaded=True, is_loadable=True)
+        self.assertTrue(issubclass(type(appliance), LoadableAppliance))
+        loadable_appliance: LoadableAppliance = appliance
+        self.assertEqual(loadable_appliance.is_loaded, True)
+        loadable_appliance.load()
+        loadable_appliance.unload()
+
+    def test_loaded_attributes_and_methods_fail(self):
+        appliance = ApplianceBuilder.build_with(name='appliance', type="some type", is_loadable=False)
+        self.assertTrue(issubclass(type(appliance), Appliance))
+        self.assertFalse(issubclass(type(appliance), LoadableAppliance))
 
 
 class ApplianceTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.appliance = Appliance('appliance', "some type")
+        self.appliance = BasicAppliance('appliance', "some type")
 
     def test_unknown_watt(self):
         self.appliance.update_power_consumption(None)

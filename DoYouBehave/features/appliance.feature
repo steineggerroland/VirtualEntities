@@ -21,3 +21,20 @@ Feature: The user can change the name of an appliance. The appliance is just ren
     Then they see a diagram with the previous power consumption values
     And they see the power consumption of the Machine with a hole at the top
     And they see the running state of the Machine with a hole at the top
+
+  Scenario: The user can indicate that an appliances, which is loadable can, needs unloading and unload it afterwards.
+    Given the user goes to the virtual entities page
+    When they click the needs unloading button of appliance Washer Kai
+    Then they see the running state of the Washer Kai being loaded after a refresh
+    When they click the unload button of appliance Washer Kai
+    Then they see the running state of the Washer Kai being idling after a refresh
+
+  Scenario: Appliances which are not loadable don't have a button to indicate that it needs unloading.
+    Given the user goes to the virtual entities page
+    Then they don't see the needs unloading button of appliance Coffee machine
+
+  Scenario: Chargeable appliances have state charging when they consume power.
+    Given the user goes to the virtual entities page
+    Then they see the power state of the Floor cleaner droelf thousand being idling after a refresh
+    When the power consumption of the Floor cleaner droelf thousand is updated to 22
+    Then they see the power state of the Floor cleaner droelf thousand being charging after a refresh
