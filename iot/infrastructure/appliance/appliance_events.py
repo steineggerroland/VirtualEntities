@@ -1,7 +1,7 @@
 from enum import Enum
 
 from iot.core.timeseries_types import ConsumptionMeasurement
-from iot.infrastructure.appliance.appliance_that_can_be_loaded import ApplianceThatCanBeLoaded
+from iot.infrastructure.appliance.appliance import Appliance
 
 
 class ApplianceEvents(str, Enum):
@@ -15,11 +15,11 @@ class ApplianceEvents(str, Enum):
 
 
 class ApplianceEvent:
-    def __init__(self, appliance: ApplianceThatCanBeLoaded):
+    def __init__(self, appliance: Appliance):
         self.appliance = appliance
 
 
 class ApplianceConsumptionEvent(ApplianceEvent):
-    def __init__(self, appliance: ApplianceThatCanBeLoaded, measurement: ConsumptionMeasurement):
+    def __init__(self, appliance: Appliance, measurement: ConsumptionMeasurement):
         super().__init__(appliance)
         self.measurement = measurement

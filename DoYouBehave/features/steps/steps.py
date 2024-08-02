@@ -3,7 +3,6 @@ import re
 from datetime import timedelta, datetime
 from typing import Optional
 
-import pytz
 from behave import *
 from dateutil.tz import tzlocal
 from influxdb import InfluxDBClient
@@ -152,7 +151,7 @@ def submit_form(context):
 use_step_matcher('re')
 
 
-@When(r'they click the (?P<class_name>\w+(?> \w+)*?) (?P<clickable_type>\w+)'
+@When(r'they click the (?P<class_name>\w+(?> \w+)*?) (?P<clickable_type>button)'
       r'(?> of (?P<entity_type>appliance|room|person) (?P<entity_name>\w+(?> \w+)*))?')
 def click_on_something(context, class_name: str, clickable_type: str, entity_type=None, entity_name=None):
     if entity_type is None:
@@ -268,7 +267,10 @@ def property_has_new_value(context, property_name=None, entity_name=None, value=
 
 def get_type_for_entity_with_name(context, entity_name):
     entity_type = 'appliance' if any(a == entity_name for a in context.appliances) else \
-        'room' if any(r == entity_name for r in context.rooms) else 'person'
+        'room' if any(r == entity_name for r in context.rooms) else \
+            'person' if any(p == entity_name for p in context.persons) else None
+    if entity_type is None:
+        raise AttributeError('%s is not a known entity' % entity_name)
     return entity_type
 
 
@@ -378,11 +380,28 @@ def headline_contains(context, some_string):
     return context.webdriver.find_element(By.TAG_NAME, 'h1').text.find(some_string) >= 0
 
 
-@then(r'(?>the user sees|they see) an icon indicating (?P<entity_type>\w+(?> \w+)*) '
+@then(r'(?P<may_contain_not>.*see[s]?) an icon indicating (?P<entity_type>\w+(?> \w+)*) '
       r'being the type of (?P<entity_category>\w+(?> \w+)*)')
-def icon_indicating_entity_type(context, entity_type: str, entity_category: str):
-    assert any(icon_element.get_attribute('src').lower().find(entity_type.lower()) for icon_element in
-               context.webdriver.find_elements(By.CSS_SELECTOR, '.%s img.icon' % entity_category))
+def icon_indicating_entity_type(context, may_contain_not: str, entity_type: str, entity_category: str):
+    negate = may_contain_not.find('not') >= 0 or may_contain_not.find('n\'t') >= 0
+    assert not negate == any(icon_element.get_attribute('src').lower().find(entity_type.lower()) for icon_element in
+                             context.webdriver.find_elements(By.CSS_SELECTOR, '.%s img.icon' % entity_category))
+
+
+@then(r'(?P<may_contain_not>.*see[s]?) the (?P<class_name>\w+(?> \w+)*?) (?P<clickable_type>button)'
+      r'(?> of (?P<entity_type>appliance|room|person) (?P<entity_name>\w+(?> \w+)*))?')
+def contains_button_with_class(context, may_contain_not: str, class_name: str, clickable_type: str, entity_type: str,
+                               entity_name: str):
+    negate = may_contain_not.find('not') >= 0 or may_contain_not.find('n\'t') >= 0
+    if entity_type is None:
+        parent = context.webdriver.find_element(By.TAG_NAME, 'body')
+    else:
+        elements_of_entity_type = context.webdriver.find_elements(By.CLASS_NAME, to_class(entity_type))
+        parent = (list(filter(lambda entity_element:
+                              entity_element.find_element(By.CLASS_NAME, 'name').text == entity_name,
+                              elements_of_entity_type))
+                  .pop())
+    assert not negate == any(parent.find_elements(By.CSS_SELECTOR, '%s.%s' % (clickable_type, class_name)))
 
 
 @then(r'(?>the user sees|they see) the (?P<class_name>\w+(?> \w+)*) is (?P<some_string>\w+(?> \w+)*)')
@@ -400,8 +419,8 @@ def input_with_value(context, field_name, value):
 
 @then(r'(?>the user sees|they see) a (?P<message_type>\w+(?> \w+)*) message')
 def message_of_type(context, message_type):
-    WebDriverWait(context.webdriver, 30).until(
-        presence_of_element_located((By.CSS_SELECTOR, '.messages .message.%s' % message_type)),
+    WebDriverWait(context.webdriver, 30).until(presence_of_element_located(
+        (By.CSS_SELECTOR, '.messages .message.%s' % message_type)),
         'No message of type "%s" found' % message_type)
 
 

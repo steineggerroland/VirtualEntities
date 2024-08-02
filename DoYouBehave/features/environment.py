@@ -141,7 +141,10 @@ def appliances_setup(context, timeout=10, **kwargs):
         'Toploader': Appliance(mqtt_client, 'Toploader', 'measurements/home/indoor/toploader/power',
                                'home/things/toploader/load', 'home/things/toploader/unload'),
         'Coffee machine': Appliance(mqtt_client, 'Coffee machine', 'measurements/home/indoor/coffee_machine/power',
-                                    'home/things/coffee_machine/load', 'home/things/coffee_machine/unload')
+                                    'home/things/coffee_machine/load', 'home/things/coffee_machine/unload'),
+        'Floor cleaner droelf thousand': Appliance(mqtt_client, 'Floor cleaner droelf thousand',
+                                                   'measurements/home/indoor/droelf/power',
+                                                   'home/things/droelf/load', 'home/things/droelf/unload')
     }
     context.rooms = {
         'Kitchen': Room(mqtt_client, 'Kitchen', 'zigbee/home/kitchen/sensor01'),

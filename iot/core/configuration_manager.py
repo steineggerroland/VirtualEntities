@@ -156,17 +156,19 @@ def _read_calendars_configuration(entity_config: dict) -> CalendarsConfig:
     return CalendarsConfig(categories, calendars)
 
 
-def _read_entity(entity_config, calendars) -> VirtualEntityConfig:
+def _read_entity(entity_config:dict, calendars) -> VirtualEntityConfig:
     _verify_keys(entity_config, ["name", "type"], "entities[]")
     return VirtualEntityConfig(entity_config['name'], entity_config['type'],
                                _read_temperature_thresholds_configuration(entity_config),
                                _read_humidity_thresholds_configuration(entity_config),
                                _read_sources_configuration(entity_config, calendars),
                                _read_destination_configuration(entity_config),
-                               _read_run_complete_threshold(entity_config))
+                               _read_run_complete_threshold(entity_config),
+                               entity_config.get('power_consumption_indicates_charging', None),
+                               entity_config.get('is_loadable', None))
 
 
-def _read_entities(conf_dict, calendars) -> List[VirtualEntityConfig]:
+def _read_entities(conf_dict: dict, calendars) -> List[VirtualEntityConfig]:
     _verify_keys(conf_dict, ["entities"])
     return [_read_entity(entity_config, calendars) for entity_config in conf_dict['entities']]
 
@@ -179,7 +181,7 @@ def _read_time_series_config(time_series_config) -> TimeSeriesConfig:
                             time_series_config['password'], time_series_config['bucket_name'])
 
 
-def _read_configuration(conf_dict) -> Configuration:
+def _read_configuration(conf_dict:dict) -> Configuration:
     calendars_config = _read_calendars_configuration(conf_dict)
     return Configuration(_read_mqtt_configuration(conf_dict),
                          _read_entities(conf_dict, calendars_config.calendars),
@@ -229,7 +231,7 @@ class ConfigurationManager:
         conf_file = None
         try:
             conf_file = open(config_path)
-            conf_dict = yamlenv.load(conf_file)
+            conf_dict: dict = yamlenv.load(conf_file)
             self.configuration = _read_configuration(conf_dict)
         except FileNotFoundError as e:
             raise Exception(f'Configuration file is missing. File "{config_path}" is needed.') from e
