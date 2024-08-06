@@ -12,8 +12,9 @@ from iot.core.timeseries_types import ConsumptionMeasurement
 from iot.infrastructure.appliance.appliance import Appliance
 from iot.infrastructure.appliance.appliance_builder import ApplianceBuilder
 from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
-from iot.infrastructure.appliance.appliance_enhancements import LoadableAppliance
 from iot.infrastructure.appliance.appliance_events import ApplianceEvents, ApplianceEvent, ApplianceConsumptionEvent
+from iot.infrastructure.appliance.cleanable_appliance import CleanableAppliance
+from iot.infrastructure.appliance.loadable_appliance import LoadableAppliance
 from iot.infrastructure.appliance.power_state_decorator import PowerState
 from iot.infrastructure.appliance.run_complete_strategy import SimpleHistoryRunCompleteStrategy, \
     FinishedWhenChargingStrategy
@@ -144,7 +145,8 @@ class ApplianceService:
             self.appliance_depot.stock(appliance)
             EventBus.call(ApplianceEvents.UNLOADED, ApplianceEvent(appliance))
         except ValueError as e:
-            raise DatabaseException('Failed to save unloading appliance because of database error.', e) from e
+            raise DatabaseException(
+                "Failed to save unloading appliance '%s' because of database error." % appliance_name, e) from e
 
     def loaded(self, appliance_name: str, needs_unloading=False):
         try:
@@ -152,7 +154,26 @@ class ApplianceService:
             self.appliance_depot.stock(appliance)
             EventBus.call(ApplianceEvents.LOADED, ApplianceEvent(appliance))
         except ValueError as e:
-            raise DatabaseException('Failed to save setting appliance to loaded.', e) from e
+            raise DatabaseException("Failed to save setting appliance '%s' to loaded." % appliance_name, e) from e
+
+    def clean(self, name):
+        try:
+            appliance: CleanableAppliance = self.appliance_depot.retrieve(name).clean()
+            self.appliance_depot.stock(appliance)
+            EventBus.call(ApplianceEvents.CLEAN, ApplianceEvent(appliance))
+        except ValueError as e:
+            raise DatabaseException("Failed to save the cleaning of the appliance '%s'." % name, e) from e
+
+    def notice_dirt(self, name, needs_cleaning=True):
+        try:
+            appliance: CleanableAppliance = self.appliance_depot.retrieve(name).notice_dirt(
+                needs_cleaning=needs_cleaning)
+            self.appliance_depot.stock(appliance)
+            EventBus.call(ApplianceEvents.CLEAN, ApplianceEvent(appliance))
+        except ValueError as e:
+            raise DatabaseException(
+                "Failed to save noticing dirt of appliance '%s' with need to clean being %s." % (
+                    name, needs_cleaning), e) from e
 
     def change_name(self, name: str, old_name: str):
         managed_appliance = self.managed_appliances.find(old_name)

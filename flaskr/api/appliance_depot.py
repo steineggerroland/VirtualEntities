@@ -42,4 +42,14 @@ def appliance_depot_api(appliance_service: ApplianceService, appliance_depot: Ap
         appliance_service.loaded(name, True)
         return '', HTTPStatus.OK
 
+    @api.post('/appliances/<name>/clean')
+    def clean(name: str):
+        appliance_service.clean(name)
+        return '', HTTPStatus.OK
+
+    @api.post('/appliances/<name>/notice-dirt')
+    def notice_dirt(name: str):
+        appliance_service.notice_dirt(name)
+        return '', HTTPStatus.OK
+
     return api
