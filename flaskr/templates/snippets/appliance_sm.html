@@ -17,7 +17,8 @@
     </div>
     <div class="row g-1">
         <div class="col-4">
-            <div class="w-100 position-relative text-bg-light border border-secondary bg-secondary" style="aspect-ratio: 1">
+            <div class="w-100 position-relative text-bg-light border border-secondary bg-secondary"
+                 style="aspect-ratio: 1">
                 <div class="power-consumption diagram position-absolute top-0 start-0 w-100 h-100"
                      data-entity-name="{{ appliance.name }}" data-fullscreen="true"
                      data-x-axis-label="{{ _('Watt') }}"></div>
@@ -45,12 +46,25 @@
                             data-running-since-label="{{ _('Running since %(xMinutes)s', xMinutes=appliance.running_for_time_period()|timedeltaformat()) }}"
                             data-finished-last-run-before-label="{{ _('Finished last run %(xMinutesAgo)s', xMinutesAgo=appliance.finished_last_run_before_time_period()|timedeltaformat(add_direction=True)) }}"
         ></lm-appliance-state>
-        <lm-appliance-action-buttons class="col-4 d-flex flex-column align-items-center justify-content-center"
-                                     data-appliance-json='{{ appliance.to_dict()|tojson }}'
-                                     data-unload-api-url="{{ url_for('appliance-depot_api.unload', name=appliance.name ) }}"
-                                     data-unload-label="{{ _('Unload') }}"
-                                     data-load-api-url="{{ url_for('appliance-depot_api.load', name=appliance.name ) }}"
-                                     data-load-label="{{ _('Needs unloading') }}"></lm-appliance-action-buttons>
+        {%- if appliance.is_cleanable %}
+            <lm-appliance-cleaning-state class="col-4 fs-5"
+                                         data-appliance-json='{{ appliance.to_dict()|tojson }}'
+                                         data-needs-cleaning-label="{{ _('Dirty') }}"
+                                         data-is-clean-label="{{ _('Clean') }}"
+            ></lm-appliance-cleaning-state>
+        {%- endif %}
+        <lm-appliance-loading-action-buttons class="row g-1" style="display: contents"
+                                             data-appliance-json='{{ appliance.to_dict()|tojson }}'
+                                             data-unload-api-url="{{ url_for('appliance-depot_api.unload', name=appliance.name ) }}"
+                                             data-unload-label="{{ _('Unload') }}"
+                                             data-load-api-url="{{ url_for('appliance-depot_api.load', name=appliance.name ) }}"
+                                             data-load-label="{{ _('Needs unloading') }}"></lm-appliance-loading-action-buttons>
+        <lm-appliance-cleaning-action-buttons class="row g-1" style="display: contents"
+                                              data-appliance-json='{{ appliance.to_dict()|tojson }}'
+                                              data-clean-api-url="{{ url_for('appliance-depot_api.clean', name=appliance.name ) }}"
+                                              data-clean-label="{{ _('Clean') }}"
+                                              data-notice-dirt-api-url="{{ url_for('appliance-depot_api.notice_dirt', name=appliance.name ) }}"
+                                              data-notice-dirt-label="{{ _('Notice dirt') }}"></lm-appliance-cleaning-action-buttons>
     </div>
     {%- if debug %}{{ appliance.to_dict() }}{% endif %}
 </div>

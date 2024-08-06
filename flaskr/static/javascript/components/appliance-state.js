@@ -9,13 +9,16 @@ const ApplianceState = function () {
             (oldAppliance.type !== event.appliance.type) ||
             (oldAppliance.needs_unloading !== event.appliance.needs_unloading) ||
             (oldAppliance.started_run_at !== event.appliance.started_run_at)) {
-            if (self.interval) {
-                clearInterval(self.interval)
-            }
-            socket.off(`appliances/${JSON.parse(self.dataset.applianceJson).name}/updated`, socketHandler);
-            self.refresh()
+            refresh()
         }
-    };
+    }
+    const refresh = () => {
+        if (self.interval) {
+            clearInterval(self.interval)
+        }
+        socket.off(`appliances/${JSON.parse(self.dataset.applianceJson).name}/updated`, socketHandler);
+        self.refresh()
+    }
     socket.on(`appliances/${JSON.parse(self.dataset.applianceJson).name}/updated`, socketHandler);
     const appliance = JSON.parse(self.dataset.applianceJson)
     self.text = self.color = self.icon = null

@@ -30,6 +30,7 @@ class ConfigurationTest(unittest.TestCase):
         self.assertEqual("dryer", config.entities[0].type)
         self.assertEqual(5, config.entities[0].run_complete_when.below_threshold_for_seconds)
         self.assertEqual(10, config.entities[0].run_complete_when.watt_threshold)
+        self.assertEqual(True, config.entities[0].is_loadable)
         self.assertIn(MqttMeasureSource('consumption/topic', [Measure(source_type='consumption')]),
                       config.entities[0].sources.list)
         self.assertIn(MqttMeasureSource('loading/topic', [Measure(source_type='loading')]),
@@ -45,6 +46,7 @@ class ConfigurationTest(unittest.TestCase):
         self.assertEqual("Coffee machine", config.entities[1].name)
         self.assertEqual("this_is_some_unknown_type", config.entities[1].type)
         self.assertEqual(True, config.entities[1].power_consumption_indicates_charging)
+        self.assertEqual(True, config.entities[1].is_cleanable)
 
         self.assertEqual("Kitchen", config.entities[2].name)
         self.assertEqual("room", config.entities[2].type)
@@ -137,6 +139,7 @@ class ConfigurationTest(unittest.TestCase):
                               (DIR / "incomplete_person_calendar_config.yaml"))
 
     def test_saving_config(self):
+        self.maxDiff = None
         try:
             # given
             manager = ConfigurationManager()
