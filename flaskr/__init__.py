@@ -7,10 +7,10 @@ from flask_babel import Babel
 from flask_bootstrap import Bootstrap5
 from flask_socketio import SocketIO
 
-from flaskr.api.ApplianceDepot import appliance_depot_api
-from flaskr.api.ApplianceSocketNotifier import ApplianceSocketNotifier
-from flaskr.api.RoomCatalog import room_catalog_api
-from flaskr.api.RoomSocketNotifier import RoomSocketNotifier
+from flaskr.api.appliance_depot import appliance_depot_api
+from flaskr.api.appliance_socket_notifier import ApplianceSocketNotifier
+from flaskr.api.room_catalog import room_catalog_api
+from flaskr.api.room_socket_notifier import RoomSocketNotifier
 from flaskr.options_controller import options_blueprint
 from flaskr.views import VirtualEntities, Room, Appliance, Person
 from flaskr.views.Homepage import Homepage

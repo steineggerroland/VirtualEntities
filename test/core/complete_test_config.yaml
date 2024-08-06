@@ -13,6 +13,7 @@ time_series:
 entities:
   - name: super_entity
     type: dryer
+    is_loadable: true
     run_complete_when:
       below_threshold_for: 5
       threshold: 10
@@ -31,7 +32,8 @@ entities:
           cron_expression: "* */15 * * * *"
   - name: Coffee machine
     type: this_is_some_unknown_type #verify unknown types can be used
-    power_consumption_indicates_charging: True
+    power_consumption_indicates_charging: true
+    is_cleanable: true
   - name: Kitchen
     type: room
     sources:

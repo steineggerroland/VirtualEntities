@@ -6,7 +6,7 @@ from dateutil.tz import tzlocal
 
 from iot.infrastructure.appliance.appliance import BasicAppliance, Appliance
 from iot.infrastructure.appliance.appliance_builder import ApplianceBuilder
-from iot.infrastructure.appliance.appliance_enhancements import LoadableAppliance
+from iot.infrastructure.appliance.loadable_appliance import LoadableAppliance
 from iot.infrastructure.appliance.power_state_decorator import PowerState
 from iot.infrastructure.virtual_entity import OnlineStatus
 
@@ -59,6 +59,33 @@ class ConstructionTest(unittest.TestCase):
         appliance = ApplianceBuilder.build_with(name='appliance', type="some type", is_loadable=False)
         self.assertTrue(issubclass(type(appliance), Appliance))
         self.assertFalse(issubclass(type(appliance), LoadableAppliance))
+
+
+class InitTest(unittest.TestCase):
+    def test_name(self):
+        power_state_appliance: LoadableAppliance = ApplianceBuilder.build_with(name='super_power_state_appliance',
+                                                                               type="some appliance")
+        self.assertEqual(power_state_appliance.name, 'super_power_state_appliance')
+
+    def test_unknown_watt(self):
+        power_state_appliance: LoadableAppliance = ApplianceBuilder.build_with(name='power_state_appliance',
+                                                                               type="some appliance")
+        self.assertEqual(power_state_appliance.power_state, PowerState.UNKNOWN)
+
+    def test_zero_watt_is_off(self):
+        power_state_appliance: LoadableAppliance = ApplianceBuilder.build_with(name='power_state_appliance',
+                                                                               type="some appliance", watt=0)
+        self.assertEqual(power_state_appliance.power_state, PowerState.OFF)
+
+    def test_low_watt_is_idle(self):
+        power_state_appliance: LoadableAppliance = ApplianceBuilder.build_with(name='power_state_appliance',
+                                                                               type="some appliance", watt=4)
+        self.assertEqual(power_state_appliance.power_state, PowerState.IDLE)
+
+    def test_high_watt_is_running(self):
+        power_state_appliance: LoadableAppliance = ApplianceBuilder.build_with(name='power_state_appliance',
+                                                                               type="some appliance", watt=400)
+        self.assertEqual(power_state_appliance.power_state, PowerState.RUNNING)
 
 
 class ApplianceTest(unittest.TestCase):

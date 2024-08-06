@@ -11,7 +11,7 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support.expected_conditions import presence_of_element_located, url_matches
+from selenium.webdriver.support.expected_conditions import presence_of_element_located, url_matches, none_of
 from selenium.webdriver.support.wait import WebDriverWait
 
 use_step_matcher('re')
@@ -393,22 +393,34 @@ def icon_indicating_entity_type(context, may_contain_not: str, entity_type: str,
 def contains_button_with_class(context, may_contain_not: str, class_name: str, clickable_type: str, entity_type: str,
                                entity_name: str):
     negate = may_contain_not.find('not') >= 0 or may_contain_not.find('n\'t') >= 0
-    if entity_type is None:
-        parent = context.webdriver.find_element(By.TAG_NAME, 'body')
+
+    def any_clickable_element_exists(webdriver: WebDriver):
+        if entity_type is None:
+            parent = webdriver.find_element(By.TAG_NAME, 'body')
+        else:
+            elements_of_entity_type = webdriver.find_elements(By.CLASS_NAME, to_class(entity_type))
+            parent = (list(filter(lambda entity_element:
+                                  entity_element.find_element(By.CLASS_NAME, 'name').text == entity_name,
+                                  elements_of_entity_type))
+                      .pop())
+
+        return any(parent.find_elements(By.CSS_SELECTOR, '%s.%s' % (clickable_type, to_class(class_name))))
+
+    if negate:
+        WebDriverWait(context.webdriver, 30).until(none_of(any_clickable_element_exists),
+                                                   "No clickable element with selector '%s' expected." % (
+                                                           '%s.%s' % (clickable_type, to_class(class_name))))
     else:
-        elements_of_entity_type = context.webdriver.find_elements(By.CLASS_NAME, to_class(entity_type))
-        parent = (list(filter(lambda entity_element:
-                              entity_element.find_element(By.CLASS_NAME, 'name').text == entity_name,
-                              elements_of_entity_type))
-                  .pop())
-    assert not negate == any(parent.find_elements(By.CSS_SELECTOR, '%s.%s' % (clickable_type, class_name)))
+        WebDriverWait(context.webdriver, 30).until(any_clickable_element_exists,
+                                                   "Clickable element with selector '%s' expected." % (
+                                                           '%s.%s' % (clickable_type, to_class(class_name))))
 
 
 @then(r'(?>the user sees|they see) the (?P<class_name>\w+(?> \w+)*) is (?P<some_string>\w+(?> \w+)*)')
 def some_string_in_class_name(context, class_name: str, some_string: str):
     WebDriverWait(context.webdriver, 30).until(
         lambda d: any(matching_element.text.lower().find(some_string.lower()) >= 0 for matching_element in
-                      d.find_elements(By.CLASS_NAME, class_name)))
+                      d.find_elements(By.CLASS_NAME, to_class(class_name))))
 
 
 @then(r'(?>the user sees|they see) an input for the (?P<field_name>\w+(?> \w+)*) having value (?P<value>\w+(?> \w+)*)')

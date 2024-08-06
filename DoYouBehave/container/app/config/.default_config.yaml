@@ -86,7 +86,10 @@ entities:
           cron_expression: '* * * * *'
   - name: Coffee machine
     type: coffee_machine
-    needs_cleaning: true
+    is_cleanable: true
+    run_complete_when:
+      below_threshold_for: 1
+      threshold: 10
     sources:
       - mqtt_topic: measurements/home/indoor/coffee_machine/power
         type: consumption

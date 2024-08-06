@@ -1,6 +1,7 @@
 from python_event_bus import EventBus
 
 from iot.core.configuration import Sources, Destinations
+from iot.infrastructure.appliance.appliance_events import ApplianceEvents
 from iot.infrastructure.appliance.appliance_service import ApplianceService, DatabaseException
 from iot.mqtt.mqtt_client import MqttClient
 from iot.mqtt.mqtt_mediator import MqttMediator
@@ -12,7 +13,7 @@ class MqttApplianceMediator(MqttMediator):
         self.appliance_service = appliance_service
         self.sources = {}
         self.destinations = {}
-        EventBus.subscribe("entity_configs/changed_config_name", self.rename)
+        EventBus.subscribe(ApplianceEvents.CHANGED_CONFIG_NAME, self.rename)
 
     def add_appliance_by_config(self, appliance_name: str, mqtt_sources: Sources | None = None,
                                 destinations: Destinations | None = None):

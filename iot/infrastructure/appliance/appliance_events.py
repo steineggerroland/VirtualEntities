@@ -6,12 +6,14 @@ from iot.infrastructure.appliance.appliance import Appliance
 
 class ApplianceEvents(str, Enum):
     ADDED = "appliance/added"
-    CHANGED_CONFIG_NAME = "appliance/changed_config_name"
+    CHANGED_CONFIG_NAME = "appliance/changedConfigName"
     UPDATED_POWER_CONSUMPTION = "appliance/updatedPowerConsumption"
     STARTED_RUN = "appliance/startedRun"
     FINISHED_RUN = "appliance/finishedRun"
     LOADED = "appliance/loaded"
     UNLOADED = "appliance/unloaded"
+    CLEAN = "appliance/clean"
+    NOTICE_DIRT = "appliance/noticeDirt"
 
 
 class ApplianceEvent:

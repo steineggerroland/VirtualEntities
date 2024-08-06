@@ -1,5 +1,6 @@
 from iot.infrastructure.appliance.appliance import BasicAppliance
-from iot.infrastructure.appliance.appliance_enhancements import LoadableAppliance
+from iot.infrastructure.appliance.cleanable_appliance import CleanableAppliance
+from iot.infrastructure.appliance.loadable_appliance import LoadableAppliance
 from iot.infrastructure.exceptions import InvalidEntityType
 from iot.infrastructure.virtual_entity import _datetime_from_dict_key
 from project import Project
@@ -7,12 +8,13 @@ from project import Project
 
 class ApplianceBuilder:
     @staticmethod
-    def build_with(**kwargs) -> BasicAppliance | LoadableAppliance:
+    def build_with(**kwargs) -> BasicAppliance | LoadableAppliance | CleanableAppliance:
         appliance = BasicAppliance(name=kwargs['name'], entity_type=kwargs['type'],
                                    watt=kwargs.get('watt', None),
                                    watt_threshold=kwargs.get('watt_threshold', None),
-                                   power_consumption_indicates_charging=kwargs.get('power_consumption_indicates_charging',
-                                                                                  None),
+                                   power_consumption_indicates_charging=kwargs.get(
+                                       'power_consumption_indicates_charging',
+                                       None),
                                    running_state=kwargs.get('running_state', None),
                                    started_run_at=kwargs.get('started_run_at', None),
                                    last_updated_at=kwargs.get('last_updated_at', None),
@@ -24,6 +26,10 @@ class ApplianceBuilder:
                                           is_loaded=kwargs['is_loaded'] if 'is_loaded' in kwargs else None,
                                           needs_unloading=kwargs[
                                               'needs_unloading'] if 'needs_unloading' in kwargs else None)
+        if 'is_cleanable' in kwargs and kwargs['is_cleanable']:
+            appliance = CleanableAppliance(appliance,
+                                           needs_cleaning=kwargs[
+                                               'needs_cleaning'] if 'needs_cleaning' in kwargs else None)
         return appliance
 
     @staticmethod
@@ -32,6 +38,7 @@ class ApplianceBuilder:
             raise InvalidEntityType()
         is_loadable = dictionary['is_loadable'] if 'is_loadable' in dictionary else (
                 'needs_unloading' in dictionary or 'is_loaded' in dictionary)
+        is_cleanable = dictionary['is_cleanable'] if 'is_cleanable' in dictionary else ('needs_cleaning' in dictionary)
         return ApplianceBuilder.build_with(name=dictionary['name'], type=dictionary['type'],
                                            watt=dictionary['watt'] if 'watt' in dictionary else None,
                                            last_updated_at=_datetime_from_dict_key(dictionary, 'last_updated_at'),
@@ -48,7 +55,10 @@ class ApplianceBuilder:
                                            is_loadable=is_loadable,
                                            needs_unloading=dictionary[
                                                'needs_unloading'] if 'needs_unloading' in dictionary else False,
-                                           is_loaded=dictionary['is_loaded'] if 'is_loaded' in dictionary else False
+                                           is_loaded=dictionary['is_loaded'] if 'is_loaded' in dictionary else False,
+                                           is_cleanable=is_cleanable,
+                                           needs_cleaning=dictionary[
+                                               'needs_cleaning'] if 'needs_cleaning' in dictionary else None
                                            )
 
     @staticmethod
