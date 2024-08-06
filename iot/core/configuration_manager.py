@@ -6,6 +6,8 @@ from python_event_bus import EventBus
 
 from iot.core.configuration import *
 from iot.core.configuration_to_yaml_dumper import ConfigDumpers
+from iot.infrastructure.appliance.appliance_events import ApplianceEvents
+from iot.infrastructure.room_events import RoomEvents
 
 
 def _read_mqtt_configuration(conf_dict) -> MqttConfiguration:
@@ -156,7 +158,7 @@ def _read_calendars_configuration(entity_config: dict) -> CalendarsConfig:
     return CalendarsConfig(categories, calendars)
 
 
-def _read_entity(entity_config:dict, calendars) -> VirtualEntityConfig:
+def _read_entity(entity_config: dict, calendars) -> VirtualEntityConfig:
     _verify_keys(entity_config, ["name", "type"], "entities[]")
     return VirtualEntityConfig(entity_config['name'], entity_config['type'],
                                _read_temperature_thresholds_configuration(entity_config),
@@ -165,7 +167,8 @@ def _read_entity(entity_config:dict, calendars) -> VirtualEntityConfig:
                                _read_destination_configuration(entity_config),
                                _read_run_complete_threshold(entity_config),
                                entity_config.get('power_consumption_indicates_charging', None),
-                               entity_config.get('is_loadable', None))
+                               entity_config.get('is_loadable', None),
+                               entity_config.get('is_cleanable', None))
 
 
 def _read_entities(conf_dict: dict, calendars) -> List[VirtualEntityConfig]:
@@ -181,7 +184,7 @@ def _read_time_series_config(time_series_config) -> TimeSeriesConfig:
                             time_series_config['password'], time_series_config['bucket_name'])
 
 
-def _read_configuration(conf_dict:dict) -> Configuration:
+def _read_configuration(conf_dict: dict) -> Configuration:
     calendars_config = _read_calendars_configuration(conf_dict)
     return Configuration(_read_mqtt_configuration(conf_dict),
                          _read_entities(conf_dict, calendars_config.calendars),
@@ -245,14 +248,14 @@ class ConfigurationManager:
             entity = list(filter(lambda t: t.name == old_name, self.configuration.entities)).pop()
             entity.name = new_name
             self.save()
-            EventBus.call("appliance/changed_config_name", name=new_name, old_name=old_name)
+            EventBus.call(ApplianceEvents.CHANGED_CONFIG_NAME, name=new_name, old_name=old_name)
 
     def rename_room(self, old_name, new_name):
         if new_name != old_name:
             entity = list(filter(lambda t: t.name == old_name, self.configuration.entities)).pop()
             entity.name = new_name
             self.save()
-            EventBus.call("room/changed_config_name", name=new_name, old_name=old_name)
+            EventBus.call(RoomEvents.CHANGED_CONFIG_NAME, name=new_name, old_name=old_name)
 
     def rename_person(self, old_name, new_name):
         if new_name != old_name:

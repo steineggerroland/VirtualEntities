@@ -7,6 +7,8 @@ from iot.core.configuration import TimeSeriesConfig
 from iot.core.timeseries_storage_in_memory import InMemoryTimeSeriesStorageStrategy
 from iot.core.timeseries_storage_influxdb import InfluxDbTimeSeriesStorageStrategy
 from iot.core.timeseries_types import ConsumptionMeasurement, TemperatureHumidityMeasurement
+from iot.infrastructure.appliance.appliance_events import ApplianceEvents
+from iot.infrastructure.room_events import RoomEvents
 from iot.infrastructure.units import Temperature
 
 
@@ -16,8 +18,8 @@ class TimeSeriesStorage(metaclass=ABCMeta):
             self.time_series_storage_strategy = InfluxDbTimeSeriesStorageStrategy(time_series_config)
         else:
             self.time_series_storage_strategy = InMemoryTimeSeriesStorageStrategy()
-        EventBus.subscribe("appliance/changed_config_name", self.rename)
-        EventBus.subscribe("room/changed_config_name", self.rename)
+        EventBus.subscribe(ApplianceEvents.CHANGED_CONFIG_NAME, self.rename)
+        EventBus.subscribe(RoomEvents.CHANGED_CONFIG_NAME, self.rename)
 
     def start(self):
         self.time_series_storage_strategy.start()

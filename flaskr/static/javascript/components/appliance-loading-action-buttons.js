@@ -1,6 +1,6 @@
 import {socket} from "../refresh.js";
 
-const ActionButtons = function () {
+const LoadingActionButtons = function () {
     const self = this;
     const appliance = JSON.parse(self.dataset.applianceJson)
     let content = ''
@@ -52,9 +52,10 @@ const ActionButtons = function () {
     }
     if (!!content) {
         self.classList.remove('d-none')
+        return content
     } else {
         self.classList.add('d-none')
+        return '<div></div>'
     }
-    return `<>${content}</>`
 }
-export {ActionButtons}
+export {LoadingActionButtons}

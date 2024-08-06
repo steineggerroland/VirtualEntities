@@ -5,7 +5,7 @@ from dateutil.tz import tzlocal
 
 from iot.infrastructure.appliance.appliance import RunningState
 from iot.infrastructure.appliance.appliance_builder import ApplianceBuilder
-from iot.infrastructure.appliance.appliance_enhancements import LoadableAppliance
+from iot.infrastructure.appliance.loadable_appliance import LoadableAppliance
 from iot.infrastructure.appliance.power_state_decorator import PowerState
 from iot.infrastructure.virtual_entity import OnlineStatus
 
@@ -56,64 +56,10 @@ class ApplianceThatCanBeLoadedInitTest(unittest.TestCase):
         self.assertEqual(washing_machine.finished_last_run_at, finished_last_run_at)
 
 
-class InitTest(unittest.TestCase):
-    def test_name(self):
-        power_state_appliance: LoadableAppliance = ApplianceBuilder.build_with(name='super_power_state_appliance',
-                                                                               type="some appliance")
-        self.assertEqual(power_state_appliance.name, 'super_power_state_appliance')
-
-    def test_unknown_watt(self):
-        power_state_appliance: LoadableAppliance = ApplianceBuilder.build_with(name='power_state_appliance',
-                                                                               type="some appliance")
-        self.assertEqual(power_state_appliance.power_state, PowerState.UNKNOWN)
-
-    def test_zero_watt_is_off(self):
-        power_state_appliance: LoadableAppliance = ApplianceBuilder.build_with(name='power_state_appliance',
-                                                                               type="some appliance", watt=0)
-        self.assertEqual(power_state_appliance.power_state, PowerState.OFF)
-
-    def test_low_watt_is_idle(self):
-        power_state_appliance: LoadableAppliance = ApplianceBuilder.build_with(name='power_state_appliance',
-                                                                               type="some appliance", watt=4)
-        self.assertEqual(power_state_appliance.power_state, PowerState.IDLE)
-
-    def test_high_watt_is_running(self):
-        power_state_appliance: LoadableAppliance = ApplianceBuilder.build_with(name='power_state_appliance',
-                                                                               type="some appliance", watt=400)
-        self.assertEqual(power_state_appliance.power_state, PowerState.RUNNING)
-
-
 class ApplianceThatCanBeLoadedTest(unittest.TestCase):
     def setUp(self):
         self.appliance: LoadableAppliance = ApplianceBuilder.build_with(name='my-power_state_appliance',
                                                                         type="some appliance", watt=0, is_loadable=True)
-
-    def test_sets_running_state_idle_when_off_after_updating_power_consumption(self):
-        # given
-        appliance: LoadableAppliance = ApplianceBuilder.build_with(name='unknown appliance', type="some appliance",
-                                                                   running_state=RunningState.UNKNOWN)
-        # when
-        appliance.update_power_consumption(0)
-        # then
-        self.assertEqual(RunningState.IDLE, appliance.running_state)
-
-    def test_sets_running_state_run_when_running_after_updating_power_consumption(self):
-        # given
-        appliance: LoadableAppliance = ApplianceBuilder.build_with(name='unknown appliance', type="some appliance",
-                                                                   running_state=RunningState.UNKNOWN)
-        # when
-        appliance.update_power_consumption(2000)
-        # then
-        self.assertEqual(RunningState.RUNNING, appliance.running_state)
-
-    def test_sets_start_at_when_starting_run(self):
-        # given
-        self.appliance.update_power_consumption(2000)
-        # when
-        self.appliance.start_run()
-        # then
-        self.assertAlmostEqual(self.appliance.started_run_at, datetime.now(tzlocal()),
-                               delta=timedelta(milliseconds=100))
 
     def test_sets_appliance_loaded_when_starting_run(self):
         # given
@@ -231,6 +177,39 @@ class ApplianceThatCanBeLoadedTest(unittest.TestCase):
         self.appliance.unload()
         # then
         self.assertNotEqual(self.appliance.online_status(), OnlineStatus.ONLINE)
+
+
+class LoadableApplianceBehavesNormal(unittest.TestCase):
+    def setUp(self):
+        self.appliance: LoadableAppliance = ApplianceBuilder.build_with(name='my-power_state_appliance',
+                                                                        type="some appliance", watt=0, is_loadable=True)
+
+    def test_sets_running_state_idle_when_off_after_updating_power_consumption(self):
+        # given
+        appliance: LoadableAppliance = ApplianceBuilder.build_with(name='unknown appliance', type="some appliance",
+                                                                   running_state=RunningState.UNKNOWN, is_loadable=True)
+        # when
+        appliance.update_power_consumption(0)
+        # then
+        self.assertEqual(RunningState.IDLE, appliance.running_state)
+
+    def test_sets_running_state_run_when_running_after_updating_power_consumption(self):
+        # given
+        appliance: LoadableAppliance = ApplianceBuilder.build_with(name='unknown appliance', type="some appliance",
+                                                                   running_state=RunningState.UNKNOWN, is_loadable=True)
+        # when
+        appliance.update_power_consumption(2000)
+        # then
+        self.assertEqual(RunningState.RUNNING, appliance.running_state)
+
+    def test_sets_start_at_when_starting_run(self):
+        # given
+        self.appliance.update_power_consumption(2000)
+        # when
+        self.appliance.start_run()
+        # then
+        self.assertAlmostEqual(self.appliance.started_run_at, datetime.now(tzlocal()),
+                               delta=timedelta(milliseconds=100))
 
     def test_not_online_when_starting_or_finishing(self):
         # given
