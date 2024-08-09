@@ -28,6 +28,9 @@ entities:
 - name: Coffee machine
   type: coffee_machine
   is_cleanable: true
+  sources:
+  - mqtt_topic: measurements/home/indoor/covfefe/power
+    type: consumption
 - name: Dryer
   type: dryer
   sources:
@@ -51,7 +54,6 @@ entities:
   sources:
   - mqtt_topic: zigbee/home/living-room/robot-cleaner-station
     type: consumption
-    path: $.power
   - mqtt_topic: debug/home/things/robot-cleaner-01/load
     type: loading
   - mqtt_topic: debug/home/things/robot-cleaner-01/unload
