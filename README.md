@@ -19,6 +19,8 @@ This project helped us a lot with some sensors and power plug adapters as well a
 
 ## What it does
 
+[Demo environment (may take long to load on first visit because it's a free environment)](https://virtualentities.onrender.com)
+
 * Configure your virtual entities, i.e., **appliances**, **rooms** and **calendars** of **persons**
 * Reads power consumption, temperature and humidity measurements from [**MQTT**](https://en.wikipedia.org/wiki/MQTT)
 * Notifies about new status of entities through MQTT
