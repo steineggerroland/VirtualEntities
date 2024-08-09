@@ -1,7 +1,7 @@
 name: Demo deployment dummy data generation
 on:
   schedule:
-  - cron: "*/2 * * * *"
+  - cron: "* * * * *"
 jobs:
   generate:
     runs-on: ubuntu-latest
@@ -21,3 +21,6 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Test with unittest and coverage
         run: python dummy-data-generator.py data/demo.yaml
+        env:
+          nextcloud_username: ${{ secrets.NEXTCLOUD_USERNAME }}
+          nextcloud_password: ${{ secrets.NEXTCLOUD_PASSWORD }}
