@@ -1,0 +1,223 @@
+mqtt:
+  url: broker.hivemq.com
+  port: 1883
+  client_id: iot-things-client-test-t14
+entities:
+- name: Washing machine
+  type: washing_machine
+  run_complete_when:
+    below_threshold_for: 10
+    threshold: 10
+  sources:
+  - mqtt_topic: measurements/home/indoor/waschmaschine/power
+    type: consumption
+  - mqtt_topic: debug/home/things/washing_machine/load
+    type: loading
+  - mqtt_topic: debug/home/things/washing_machine/unload
+    type: unloading
+  destinations:
+    planned_notifications:
+    - mqtt_topic: debug/announce
+      cron_expression: '* * * * *'
+  is_loadable: true
+- name: Hair dryer
+  type: hair_dryer
+  sources:
+  - mqtt_topic: debug/hair
+    type: consumption
+- name: Coffee machine
+  type: coffee_machine
+  is_cleanable: true
+- name: Dryer
+  type: dryer
+  sources:
+  - mqtt_topic: measurements/home/indoor/trockner/power
+    type: consumption
+  - mqtt_topic: debug/home/things/dryer/load
+    type: loading
+  - mqtt_topic: debug/home/things/dryer/unload
+    type: unloading
+- name: Dishwasher
+  type: dishwasher
+  sources:
+  - mqtt_topic: measurements/home/indoor/spuelmaschine/power
+    type: consumption
+  - mqtt_topic: debug/home/things/dishwasher/load
+    type: loading
+  - mqtt_topic: debug/home/things/dishwasher/unload
+    type: unloading
+- name: Robot cleaner
+  type: vacuum
+  sources:
+  - mqtt_topic: zigbee/home/living-room/robot-cleaner-station
+    type: consumption
+    path: $.power
+  - mqtt_topic: debug/home/things/robot-cleaner-01/load
+    type: loading
+  - mqtt_topic: debug/home/things/robot-cleaner-01/unload
+    type: unloading
+  power_consumption_indicates_charging: true
+- name: Parents bedroom
+  type: room
+  temperature_thresholds:
+    optimal:
+      lower: 19
+      upper: 22
+    critical_lower: 16
+    critical_upper: 28
+  humidity_thresholds:
+    optimal:
+      lower: 40
+      upper: 60
+    critical_lower: 30
+    critical_upper: 75
+  sources:
+  - mqtt_topic: zigbee/home/parents-bedroom/sensor01
+    measures:
+    - type: temperature
+      path: $.temperature
+    - type: humidity
+      path: $.humidity
+- name: Hallway upstairs
+  type: room
+  temperature_thresholds:
+    optimal:
+      lower: 20
+      upper: 23
+    critical_lower: 15
+    critical_upper: 30
+  humidity_thresholds:
+    optimal:
+      lower: 50
+      upper: 75
+    critical_lower: 40
+    critical_upper: 85
+  sources:
+  - mqtt_topic: zigbee/home/hallway-top/sensor01
+    measures:
+    - type: temperature
+      path: $.temperature
+    - type: humidity
+      path: $.humidity
+- name: Hallway downstairs
+  type: room
+  temperature_thresholds:
+    optimal:
+      lower: 20
+      upper: 23
+    critical_lower: 15
+    critical_upper: 30
+  humidity_thresholds:
+    optimal:
+      lower: 50
+      upper: 75
+    critical_lower: 40
+    critical_upper: 85
+  sources:
+  - mqtt_topic: zigbee/home/hallway-downstairs/sensor01
+    measures:
+    - type: temperature
+      path: $.temperature
+    - type: humidity
+      path: $.humidity
+- name: bathroom
+  type: room
+  temperature_thresholds:
+    optimal:
+      lower: 21
+      upper: 24
+    critical_lower: 19
+    critical_upper: 30
+  humidity_thresholds:
+    optimal:
+      lower: 50
+      upper: 70
+    critical_lower: 40
+    critical_upper: 85
+  sources:
+  - mqtt_topic: zigbee/home/bathroom/sensor01
+    measures:
+    - type: temperature
+      path: $.temperature
+    - type: humidity
+      path: $.humidity
+- name: kitchen
+  type: room
+  temperature_thresholds:
+    optimal:
+      lower: 18
+      upper: 22
+    critical_lower: 16
+    critical_upper: 30
+  humidity_thresholds:
+    optimal:
+      lower: 50
+      upper: 60
+    critical_lower: 40
+    critical_upper: 80
+  sources:
+  - mqtt_topic: zigbee/home/kitchen/sensor01
+    measures:
+    - type: temperature
+      path: $.temperature
+    - type: humidity
+      path: $.humidity
+- name: living-room
+  type: room
+  temperature_thresholds:
+    optimal:
+      lower: 20
+      upper: 22
+    critical_lower: 18
+    critical_upper: 30
+  humidity_thresholds:
+    optimal:
+      lower: 40
+      upper: 60
+    critical_lower: 30
+    critical_upper: 70
+  sources:
+  - mqtt_topic: zigbee/home/living-room/sensor01
+    measures:
+    - type: temperature
+      path: $.temperature
+    - type: humidity
+      path: $.humidity
+  destinations:
+    planned_notifications:
+    - mqtt_topic: debug/announce
+      cron_expression: '* * * * *'
+- name: Terrasse
+  type: room
+  temperature_thresholds:
+    optimal:
+      lower: 15
+      upper: 23
+    critical_lower: 6
+    critical_upper: 30
+  humidity_thresholds:
+    optimal:
+      lower: 40
+      upper: 70
+    critical_lower: 30
+    critical_upper: 80
+  sources:
+  - mqtt_topic: zigbee/home/terrace/sensor01
+    measures:
+    - type: temperature
+      path: $.temperature
+    - type: humidity
+      path: $.humidity
+- name: Alfi
+  type: person
+  sources:
+  - application: calendar
+    name: Nextcloud
+    url: https://kim.nl.tab.digital/remote.php/dav/calendars/nextcloud_com@edudea.de/personal
+    username: ${nextcloud_username}
+    password: ${nextcloud_password}
+    update_cron: 1,2 * * * * 15
+    color_hex: ffffff
+flaskr:
+  HOST: 0.0.0.0
+  PORT: ${port:-10000}
