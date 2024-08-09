@@ -11,6 +11,7 @@ from iot.core.configuration import MqttMeasureSource
 from iot.core.configuration_manager import ConfigurationManager
 
 CONFIG_FILE_NAME = sys.argv[1] if len(sys.argv) > 1 else 'config.yaml'
+continuous: bool = sys.argv.count('--continuous') > 0
 
 logging.basicConfig(encoding='utf-8',
                     level=logging.DEBUG,
@@ -31,6 +32,12 @@ client.connect(config.mqtt.url, config.mqtt.port)
 
 
 def notify_repeatedly():
+    send_random_data_for_entities()
+    sleep(42)
+    notify_repeatedly()
+
+
+def send_random_data_for_entities():
     for entity in config.entities:
         if entity.type == "appliance":
             if entity.sources:
@@ -47,13 +54,12 @@ def notify_repeatedly():
                         client.publish(source.mqtt_topic, json.dumps(
                             {"temperature": 15 + round(random() * 20, 2), "humidity": round(random() * 100, 2)}))
                         sleep(2)
-
     logging.debug('sent notifications')
-    logging.debug(client.is_connected())
-    sleep(42)
-    notify_repeatedly()
 
 
-client.loop()
-t = threading.Thread(target=notify_repeatedly)
-t.start()
+if continuous:
+    client.loop()
+    t = threading.Thread(target=notify_repeatedly)
+    t.start()
+else:
+    send_random_data_for_entities()
