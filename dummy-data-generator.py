@@ -2,11 +2,13 @@ import json
 import logging
 import sys
 import threading
+from random import random
 from time import sleep
 
 import paho.mqtt.client as paho_mqtt
 
-from iot.core.configuration import load_configuration
+from iot.core.configuration import MqttMeasureSource
+from iot.core.configuration_manager import ConfigurationManager
 
 CONFIG_FILE_NAME = sys.argv[1] if len(sys.argv) > 1 else 'config.yaml'
 
@@ -14,7 +16,7 @@ logging.basicConfig(encoding='utf-8',
                     level=logging.DEBUG,
                     format='%(asctime)s - %(name)s(%(lineno)s) - %(levelname)s - %(message)s')
 
-config = load_configuration(CONFIG_FILE_NAME)
+config = ConfigurationManager().load(CONFIG_FILE_NAME)
 
 
 def on_connect(client, userdata, flags, rc):
@@ -27,19 +29,28 @@ if config.mqtt.has_credentials:
 client.on_connect = on_connect
 client.connect(config.mqtt.url, config.mqtt.port)
 
-room = {"type": "room", "temperature": 22.1, "humidity": 66.6, "topic": "kitchen/sensor/temperature"}
-room2 = {"type": "room", "temperature": 22.2, "humidity": 65.43, "topic": "bath/sensor/temperature"}
-thing = {"type": "appliance", "consumption": 1201.12, "topic": "consumption/topic", "unloading": "unloading/topic",
-         "loading": "loading/topic"}
-things = [room, room2, thing]
-
 
 def notify_repeatedly():
-    for t in things:
-        client.publish(t['topic'], payload=json.dumps(t))
+    for entity in config.entities:
+        if entity.type == "appliance":
+            if entity.sources:
+                for source in entity.sources.list:
+                    if type(source) is MqttMeasureSource:
+                        source: MqttMeasureSource = source
+                        client.publish(source.mqtt_topic, round(random() * 2400, 2))
+                        sleep(2)
+        elif entity.type == "room":
+            if entity.sources:
+                for source in entity.sources.list:
+                    if type(source) is MqttMeasureSource:
+                        source: MqttMeasureSource = source
+                        client.publish(source.mqtt_topic, json.dumps(
+                            {"temperature": 15 + round(random() * 20, 2), "humidity": round(random() * 100, 2)}))
+                        sleep(2)
+
     logging.debug('sent notifications')
     logging.debug(client.is_connected())
-    sleep(5)
+    sleep(42)
     notify_repeatedly()
 
 
