@@ -52,7 +52,7 @@ def send_random_data_for_entities():
                         elif rand == 'idle':
                             payload = round(random() * 10, 2)
                         else:
-                            payload = round(random() * 2400, 2)
+                            payload = round(10 + random() * 2390, 2)
                         logging.debug('Sending to %s consumption %s', source.mqtt_topic, payload)
                         client.publish(source.mqtt_topic, payload)
                         count += 1
