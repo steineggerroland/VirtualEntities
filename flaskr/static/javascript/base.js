@@ -60,21 +60,22 @@ const behave = (function () {
 
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    const isDebugMode = params.has('debug') && params.get('debug') || params.has('debug.js') && params.get('debug.js');
     return {
         logger: (name) => {
             return {
                 error: (msg) => console.error(`${new Date().toISOString()} <${name}>: ${msg}`),
-                debug: (msg) => console.debug(`${new Date().toISOString()} <${name}>: ${msg}`),
-                info: (msg) => console.info(`${new Date().toISOString()} <${name}>: ${msg}`)
+                debug: !isDebugMode ? () => {
+                } : (msg) => console.debug(`${new Date().toISOString()} <${name}>: ${msg}`),
+                info: !isDebugMode ? () => {
+                } : (msg) => console.info(`${new Date().toISOString()} <${name}>: ${msg}`)
             }
         },
-        isDebugMode: params.has('debug') && params.get('debug') || params.has('debug.js') && params.get('debug.js')
+        isDebugMode
     }
 })()
 
-if (behave.isDebugMode) {
-    behave.logger('base').debug('Logging is enabled')
-}
+behave.logger('base').debug('Logging is enabled')
 
 if (behave.isDebugMode) {
     socket.onAny((event) => {
