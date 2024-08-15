@@ -34,14 +34,22 @@ class CalendarLoader:
                            caldav_events: List[CalendarObjectResource]) -> Calendar:
         appointments = []
         for event in caldav_events:
-            ical_component = event.icalendar_component
-            summary = str(ical_component['SUMMARY'])
-            description = str(ical_component['DESCRIPTION']) if 'DESCRIPTION' in ical_component else ''
-            start_at = ical_component['DTSTART'].dt
-            end_at = ical_component['DTEND'].dt
-            color = self.search_color_for_category(default_color, ical_component)
-            appointments.append(Appointment(summary, start_at, end_at, color, description))
+            try:
+                appointment = self._convert_to_appointment(default_color, event)
+                appointments.append(appointment)
+            except AttributeError:
+                self.logger.debug('Could not parse event as appointment "%s"', event)
         return Calendar(name, url, default_color, appointments, last_seen_at=datetime.now(tzlocal()))
+
+    def _convert_to_appointment(self, default_color, event):
+        ical_component = event.icalendar_component
+        summary = str(ical_component['SUMMARY'])
+        description = str(ical_component['DESCRIPTION']) if 'DESCRIPTION' in ical_component else ''
+        start_at = ical_component['DTSTART'].dt
+        end_at = ical_component['DTEND'].dt
+        color = self.search_color_for_category(default_color, ical_component)
+        appointment = Appointment(summary, start_at, end_at, color, description)
+        return appointment
 
     def search_color_for_category(self, default_color: str, ical_component) -> str:
         try:
