@@ -10,7 +10,8 @@ class ApplianceSocketNotifier:
         self.socket = socket
         self.appliance_service = appliance_service
 
-        for event in filter(lambda e: e != ApplianceEvents.CHANGED_CONFIG_NAME, ApplianceEvents):
+        specific_events = [ApplianceEvents.CHANGED_CONFIG_NAME, ApplianceEvents.UPDATED_POWER_CONSUMPTION]
+        for event in filter(lambda e: e not in specific_events, ApplianceEvents):
             EventBus.subscribe(event, self._appliance_updated)
         EventBus.subscribe(ApplianceEvents.UPDATED_POWER_CONSUMPTION, self._appliance_power_consumption_updated)
 
@@ -18,5 +19,5 @@ class ApplianceSocketNotifier:
         self.socket.emit(f'appliances/{event.appliance.name}/updated', {'appliance': event.appliance.to_dict()})
 
     def _appliance_power_consumption_updated(self, event: ApplianceConsumptionEvent):
-        self.socket.emit(f'appliances/{event.appliance.name}/powerConsumptionUpdated',
+        self.socket.emit(f'appliances/{event.appliance.name}/power-consumption/updated',
                          {'appliance': event.appliance.to_dict(), 'measure': event.measurement.to_dict()})

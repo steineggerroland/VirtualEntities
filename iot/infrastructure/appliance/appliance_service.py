@@ -160,7 +160,7 @@ class ApplianceService:
         try:
             appliance: CleanableAppliance = self.appliance_depot.retrieve(name).clean()
             self.appliance_depot.stock(appliance)
-            EventBus.call(ApplianceEvents.CLEAN, ApplianceEvent(appliance))
+            EventBus.call(ApplianceEvents.CLEANED, ApplianceEvent(appliance))
         except ValueError as e:
             raise DatabaseException("Failed to save the cleaning of the appliance '%s'." % name, e) from e
 
@@ -169,7 +169,7 @@ class ApplianceService:
             appliance: CleanableAppliance = self.appliance_depot.retrieve(name).notice_dirt(
                 needs_cleaning=needs_cleaning)
             self.appliance_depot.stock(appliance)
-            EventBus.call(ApplianceEvents.CLEAN, ApplianceEvent(appliance))
+            EventBus.call(ApplianceEvents.NOTICED_DIRT, ApplianceEvent(appliance))
         except ValueError as e:
             raise DatabaseException(
                 "Failed to save noticing dirt of appliance '%s' with need to clean being %s." % (
