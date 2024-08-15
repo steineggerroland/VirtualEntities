@@ -27,7 +27,7 @@ const PowerConsumption = function () {
         self.watt_formatted = watt_formatted
         self.refresh()
     };
-    socket.on(`appliances/${self.name}/powerConsumptionUpdated`, socketHandler);
+    socket.on(`appliances/${self.name}/power-consumption/updated`, socketHandler);
     const {watt_formatted, watt_formatted_short} = formatWatt(self.dataset.watt);
     self.watt_formatted_short = watt_formatted_short
     self.watt_formatted = watt_formatted

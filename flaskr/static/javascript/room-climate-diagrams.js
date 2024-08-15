@@ -112,7 +112,7 @@ import {socket} from "./refresh.js";
                     drawChart(measurements, container.id, xAxisLabel, fullscreen)
                 }
             })
-        socket.on(`rooms/${entityName}/indorClimateUpdated`, event => {
+        socket.on(`rooms/${entityName}/indor-climate/updated`, event => {
             const measure = event.measure
             measurements.pop()
             measurements.push({"date": new Date(measure.time), "value": measure[attribute]})
