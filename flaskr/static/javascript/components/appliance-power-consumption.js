@@ -2,7 +2,7 @@ import {socket} from "../refresh.js";
 
 const formatWatt = (watt) => {
     watt = parseFloat(watt)
-    if (isNaN(watt)) return {watt_formatted: "?W", watt_formatted_short: "?W"}
+    if (isNaN(watt)) return {wattFormatted: "?W", wattFormattedShort: "?W"}
     let multiplier = ""
     let value = watt
     if (watt >= 1000) {
@@ -13,37 +13,46 @@ const formatWatt = (watt) => {
     } else {
         value = watt.toPrecision(2)
     }
-    return {watt_formatted: watt + "W", watt_formatted_short: value + multiplier + "W"}
+    return {wattFormatted: watt + "W", wattFormattedShort: value + multiplier + "W"}
 }
 const PowerConsumption = function () {
     const self = this;
     self.asBadge = !!self.dataset.asBadge
     self.name = self.dataset.name
-    let bootstrap_tooltip
-    const socketHandler = event => {
-        self.dataset.watt = event.appliance.watt
-        const {watt_formatted, watt_formatted_short} = formatWatt(self.dataset.watt);
-        self.watt_formatted_short = watt_formatted_short
-        self.watt_formatted = watt_formatted
-        self.refresh()
-    };
-    socket.on(`appliances/${self.name}/power-consumption/updated`, socketHandler);
-    const {watt_formatted, watt_formatted_short} = formatWatt(self.dataset.watt);
-    self.watt_formatted_short = watt_formatted_short
-    self.watt_formatted = watt_formatted
     self.tooltip = self.dataset.tooltip
-    self.chargingIconUrl = self.dataset.chargingIconUrl
+    let bootstrap_tooltip
+
+    function update() {
+        const {wattFormatted, wattFormattedShort} = formatWatt(self.dataset.watt);
+        self.wattFormattedShort = wattFormattedShort
+        self.wattFormatted = wattFormatted
+    }
+
+    const socketHandler = event => {
+        if (self.dataset.powerState !== event.appliance['power_state'] &&
+            (self.dataset.powerState === 'charging' || event.appliance['power_state'] === 'charging')) {
+            self.dataset.powerState = event.appliance['power_state']
+            self.dataset.watt = event.appliance.watt
+            socket.off(`appliances/${self.name}/power-consumption/updated`, socketHandler);
+            self.refresh()
+        } else if (parseFloat(self.dataset.watt) !== event.appliance.watt) {
+            self.dataset.watt = event.appliance.watt
+            update()
+        }
+    };
+    update()
+    socket.on(`appliances/${self.name}/power-consumption/updated`, socketHandler);
     self.onload = (element) => {
         bootstrap_tooltip = new bootstrap.Tooltip(element)
     }
-    const watt_span = `<span title="{{ self.watt_formatted }}">{{ self.watt_formatted_short }}</span>`
+    const wattSpan = `<span title="{{ self.wattFormatted }}">{{ self.wattFormattedShort }}</span>`
     if (self.asBadge) {
         return `<span class="badge text-bg-secondary power-consumption" data-bs-title="{{ self.tooltip }}"
-          data-bs-toggle="tooltip">${watt_span}</span>`
+          data-bs-toggle="tooltip">${wattSpan}</span>`
     } else {
-        let template = `<div class="h-100 w-100 d-flex flex-column justify-content-center align-items-center power-consumption" data-bs-title="{{ self.tooltip }}" data-bs-toggle="tooltip" >`
-        template += self.dataset.powerState === 'charging' ? `<img class="icon charging" src="{{self.chargingIconUrl}}" alt="" />` : ''
-        template += watt_span
+        let template = `<div class="h-100 w-100 d-flex flex-column justify-content-center align-items-center power-consumption" data-bs-title="{{ self.tooltip }}" data-bs-toggle="tooltip">`
+        template += self.dataset.powerState === 'charging' ? `<img class="icon charging" src="${self.dataset.chargingIconUrl}" alt="" />` : ' '
+        template += wattSpan
         template += `</div>`;
         return template
     }
