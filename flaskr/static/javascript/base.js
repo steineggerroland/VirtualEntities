@@ -1,7 +1,8 @@
 import "./refresh.js";
 import "./components.js";
+import {socket} from "./refresh.js";
 
-(function () {
+const behave = (function () {
     const params = new URLSearchParams(window.location.search)
     if (params.has('refresh_interval')) {
         setTimeout(() => {
@@ -59,5 +60,26 @@ import "./components.js";
 
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-
+    return {
+        logger: (name) => {
+            return {
+                error: (msg) => console.error(`${new Date().toISOString()} <${name}>: ${msg}`),
+                debug: (msg) => console.debug(`${new Date().toISOString()} <${name}>: ${msg}`),
+                info: (msg) => console.info(`${new Date().toISOString()} <${name}>: ${msg}`)
+            }
+        },
+        isDebugMode: params.has('debug') && params.get('debug') || params.has('debug.js') && params.get('debug.js')
+    }
 })()
+
+if (behave.isDebugMode) {
+    behave.logger('base').debug('Logging is enabled')
+}
+
+if (behave.isDebugMode) {
+    socket.onAny((event) => {
+        behave.logger('ws').debug(event)
+    });
+}
+
+export {behave}

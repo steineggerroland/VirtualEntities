@@ -4,9 +4,6 @@ const socket = io();
 socket.on('connect', function () {
     console.debug('Connected to socket')
 });
-socket.onAny((event) => {
-    //console.log(`${new Date().getTime()}: ${event}`)
-});
-
+const params = new URL(document.location.toString()).searchParams
 
 export {socket}
