@@ -18,7 +18,6 @@ const CleaningActionButtons = function () {
             submit = function (event) {
                 if (event.preventDefault) event.preventDefault();
                 fetch(self.dataset.cleanApiUrl, {method: "POST"})
-                socket.emit('celebrate')
                 return false;
             }
         } else {

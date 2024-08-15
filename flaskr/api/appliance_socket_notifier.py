@@ -15,9 +15,15 @@ class ApplianceSocketNotifier:
             EventBus.subscribe(event, self._appliance_updated)
         EventBus.subscribe(ApplianceEvents.UPDATED_POWER_CONSUMPTION, self._appliance_power_consumption_updated)
 
+        EventBus.subscribe(ApplianceEvents.UNLOADED, self._celebrate)
+        EventBus.subscribe(ApplianceEvents.CLEANED, self._celebrate)
+
     def _appliance_updated(self, event: ApplianceEvent):
         self.socket.emit(f'appliances/{event.appliance.name}/updated', {'appliance': event.appliance.to_dict()})
 
     def _appliance_power_consumption_updated(self, event: ApplianceConsumptionEvent):
         self.socket.emit(f'appliances/{event.appliance.name}/power-consumption/updated',
                          {'appliance': event.appliance.to_dict(), 'measure': event.measurement.to_dict()})
+
+    def _celebrate(self, _):
+        self.socket.emit('celebrate')
