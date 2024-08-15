@@ -1,5 +1,6 @@
 import logging
 import sys
+from collections.abc import Iterable
 from pathlib import Path
 from time import sleep
 from typing import List
@@ -80,7 +81,7 @@ def run():
                               appliance_service, appliance_depot, time_series_storage, room_catalog,
                               register_of_persons,
                               config_manager, config.flaskr)
-        if type(config.flaskr) is not iter or 'HOST' not in config.flaskr and 'PORT' not in config.flaskr:
+        if not isinstance(config.flaskr, Iterable) or 'HOST' not in config.flaskr and 'PORT' not in config.flaskr:
             frontend.run()
         elif 'HOST' in config.flaskr and 'PORT' in config.flaskr:
             frontend.run(host=config.flaskr['HOST'], port=config.flaskr['PORT'])
