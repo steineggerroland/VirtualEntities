@@ -1,4 +1,4 @@
-import {socket} from "../refresh.js";
+import {socket, behave} from "../app.js";
 
 const CleaningActionButtons = function () {
     const self = this;
@@ -40,6 +40,9 @@ const CleaningActionButtons = function () {
         update()
     }
     socket.on(`appliances/${JSON.parse(self.dataset.applianceJson).name}/updated`, socketHandler)
+    self.onload = (element) => {
+        behave.createLogger('appliance-cleaning-action-buttons').debug('Loaded')
+    }
     return `<div class="col-4 fs-5 d-flex flex-column align-items-center justify-content-center">
     <form class="w-100 w-sm-75 overflow-hidden" style="aspect-ratio: 1" method="get"
           action="#" onsubmit="self.submitHandler">

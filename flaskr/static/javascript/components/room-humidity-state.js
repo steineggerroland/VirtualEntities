@@ -1,4 +1,4 @@
-import {socket} from "../refresh.js";
+import {socket, behave} from "../app.js";
 
 const RoomHumidityState = function () {
     const self = this
@@ -55,6 +55,9 @@ const RoomHumidityState = function () {
         self.iconUrl = self.dataset.unknownIconUrl
     }
 
+    self.onload = (element) => {
+        behave.createLogger('room-humidity-state').debug('Loaded')
+    }
     let template = '<div style="display: contents !important;">'
     if (!!self.dataset.asBadge) {
         template += `

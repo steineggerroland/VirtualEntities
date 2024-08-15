@@ -1,4 +1,4 @@
-import {socket} from "../refresh.js";
+import {socket, behave} from "../app.js";
 
 const ApplianceState = function () {
     const self = this;
@@ -84,6 +84,9 @@ const ApplianceState = function () {
         self.color = 'success'
     }
     self.runningSinceLabel = self.dataset.runningSinceLabel
+    self.onload = (element) => {
+        behave.createLogger('appliance-state').debug('Loaded')
+    }
     let template = `<div class="running-state w-100 overflow-hidden text-bg-{{ self.color }} bg-{{ self.color }} align-content-center text-center"
              style="aspect-ratio: 1" role="status">`
     if (appliance.running_state == 'running') {

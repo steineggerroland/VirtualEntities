@@ -1,4 +1,4 @@
-import {socket} from "../refresh.js";
+import {socket, behave} from "../app.js";
 
 const ApplianceCleaningState = function () {
     const self = this;
@@ -25,6 +25,9 @@ const ApplianceCleaningState = function () {
     }
     socket.on(`appliances/${self.appliance.name}/updated`, socketHandler);
     update()
+    self.onload = (element) => {
+        behave.createLogger('appliance-cleaning-state').debug('Loaded')
+    }
     let template = '<div class="cleanliness w-100 overflow-hidden align-content-center text-center ' +
         'text-bg-{{ self.color }} bg-{{ self.color }}" style="aspect-ratio: 1">'
     template += '{{self.text}}'

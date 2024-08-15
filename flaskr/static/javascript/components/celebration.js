@@ -1,4 +1,4 @@
-import {socket} from "../refresh.js";
+import {socket} from "../app.js";
 
 const ConfettiWall = function () {
     /* Snippet seems to be Confetti by Patrik Svensson (http://metervara.net) */

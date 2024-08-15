@@ -1,4 +1,4 @@
-import {socket} from "./refresh.js";
+import {socket} from "./app.js";
 
 (function () {
 
