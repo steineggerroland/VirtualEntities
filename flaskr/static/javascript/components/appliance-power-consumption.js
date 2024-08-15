@@ -1,4 +1,4 @@
-import {socket} from "../refresh.js";
+import {socket, behave} from "../app.js";
 
 const formatWatt = (watt) => {
     watt = parseFloat(watt)
@@ -44,6 +44,7 @@ const PowerConsumption = function () {
     socket.on(`appliances/${self.name}/power-consumption/updated`, socketHandler);
     self.onload = (element) => {
         bootstrap_tooltip = new bootstrap.Tooltip(element)
+        behave.createLogger('appliance-power-consumption').debug('Loaded')
     }
     const wattSpan = `<span title="{{ self.wattFormatted }}">{{ self.wattFormattedShort }}</span>`
     if (self.asBadge) {

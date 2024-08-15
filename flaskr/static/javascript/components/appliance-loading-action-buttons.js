@@ -1,4 +1,4 @@
-import {socket} from "../refresh.js";
+import {socket, behave} from "../app.js";
 
 const LoadingActionButtons = function () {
     const self = this;
@@ -49,6 +49,9 @@ const LoadingActionButtons = function () {
     </form>
 </div>`
         }
+    }
+    self.onload = (element) => {
+        behave.createLogger('appliance-loading-action-buttons').debug('Loaded')
     }
     if (!!content) {
         self.classList.remove('d-none')
