@@ -28,5 +28,13 @@ if (behave.isDebugMode) {
         logger.debug(event)
     });
 }
+const loader = import("./date-fns@3.6.0.js")
+if (document.documentElement.lang === 'de') {
+    loader.then(() => import("./date-fns@3.6.0-locale-de.js").then(() => {
+        dateFns.setDefaultOptions({locale: dateFns.locale.de})
+    }))
+}
+loader.then(() => import('./components.js'))
+    .then(() => import('./base.js'))
 
 export {socket, behave}

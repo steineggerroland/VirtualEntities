@@ -3,9 +3,16 @@
         <h4 class="card-title mb-0 d-flex flex-nowrap">
             <a class="name me-1 overflow-hidden text-truncate" href="{{ url_for('person', name=person.name) }}"
                data-bs-title="{{ person.name }}" data-bs-toggle="tooltip">{{ person.name }}</a>
-            {%- with online_status=person.online_status(), time_delta=person.last_seen_time_delta() %}
-                <div class="ms-auto">{%- include "snippets/online_status_icon.html" %}</div>
-            {%- endwith %}
+            <span class="ms-auto">
+                <lm-online-status-icon data-entity-type="person" data-entity-name="{{ person.name }}"
+                                       data-online-status="{{ person.online_status() }}"
+                                       data-last-seen-at="{{ person.last_seen_at.isoformat() if person.last_seen_at else '' }}"
+                                       data-last-seen-label="{{ _('Last seen') }}"
+                                       data-online-label="{{ _('Online') }}"
+                                       data-offline-label="{{ _('Offline') }}"
+                                       data-unknown-label="{{ _('Online status not known') }}"
+                ></lm-online-status-icon>
+            </span>
         </h4>
     </div>
     {%- for calendar in person.calendars %}

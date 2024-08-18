@@ -26,8 +26,10 @@ Feature: Showing general information of virtual entities
   Scenario: The different status of an appliance are displayed, i.e.,
   idle, running with duration and needing treatment.
     Given the user goes to the virtual entities page
+    Then the user sees the online status of the Dishwasher being offline after a refresh
     When the power consumption of the Dishwasher is updated to 0
     Then the user sees the new running state of the Dishwasher being idling after a refresh
+    And the user sees the new online status of the Dishwasher being online after a refresh
     When the power consumption of the Dishwasher is updated to 1024
     Then the user sees the new running state of the Dishwasher being running after a refresh
     When the power consumption of the Dishwasher is updated to 5

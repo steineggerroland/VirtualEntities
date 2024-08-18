@@ -3,9 +3,16 @@
         <h4 class="card-title mb-0 d-flex flex-nowrap">
             <a class="name me-1 overflow-hidden text-truncate" href="{{ url_for('room', name=room.name) }}"
                data-bs-title="{{ room.name }}" data-bs-toggle="tooltip">{{ room.name }}</a>
-            {%- with online_status=room.online_status(), time_delta=room.last_seen_time_delta() %}
-                <div class="ms-auto">{%- include "snippets/online_status_icon.html" %}</div>
-            {%- endwith %}
+            <span class="ms-auto">
+                <lm-online-status-icon data-entity-type="room" data-entity-name="{{ room.name }}"
+                                       data-online-status="{{ room.online_status() }}"
+                                       data-last-seen-at="{{ room.last_seen_at.isoformat() if room.last_seen_at else '' }}"
+                                       data-last-seen-label="{{ _('Last seen') }}"
+                                       data-online-label="{{ _('Online') }}"
+                                       data-offline-label="{{ _('Offline') }}"
+                                       data-unknown-label="{{ _('Online status not known') }}"
+                ></lm-online-status-icon>
+            </span>
         </h4>
     </div>
     <div class="row g-1">

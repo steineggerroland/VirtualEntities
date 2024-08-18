@@ -1,5 +1,4 @@
 import {behave, socket} from "./app.js";
-import "./components.js";
 
  (function () {
     const params = new URLSearchParams(window.location.search)
