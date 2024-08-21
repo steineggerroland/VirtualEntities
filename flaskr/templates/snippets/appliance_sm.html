@@ -9,10 +9,17 @@
             <a class="name me-1 overflow-hidden text-truncate" id="appliance-{{ appliance.name|replace(' ', '-') }}"
                href="{{ url_for('appliance', name=appliance.name) }}"
                data-bs-title="{{ appliance.name }}" data-bs-toggle="tooltip">{{ appliance.name }}</a>
-            {%- with online_status=appliance.online_status(),time_delta=appliance.last_seen_time_delta() %}
-                <div class="ms-auto">{%- include "snippets/online_status_icon.html" %}</div>
-            {%- endwith %}
-            <div class="visually-hidden power-state">{{ _(appliance.power_state) }}</div>
+            <span class="ms-auto">
+                <lm-online-status-icon data-entity-type="appliance" data-entity-name="{{ appliance.name }}"
+                                       data-online-status="{{ appliance.online_status() }}"
+                                       data-last-seen-at="{{ appliance.last_seen_at.isoformat() if appliance.last_seen_at else '' }}"
+                                       data-last-seen-label="{{ _('Last seen') }}"
+                                       data-online-label="{{ _('Online') }}"
+                                       data-offline-label="{{ _('Offline') }}"
+                                       data-unknown-label="{{ _('Online status not known') }}"
+                ></lm-online-status-icon>
+            </span>
+            <span class="visually-hidden power-state">{{ _(appliance.power_state) }}</span>
         </h4>
     </div>
     <div class="row g-1">
@@ -42,7 +49,7 @@
                             data-loaded-appliance-icon-url="{{ url_for('static', filename='img/flaticon/smart-washing-machine.gif') }}"
                             data-loaded-label="{{ _('Loaded') }}"
                             data-idling-label="{{ _('Idling') }}"
-                            data-started-run-at="{{ appliance.started_run_at|datetimeformat("yyyy-MM-dd'T'HH:mm:ss") if appliance.started_run_at else '' }}"
+                            data-started-run-at="{{ appliance.started_run_at.isoformat() if appliance.started_run_at else '' }}"
                             data-running-since-label="{{ _('Running since %(xMinutes)s', xMinutes=appliance.running_for_time_period()|timedeltaformat()) }}"
                             data-finished-last-run-before-label="{{ _('Finished last run %(xMinutesAgo)s', xMinutesAgo=appliance.finished_last_run_before_time_period()|timedeltaformat(add_direction=True)) }}"
         ></lm-appliance-state>

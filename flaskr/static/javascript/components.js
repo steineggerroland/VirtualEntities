@@ -8,9 +8,11 @@ import {RoomHumidityState} from "./components/room-humidity-state.js";
 import {RoomTemperatureState} from "./components/room-temperature-state.js";
 
 import {ConfettiWall} from "./components/celebration.js";
+import {OnlineStatusIcon} from "./components/online-status-icon.js";
 
 
 /* GENERAL COMPONENTS */
+lemonade.createWebComponent('online-status-icon', OnlineStatusIcon)
 lemonade.createWebComponent('confetti-wall', ConfettiWall, {
     shadowRoot: false,
 });

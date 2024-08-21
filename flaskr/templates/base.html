@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ lang }}" {% if session['dark_mode'] %}data-bs-theme="dark"{% endif %}>
+<html lang="{{ lang }}" xml:lang="{{ lang }}" {% if session['dark_mode'] %}data-bs-theme="dark"{% endif %} xmlns="http://www.w3.org/1999/xhtml">
 <head>
     {% block head %}
         <meta charset="utf-8">
@@ -118,8 +118,7 @@
 {% block scripts %}
     {{ bootstrap.load_js(with_popper=True) }}
     <script language="JavaScript" src="{{ url_for('static', filename='javascript/lemonade.min.js') }}"></script>
-    <script language="JavaScript" src="{{ url_for('static', filename='javascript/base.js') }}"
-            type="module"></script>
+    <script language="JavaScript" src="{{ url_for('static', filename='javascript/app.js') }}" type="module"></script>
     {% block additional_scripts %}
     {% endblock %}
 {% endblock %}
