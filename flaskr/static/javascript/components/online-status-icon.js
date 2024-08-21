@@ -1,8 +1,11 @@
-import {socket, behave} from "../app.js";
+import {applianceSocket, roomSocket, personSocket, behave} from "../app.js";
 
 const OnlineStatusIcon = function () {
     const self = this;
     self.svgStyle = self.dataset.svgStyle || ''
+    const socket = self.dataset.entityType === 'appliance' ? applianceSocket :
+        self.dataset.entityType === 'room' ? roomSocket :
+            personSocket
     let interval, tooltip
     const update = () => {
         self.onlineStatus = self.dataset.onlineStatus.toString().split('.').pop().toLowerCase()
@@ -30,7 +33,8 @@ const OnlineStatusIcon = function () {
         }
     }
     update()
-    const socketHandler = event => {
+    const socketHandler = (eventName, event) => {
+        if (!eventName.startsWith(self.dataset.entityName)) return
         const entity = event[self.dataset.entityType]
         if (self.dataset.onlineStatus !== entity['online_status'] ||
             self.dataset.lastSeenAt !== entity['last_seen_at']) {
@@ -39,7 +43,7 @@ const OnlineStatusIcon = function () {
             update()
         }
     }
-    socket.on(`${self.dataset.entityType}s/${self.dataset.entityName}/updated`, socketHandler)
+    socket.onAny(socketHandler)
     self.onload = (element) => {
         tooltip = new bootstrap.Tooltip(element)
         behave.createLogger('online-status-icon').debug('Loaded')
