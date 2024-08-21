@@ -1,4 +1,4 @@
-import {applianceSocket, roomSocket, personSocket, behave} from "../app.js";
+import {applianceSocket, behave, personSocket, roomSocket} from "../app.js";
 
 const OnlineStatusIcon = function () {
     const self = this;
@@ -23,10 +23,14 @@ const OnlineStatusIcon = function () {
         if (!!self.lastSeenAt && !interval) {
             const lastSeenAt = dateFns.formatDistanceToNow(new Date(self.lastSeenAt), {addSuffix: true})
             self.text = `${self.dataset.lastSeenLabel} ${lastSeenAt}`
-            interval = setInterval(() => {
+            interval = setInterval(async () => {
                 const lastSeenAt = dateFns.formatDistanceToNow(new Date(self.lastSeenAt), {addSuffix: true})
                 self.text = `${self.dataset.lastSeenLabel} ${lastSeenAt}`
-                if (tooltip) tooltip.setContent({'.tooltip-inner': self.text})
+                if (!!tooltip) {
+                    await tooltip.hide()
+                    await tooltip.dispose()
+                    tooltip = bootstrap.Tooltip.getOrCreateInstance(self.svgElement)
+                }
             }, (50 + Math.round(Math.random() * 20)) * 1000)
         } else if (!self.lastSeenAt && interval) {
             clearInterval(interval)
@@ -45,10 +49,10 @@ const OnlineStatusIcon = function () {
     }
     socket.onAny(socketHandler)
     self.onload = (element) => {
-        tooltip = new bootstrap.Tooltip(element)
+        tooltip = bootstrap.Tooltip.getOrCreateInstance(self.svgElement)
         behave.createLogger('online-status-icon').debug('Loaded')
     }
-    return `<><svg height="20" width="20" xmlns="http://www.w3.org/2000/svg" style="{{ self.svgStyle }}" data-bs-title="{{ self.text }}"
+    return `<><svg :ref="self.svgElement" height="20" width="20" xmlns="http://www.w3.org/2000/svg" style="{{ self.svgStyle }}" data-bs-title="{{ self.text }}"
      data-bs-toggle="tooltip">
     <circle r="8" cx="10" cy="10" stroke-width="1" fill="{{ self.color }}" stroke="lightgray"></circle>
 </svg><span class="visually-hidden online-status">{{self.onlineStatus}}</span></>`
