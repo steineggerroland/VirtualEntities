@@ -1,8 +1,11 @@
-import {socket, behave} from "../app.js";
+import {applianceSocket, behave} from "../app.js";
 
 const ApplianceState = function () {
     const self = this;
-    const socketHandler = event => {
+    const appliance = JSON.parse(self.dataset.applianceJson)
+    self.text = self.color = self.icon = null
+    const socketHandler = (eventName, event) => {
+        if (!eventName.startsWith(appliance.name)) return
         const oldAppliance = JSON.parse(self.dataset.applianceJson)
         self.dataset.applianceJson = JSON.stringify(event.appliance)
         if (oldAppliance.running_state !== event.appliance.running_state ||
@@ -16,12 +19,10 @@ const ApplianceState = function () {
         if (self.interval) {
             clearInterval(self.interval)
         }
-        socket.off(`appliances/${JSON.parse(self.dataset.applianceJson).name}/updated`, socketHandler);
+        applianceSocket.offAny(socketHandler);
         self.refresh()
     }
-    socket.on(`appliances/${JSON.parse(self.dataset.applianceJson).name}/updated`, socketHandler);
-    const appliance = JSON.parse(self.dataset.applianceJson)
-    self.text = self.color = self.icon = null
+    applianceSocket.onAny(socketHandler);
     if (appliance.running_state === 'running') {
         self.text = self.dataset.runningLabel
         self.color = 'warning'
