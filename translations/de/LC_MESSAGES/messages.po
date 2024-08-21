@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  0.1\n"
 "Report-Msgid-Bugs-To: roland@steinegger.one\n"
-"POT-Creation-Date: 2024-07-18 23:24+0200\n"
+"POT-Creation-Date: 2024-08-18 00:18+0200\n"
 "PO-Revision-Date: 2024-05-24 21:54+0200\n"
 "Last-Translator: Roland Steinegger <roland@steinegger.one>\n"
 "Language: de\n"
@@ -88,7 +88,7 @@ msgid "Unknown entity"
 msgstr "Unbekanntes Ding"
 
 #: flaskr/templates/appliance.html:76
-#: flaskr/templates/snippets/appliance_sm.html:44
+#: flaskr/templates/snippets/appliance_sm.html:53
 #, python-format
 msgid "Running since %(xMinutes)s"
 msgstr "Läuft seit %(xMinutes)s"
@@ -102,7 +102,7 @@ msgid "Currently idling"
 msgstr "Derzeit im Ruhezustand"
 
 #: flaskr/templates/appliance.html:88
-#: flaskr/templates/snippets/appliance_sm.html:45
+#: flaskr/templates/snippets/appliance_sm.html:54
 #, python-format
 msgid "Finished last run %(xMinutesAgo)s"
 msgstr "Letzter Lauf beendet %(xMinutesAgo)s"
@@ -112,7 +112,7 @@ msgid "Power consumption (Watt)"
 msgstr "Stromverbrauch (Watt)"
 
 #: flaskr/templates/appliance.html:106
-#: flaskr/templates/snippets/appliance_sm.html:22
+#: flaskr/templates/snippets/appliance_sm.html:31
 msgid "Watt"
 msgstr "Watt"
 
@@ -227,22 +227,22 @@ msgid "Configure %(room_name)s"
 msgstr "Konfiguration von %(room_name)s"
 
 #: flaskr/templates/room.html:52 flaskr/templates/room.html:66
-#: flaskr/templates/snippets/room_sm.html:21
+#: flaskr/templates/snippets/room_sm.html:28
 #: flaskr/templates/snippets/temperature.html:4
 msgid "Temperature"
 msgstr "Temperatur"
 
 #: flaskr/templates/room.html:58 flaskr/templates/room.html:72
 #: flaskr/templates/snippets/humidity.html:4
-#: flaskr/templates/snippets/room_sm.html:45
+#: flaskr/templates/snippets/room_sm.html:52
 msgid "Humidity"
 msgstr "Luftfeuchte"
 
-#: flaskr/templates/room.html:67 flaskr/templates/snippets/room_sm.html:16
+#: flaskr/templates/room.html:67 flaskr/templates/snippets/room_sm.html:23
 msgid "Temperature [°C]"
 msgstr "Temperatur [°C]"
 
-#: flaskr/templates/room.html:73 flaskr/templates/snippets/room_sm.html:39
+#: flaskr/templates/room.html:73 flaskr/templates/snippets/room_sm.html:46
 #, python-format
 msgid "Humidity [%%]"
 msgstr "Luftfeuchte [%%]"
@@ -301,30 +301,63 @@ msgstr "Das Verzeichnis ist leer"
 msgid "Unknown type: %(type)s"
 msgstr "Unbekannter Typ: %(type)s"
 
-#: flaskr/templates/snippets/appliance_sm.html:32
+#: flaskr/templates/snippets/appliance_sm.html:16
+#: flaskr/templates/snippets/room_sm.html:10
+msgid "Last seen"
+msgstr "Zuletzt gesehen"
+
+#: flaskr/templates/snippets/appliance_sm.html:17
+#: flaskr/templates/snippets/room_sm.html:11
+msgid "Online"
+msgstr "Online"
+
+#: flaskr/templates/snippets/appliance_sm.html:18
+#: flaskr/templates/snippets/room_sm.html:12
+msgid "Offline"
+msgstr "Offline"
+
+#: flaskr/templates/snippets/appliance_sm.html:19
+#: flaskr/templates/snippets/room_sm.html:13
+msgid "Online status not known"
+msgstr "Online status unbekannt"
+
+#: flaskr/templates/snippets/appliance_sm.html:41
 msgid "Running"
 msgstr "Läuft"
 
-#: flaskr/templates/snippets/appliance_sm.html:41
+#: flaskr/templates/snippets/appliance_sm.html:50
 msgid "Loaded"
 msgstr "Beladen"
 
-#: flaskr/templates/snippets/appliance_sm.html:42
+#: flaskr/templates/snippets/appliance_sm.html:51
 msgid "Idling"
 msgstr "Untätig"
 
-#: flaskr/templates/snippets/appliance_sm.html:50
+#: flaskr/templates/snippets/appliance_sm.html:59
+msgid "Dirty"
+msgstr "Verschmutzt"
+
+#: flaskr/templates/snippets/appliance_sm.html:60
+#: flaskr/templates/snippets/appliance_sm.html:72
+msgid "Clean"
+msgstr "Sauber"
+
+#: flaskr/templates/snippets/appliance_sm.html:66
 msgid "Unload"
 msgstr "Entladen"
 
-#: flaskr/templates/snippets/appliance_sm.html:52
+#: flaskr/templates/snippets/appliance_sm.html:68
 msgid "Needs unloading"
 msgstr "Muss entladen werden"
+
+#: flaskr/templates/snippets/appliance_sm.html:74
+msgid "Notice dirt"
+msgstr "Ist verschmutzt"
 
 #: flaskr/templates/snippets/attribution_footer.html:3
 #: flaskr/templates/snippets/attribution_footer.html:7
 #: flaskr/templates/snippets/attribution_footer.html:12
-#: flaskr/templates/snippets/attribution_footer.html:32
+#: flaskr/templates/snippets/attribution_footer.html:33
 #, python-format
 msgid "Icons made by %(author)s from %(url)s"
 msgstr "Icons erstellt von %(author)s von %(url)s"
@@ -339,21 +372,21 @@ msgid "URL:"
 msgstr "URL:"
 
 #: flaskr/templates/snippets/humidity.html:9
-#: flaskr/templates/snippets/room_sm.html:47
+#: flaskr/templates/snippets/room_sm.html:54
 msgid "Humidity optimal"
 msgstr "Luftfeuchte optimal"
 
 #: flaskr/templates/snippets/humidity.html:14
 #: flaskr/templates/snippets/humidity.html:24
-#: flaskr/templates/snippets/room_sm.html:49
-#: flaskr/templates/snippets/room_sm.html:53
+#: flaskr/templates/snippets/room_sm.html:56
+#: flaskr/templates/snippets/room_sm.html:60
 msgid "Humidity slightly out of range"
 msgstr "Luftfeuchte etwas außerhalb des optimalen Bereichs"
 
 #: flaskr/templates/snippets/humidity.html:19
 #: flaskr/templates/snippets/humidity.html:29
-#: flaskr/templates/snippets/room_sm.html:51
-#: flaskr/templates/snippets/room_sm.html:55
+#: flaskr/templates/snippets/room_sm.html:58
+#: flaskr/templates/snippets/room_sm.html:62
 msgid "Humidity out of range"
 msgstr "Luftfeuchte außerhalb des optimalen Bereichs"
 
@@ -363,12 +396,11 @@ msgid "?%%"
 msgstr "?%%"
 
 #: flaskr/templates/snippets/humidity.html:35
-#: flaskr/templates/snippets/room_sm.html:43
+#: flaskr/templates/snippets/room_sm.html:50
 msgid "Humidity unknown"
 msgstr "Luftfeuchte unbekannt"
 
 #: flaskr/templates/snippets/last_seen_at_subtitle.html:2
-#: flaskr/templates/snippets/online_status_icon.html:12
 #, python-format
 msgid "Last seen %(xTimeAgo)s"
 msgstr "Zuletzt gesehen %(xTimeAgo)s"
@@ -376,18 +408,6 @@ msgstr "Zuletzt gesehen %(xTimeAgo)s"
 #: flaskr/templates/snippets/last_seen_at_subtitle.html:4
 msgid "Never seen"
 msgstr "Nie gesehen"
-
-#: flaskr/templates/snippets/online_status_icon.html:3
-msgid "Online"
-msgstr "Online"
-
-#: flaskr/templates/snippets/online_status_icon.html:6
-msgid "Offline"
-msgstr "Offline"
-
-#: flaskr/templates/snippets/online_status_icon.html:9
-msgid "Online status not known"
-msgstr "Online status unbekannt"
 
 #: flaskr/templates/snippets/power_consumption.html:3
 msgid "Power consumption"
@@ -401,25 +421,25 @@ msgstr "?W"
 msgid "Power consumption unknown"
 msgstr "Stromverbrauch unbekannt"
 
-#: flaskr/templates/snippets/room_sm.html:19
+#: flaskr/templates/snippets/room_sm.html:26
 #: flaskr/templates/snippets/temperature.html:35
 msgid "Temperature unknown"
 msgstr "Temperatur unbekannt"
 
-#: flaskr/templates/snippets/room_sm.html:23
+#: flaskr/templates/snippets/room_sm.html:30
 #: flaskr/templates/snippets/temperature.html:9
 msgid "Temperature optimal"
 msgstr "Temperatur optimal"
 
-#: flaskr/templates/snippets/room_sm.html:25
-#: flaskr/templates/snippets/room_sm.html:29
+#: flaskr/templates/snippets/room_sm.html:32
+#: flaskr/templates/snippets/room_sm.html:36
 #: flaskr/templates/snippets/temperature.html:14
 #: flaskr/templates/snippets/temperature.html:24
 msgid "Temperature slightly out of range"
 msgstr "Temperatur leicht außerhalb des optimalen Bereichs"
 
-#: flaskr/templates/snippets/room_sm.html:27
-#: flaskr/templates/snippets/room_sm.html:31
+#: flaskr/templates/snippets/room_sm.html:34
+#: flaskr/templates/snippets/room_sm.html:38
 #: flaskr/templates/snippets/temperature.html:19
 #: flaskr/templates/snippets/temperature.html:29
 msgid "Temperature out of range"

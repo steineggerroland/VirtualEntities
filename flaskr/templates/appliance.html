@@ -62,11 +62,17 @@
                         {% with time_delta=appliance.last_seen_time_delta() %}
                             {% include "snippets/last_seen_at_subtitle.html" %}
                         {% endwith %}
-                        {% with online_status=appliance.online_status(),style='font-size: 0.9em' %}
                             <span class="ml-2">
-                        {% include "snippets/online_status_icon.html" %}
+                <lm-online-status-icon data-entity-type="appliance" data-entity-name="{{ appliance.name }}"
+                                       data-online-status="{{ appliance.online_status() }}"
+                                       data-last-seen-at="{{ appliance.last_seen_at.isoformat() if appliance.last_seen_at else '' }}"
+                                       data-svg-style='font-size: 0.9em'
+                                       data-last-seen-label="{{ _('Last seen') }}"
+                                       data-online-label="{{ _('Online') }}"
+                                       data-offline-label="{{ _('Offline') }}"
+                                       data-unknown-label="{{ _('Online status not known') }}"
+                ></lm-online-status-icon>
                         </span>
-                        {% endwith %}
                     </div>
                 </div>
                 <div class="row">

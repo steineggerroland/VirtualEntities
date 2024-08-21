@@ -1,4 +1,4 @@
-import {socket, behave} from "../app.js";
+import {roomSocket, behave} from "../app.js";
 
 const RoomHumidityState = function () {
     const self = this
@@ -7,13 +7,13 @@ const RoomHumidityState = function () {
         const oldState = JSON.parse(self.dataset.roomJson)
         self.dataset.roomJson = JSON.stringify(event.room)
         if (oldState.humidity_rating !== event.room.humidity_rating) {
-            socket.off(`rooms/${room.name}/updated`, socketHandler);
+            roomSocket.off(`${room.name}/indoor-climate/updated`, socketHandler);
             self.refresh()
         } else {
             self.text = parseFloat(event.room.humidity).toPrecision(3) + "%"
         }
     };
-    socket.on(`rooms/${room.name}/updated`, socketHandler);
+    roomSocket.on(`${room.name}/indoor-climate/updated`, socketHandler);
     self.rating = room.humidity_rating
     if (!!room.humidity) {
         self.text = parseFloat(room.humidity).toPrecision(3) + "%"

@@ -1,11 +1,12 @@
-import {socket, behave} from "../app.js";
+import {applianceSocket, behave} from "../app.js";
 
 const LoadingActionButtons = function () {
     const self = this;
-    const appliance = JSON.parse(self.dataset.applianceJson)
+    self.appliance = JSON.parse(self.dataset.applianceJson)
     let content = ''
-    if (!!appliance.is_loadable) {
-        const socketHandler = event => {
+    if (!!self.appliance.is_loadable) {
+        const socketHandler = (eventName, event) => {
+            if (!eventName.startsWith(self.appliance.name)) return
             const oldAppliance = JSON.parse(self.dataset.applianceJson)
             self.dataset.applianceJson = JSON.stringify(event.appliance)
             if (oldAppliance.running_state !== event.appliance.running_state ||
@@ -14,10 +15,10 @@ const LoadingActionButtons = function () {
             }
         }
         const update = () => {
-            socket.off(`appliances/${JSON.parse(self.dataset.applianceJson).name}/updated`, socketHandler);
+            applianceSocket.offAny(socketHandler);
             self.refresh()
         }
-        socket.on(`appliances/${JSON.parse(self.dataset.applianceJson).name}/updated`, socketHandler);
+        applianceSocket.onAny(socketHandler);
         self.submitUnload = function (event) {
             if (event.preventDefault) event.preventDefault();
             fetch(self.dataset.unloadApiUrl, {method: "POST"})
@@ -31,7 +32,7 @@ const LoadingActionButtons = function () {
 
         self.unloadLabel = self.dataset.unloadLabel
         self.loadLabel = self.dataset.loadLabel
-        if (!!appliance.needs_unloading) {
+        if (!!self.appliance.needs_unloading) {
             content += `<div class="col-4 d-flex flex-column align-items-center justify-content-center">
 <form class="w-100 w-sm-75 overflow-hidden" style="aspect-ratio: 1" method="get"
           action="#" onsubmit="self.submitUnload">
@@ -39,7 +40,7 @@ const LoadingActionButtons = function () {
                 type="submit" value="{{ self.unloadLabel }}">{{ self.unloadLabel }}</button>
     </form>
 </div>`
-        } else if (appliance.running_state !== 'running') {
+        } else if (self.appliance.running_state !== 'running') {
             content += `<div class="col-4 d-flex flex-column align-items-center justify-content-center">
     <form class="w-100 w-sm-75 overflow-hidden" style="aspect-ratio: 1" method="get"
           action="#" onsubmit="self.submitLoad">

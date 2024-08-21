@@ -1,10 +1,11 @@
-import {socket, behave} from "../app.js";
+import {applianceSocket, behave} from "../app.js";
 
 const ApplianceCleaningState = function () {
     const self = this;
     self.appliance = JSON.parse(self.dataset.applianceJson)
     if (!self.appliance.is_cleanable) return '<></>'
-    const socketHandler = event => {
+    const socketHandler = (eventName, event) => {
+        if (!eventName.startsWith(self.appliance.name)) return
         const oldAppliance = JSON.parse(self.dataset.applianceJson)
         self.dataset.applianceJson = JSON.stringify(event.appliance)
         self.appliance = event.appliance
@@ -23,7 +24,7 @@ const ApplianceCleaningState = function () {
             self.classList.add('d-none')
         }
     }
-    socket.on(`appliances/${self.appliance.name}/updated`, socketHandler);
+    applianceSocket.onAny(socketHandler);
     update()
     self.onload = (element) => {
         behave.createLogger('appliance-cleaning-state').debug('Loaded')

@@ -11,6 +11,7 @@ from flaskr.api.appliance_depot import appliance_depot_api
 from flaskr.api.appliance_socket_notifier import ApplianceSocketNotifier
 from flaskr.api.room_catalog import room_catalog_api
 from flaskr.api.room_socket_notifier import RoomSocketNotifier
+from flaskr.api.person_socket_notifier import PersonSocketNotifier
 from flaskr.options_controller import options_blueprint
 from flaskr.views import VirtualEntities, Room, Appliance, Person
 from flaskr.views.Homepage import Homepage
@@ -38,6 +39,7 @@ def create_app(default_config_file_name: str, appliance_service: ApplianceServic
     @socketio.on('celebrate')
     def handle_celebrate():
         socketio.emit('celebrate')
+
 
     app.add_url_rule(
         "/",
@@ -100,6 +102,7 @@ def create_app(default_config_file_name: str, appliance_service: ApplianceServic
 
     appliance_socket_notifier = ApplianceSocketNotifier(socketio, appliance_service)
     room_socket_notifier = RoomSocketNotifier(socketio)
+    person_socket_notifier = PersonSocketNotifier(socketio)
 
     # ensure the instance folder exists
     try:

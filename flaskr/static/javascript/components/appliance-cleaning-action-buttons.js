@@ -1,4 +1,4 @@
-import {socket, behave} from "../app.js";
+import {applianceSocket, behave} from "../app.js";
 
 const CleaningActionButtons = function () {
     const self = this;
@@ -8,7 +8,8 @@ const CleaningActionButtons = function () {
         self.classList.add('d-none')
         return '<div></div>'
     }
-    let submit = () => {}
+    let submit = () => {
+    }
     self.submitHandler = e => submit(e)
     const update = () => {
         if (!!self.appliance.needs_cleaning) {
@@ -32,13 +33,13 @@ const CleaningActionButtons = function () {
         }
     }
     update()
-    const socketHandler = event => {
+    const socketHandler = (eventName, event) => {
+        if (!eventName.startsWith(self.appliance.name)) return
         self.dataset.applianceJson = JSON.stringify(event.appliance)
         self.appliance = event.appliance
-        console.log(self.appliance)
         update()
     }
-    socket.on(`appliances/${JSON.parse(self.dataset.applianceJson).name}/updated`, socketHandler)
+    applianceSocket.onAny(socketHandler)
     self.onload = (element) => {
         behave.createLogger('appliance-cleaning-action-buttons').debug('Loaded')
     }

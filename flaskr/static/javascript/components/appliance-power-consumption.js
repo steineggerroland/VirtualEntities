@@ -1,4 +1,4 @@
-import {socket, behave} from "../app.js";
+import {applianceSocket, behave} from "../app.js";
 
 const formatWatt = (watt) => {
     watt = parseFloat(watt)
@@ -33,7 +33,7 @@ const PowerConsumption = function () {
             (self.dataset.powerState === 'charging' || event.appliance['power_state'] === 'charging')) {
             self.dataset.powerState = event.appliance['power_state']
             self.dataset.watt = event.appliance.watt
-            socket.off(`appliances/${self.name}/power-consumption/updated`, socketHandler);
+            applianceSocket.off(`${self.name}/power-consumption/updated`, socketHandler);
             self.refresh()
         } else if (parseFloat(self.dataset.watt) !== event.appliance.watt) {
             self.dataset.watt = event.appliance.watt
@@ -41,7 +41,7 @@ const PowerConsumption = function () {
         }
     };
     update()
-    socket.on(`appliances/${self.name}/power-consumption/updated`, socketHandler);
+    applianceSocket.on(`${self.name}/power-consumption/updated`, socketHandler);
     self.onload = (element) => {
         bootstrap_tooltip = new bootstrap.Tooltip(element)
         behave.createLogger('appliance-power-consumption').debug('Loaded')
