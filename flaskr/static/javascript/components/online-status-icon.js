@@ -7,7 +7,7 @@ const OnlineStatusIcon = function () {
         self.dataset.entityType === 'room' ? roomSocket :
             personSocket
     let interval, tooltip
-    const update = () => {
+    const update = async () => {
         self.onlineStatus = self.dataset.onlineStatus.toString().split('.').pop().toLowerCase()
         self.lastSeenAt = self.dataset.lastSeenAt
         if (self.onlineStatus.toLowerCase().endsWith('online')) {
@@ -20,16 +20,21 @@ const OnlineStatusIcon = function () {
             self.color = '#e4dfe1'
             self.text = self.dataset.unknownLabel
         }
+
+        async function resetTooltip() {
+            await tooltip.hide()
+            await tooltip.dispose()
+            tooltip = bootstrap.Tooltip.getOrCreateInstance(self.svgElement)
+        }
         if (!!self.lastSeenAt && !interval) {
             const lastSeenAt = dateFns.formatDistanceToNow(new Date(self.lastSeenAt), {addSuffix: true})
             self.text = `${self.dataset.lastSeenLabel} ${lastSeenAt}`
+            await resetTooltip()
             interval = setInterval(async () => {
                 const lastSeenAt = dateFns.formatDistanceToNow(new Date(self.lastSeenAt), {addSuffix: true})
                 self.text = `${self.dataset.lastSeenLabel} ${lastSeenAt}`
                 if (!!tooltip) {
-                    await tooltip.hide()
-                    await tooltip.dispose()
-                    tooltip = bootstrap.Tooltip.getOrCreateInstance(self.svgElement)
+                    await resetTooltip();
                 }
             }, (50 + Math.round(Math.random() * 20)) * 1000)
         } else if (!self.lastSeenAt && interval) {
