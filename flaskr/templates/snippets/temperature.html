@@ -3,32 +3,32 @@
         {%- set text = temperature %}
         {%- set tooltip = _('Temperature') %}
         {%- set color_type = 'secondary' %}
-        {%- set icon='img/flaticon/temperature.gif' %}
+        {%- set icon='img/flaticon/thermometer.png' %}
     {%- elif rating=='optimal' %}
         {%- set text = temperature %}
         {%- set tooltip = _('Temperature optimal') %}
         {%- set color_type = 'success' %}
-        {%- set icon='img/flaticon/temperature.gif' %}
+        {%- set icon='img/flaticon/thermometer.png' %}
     {%- elif rating=='hot' %}
         {%- set text = temperature %}
         {%- set tooltip = _('Temperature slightly out of range') %}
         {%- set color_type = 'warning' %}
-        {%- set icon='img/flaticon/hot.gif' %}
+        {%- set icon='img/flaticon/temperature_high.png' %}
     {%- elif rating=='critical_hot' %}
         {%- set text = temperature %}
         {%- set tooltip = _('Temperature out of range') %}
         {%- set color_type = 'danger' %}
-        {%- set icon='img/flaticon/hot.gif' %}
+        {%- set icon='img/flaticon/temperature_high.png' %}
     {%- elif rating=='cold' %}
         {%- set text = temperature %}
         {%- set tooltip = _('Temperature slightly out of range') %}
         {%- set color_type = 'warning' %}
-        {%- set icon='img/flaticon/cold.gif' %}
+        {%- set icon='img/flaticon/temperature_cold.png' %}
     {%- else %}
         {%- set text = temperature %}
         {%- set tooltip = _('Temperature out of range') %}
         {%- set color_type = 'danger' %}
-        {%- set icon='img/flaticon/cold.gif' %}
+        {%- set icon='img/flaticon/temperature_cold.png' %}
     {%- endif %}
 {%- else %}
     {%- set text = _('?°C') %}

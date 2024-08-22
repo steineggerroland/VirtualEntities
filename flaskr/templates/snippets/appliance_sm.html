@@ -49,7 +49,7 @@
                             data-loaded-appliance-icon-url="{{ url_for('static', filename='img/flaticon/smart-washing-machine.gif') }}"
                             data-loaded-label="{{ _('Loaded') }}"
                             data-idling-label="{{ _('Idling') }}"
-                            data-started-run-at="{{ appliance.started_run_at.isoformat() if appliance.started_run_at else '' }}"
+                            data-started-run-at="{{ appliance.started_run_at.isoformat()if appliance.started_run_at else '' }}"
                             data-running-since-label="{{ _('Running since %(xMinutes)s', xMinutes=appliance.running_for_time_period()|timedeltaformat()) }}"
                             data-finished-last-run-before-label="{{ _('Finished last run %(xMinutesAgo)s', xMinutesAgo=appliance.finished_last_run_before_time_period()|timedeltaformat(add_direction=True)) }}"
         ></lm-appliance-state>
