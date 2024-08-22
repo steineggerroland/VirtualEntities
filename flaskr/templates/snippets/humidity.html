@@ -13,22 +13,22 @@
         {%- set text = '%s%%' % humidity %}
         {%- set tooltip = _('Humidity slightly out of range') %}
         {%- set color_type = 'warning' %}
-        {%- set icon='img/flaticon/dryness.gif' %}
+        {%- set icon='img/flaticon/humidity_dry.png' %}
     {%- elif rating=='critical_dry' %}
         {%- set text = '%s%%' % humidity %}
         {%- set tooltip = _('Humidity out of range') %}
         {%- set color_type = 'danger' %}
-        {%- set icon='img/flaticon/dryness.gif' %}
+        {%- set icon='img/flaticon/humidity_dry.png' %}
     {%- elif rating=='wet' %}
         {%- set text = '%s%%' % humidity %}
         {%- set tooltip = _('Humidity slightly out of range') %}
         {%- set color_type = 'warning' %}
-        {%- set icon='img/flaticon/humidity.gif' %}
+        {%- set icon='img/flaticon/humidity_wet.png' %}
     {%- else %}
         {%- set text = '%s%%' % humidity %}
         {%- set tooltip = _('Humidity out of range') %}
         {%- set color_type = 'danger' %}
-        {%- set icon='img/flaticon/humidity.gif' %}
+        {%- set icon='img/flaticon/humidity_wet.png' %}
     {%- endif %}
 {%- else %}
     {%- set text = _('?%%') %}

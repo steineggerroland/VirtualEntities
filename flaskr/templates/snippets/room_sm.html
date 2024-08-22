@@ -24,19 +24,19 @@
                 <lm-room-temperature-state class="position-absolute top-0 start-0 w-100 h-100 z-1 fs-4"
                                            data-room-json='{{ room.to_dict()|tojson }}'
                                            data-unknown-label="{{ _('Temperature unknown') }}"
-                                           data-unknown-icon-url="{{ url_for('static', filename='img/flaticon/temperature.gif') }}"
+                                           data-unknown-icon-url="{{ url_for('static', filename='img/flaticon/thermometer.png') }}"
                                            data-default-label="{{ _('Temperature') }}"
                                            data-default-icon-url="{{ url_for('static', filename='img/flaticon/thermometer.png') }}"
                                            data-optimal-label="{{ _('Temperature optimal') }}"
                                            data-optimal-icon-url="{{ url_for('static', filename='img/flaticon/thermometer.png') }}"
                                            data-hot-label="{{ _('Temperature slightly out of range') }}"
-                                           data-hot-icon-url="{{ url_for('static', filename='img/flaticon/hot.gif') }}"
+                                           data-hot-icon-url="{{ url_for('static', filename='img/flaticon/temperature_high.png') }}"
                                            data-critical-hot-label="{{ _('Temperature out of range') }}"
-                                           data-critical-hot-icon-url="{{ url_for('static', filename='img/flaticon/hot.gif') }}"
+                                           data-critical-hot-icon-url="{{ url_for('static', filename='img/flaticon/temperature_high.png') }}"
                                            data-cold-label="{{ _('Temperature slightly out of range') }}"
-                                           data-cold-icon-url="{{ url_for('static', filename='img/flaticon/cold.gif') }}"
+                                           data-cold-icon-url="{{ url_for('static', filename='img/flaticon/temperature_cold.png') }}"
                                            data-critical-cold-label="{{ _('Temperature out of range') }}"
-                                           data-critical-cold-icon-url="{{ url_for('static', filename='img/flaticon/cold.gif') }}"
+                                           data-critical-cold-icon-url="{{ url_for('static', filename='img/flaticon/temperature_cold.png') }}"
                 ></lm-room-temperature-state>
             </div>
         </div>
@@ -54,13 +54,13 @@
                                         data-optimal-label="{{ _('Humidity optimal') }}"
                                         data-optimal-icon-url="{{ url_for('static', filename='img/flaticon/humidity.png') }}"
                                         data-dry-label="{{ _('Humidity slightly out of range') }}"
-                                        data-dry-icon-url="{{ url_for('static', filename='img/flaticon/dryness.gif') }}"
+                                        data-dry-icon-url="{{ url_for('static', filename='img/flaticon/humidity_dry.png') }}"
                                         data-critical-dry-label="{{ _('Humidity out of range') }}"
-                                        data-critical-dry-icon-url="{{ url_for('static', filename='img/flaticon/dryness.gif') }}"
+                                        data-critical-dry-icon-url="{{ url_for('static', filename='img/flaticon/humidity_dry.png') }}"
                                         data-wet-label="{{ _('Humidity slightly out of range') }}"
-                                        data-wet-icon-url="{{ url_for('static', filename='img/flaticon/humidity.gif') }}"
+                                        data-wet-icon-url="{{ url_for('static', filename='img/flaticon/humidity_wet.png') }}"
                                         data-critical-wet-label="{{ _('Humidity out of range') }}"
-                                        data-critical-wet-icon-url="{{ url_for('static', filename='img/flaticon/humidity.gif') }}"
+                                        data-critical-wet-icon-url="{{ url_for('static', filename='img/flaticon/humidity_wet.png') }}"
                 ></lm-room-humidity-state>
             </div>
         </div>
