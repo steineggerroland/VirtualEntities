@@ -9,10 +9,12 @@ from iot.core.configuration import VirtualEntityConfig
 from iot.core.configuration_manager import ConfigurationManager
 from iot.core.time_series_storage import TimeSeriesStorage
 from iot.core.timeseries_types import ConsumptionMeasurement
+from iot.infrastructure.appliance.run import Run
 from iot.infrastructure.appliance.appliance import Appliance
 from iot.infrastructure.appliance.appliance_builder import ApplianceBuilder
 from iot.infrastructure.appliance.appliance_depot import ApplianceDepot
-from iot.infrastructure.appliance.appliance_events import ApplianceEvents, ApplianceEvent, ApplianceConsumptionEvent
+from iot.infrastructure.appliance.appliance_events import ApplianceEvents, ApplianceEvent, ApplianceConsumptionEvent, \
+    ApplianceRunFinishedEvent
 from iot.infrastructure.appliance.cleanable_appliance import CleanableAppliance
 from iot.infrastructure.appliance.loadable_appliance import LoadableAppliance
 from iot.infrastructure.appliance.power_state_decorator import PowerState
@@ -133,9 +135,13 @@ class ApplianceService:
 
     def finish_run(self, name: str):
         try:
-            appliance = self.appliance_depot.retrieve(name).finish_run()
+            previous_state = self.appliance_depot.retrieve(name)
+            started_run_at = previous_state.started_run_at
+            appliance = previous_state.finish_run()
             self.appliance_depot.stock(appliance)
-            EventBus.call(ApplianceEvents.FINISHED_RUN, ApplianceEvent(appliance))
+            EventBus.call(ApplianceEvents.FINISHED_RUN, ApplianceRunFinishedEvent(appliance,
+                                                                                  Run(started_run_at,
+                                                                                      appliance.finished_last_run_at)))
         except ValueError as e:
             raise DatabaseException("Failed to finish run of '%s' because of database error." % name, e) from e
 

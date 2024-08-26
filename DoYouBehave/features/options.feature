@@ -11,10 +11,10 @@ Feature: The user can set options for the page which are applied to every page t
     When they activate fullscreen mode
     Then the fullscreen mode is active
 
-  Scenario: The user activates refresh interval.
+  Scenario: The user enables browser notifications.
     Given they go to the home page
-    When they activate refresh mode
-    Then the refresh interval is set to 30
+    When they activate browser notifications
+    Then the browser notifications are active
 
   Scenario: Options keep active. The user selects dark mode and the option is still active when going to other pages.
     Given they go to the home page

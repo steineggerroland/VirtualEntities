@@ -6,11 +6,11 @@ const LoadingActionButtons = function () {
     let content = ''
     if (!!self.appliance.is_loadable) {
         const socketHandler = (eventName, event) => {
-            if (!eventName.startsWith(self.appliance.name)) return
+            if (event.entity_name !== self.appliance.name) return
             const oldAppliance = JSON.parse(self.dataset.applianceJson)
-            self.dataset.applianceJson = JSON.stringify(event.appliance)
-            if (oldAppliance.running_state !== event.appliance.running_state ||
-                (oldAppliance.needs_unloading !== event.appliance.needs_unloading)) {
+            self.dataset.applianceJson = JSON.stringify(event.entity)
+            if (oldAppliance.running_state !== event.entity.running_state ||
+                (oldAppliance.needs_unloading !== event.entity.needs_unloading)) {
                 update()
             }
         }

@@ -1,6 +1,7 @@
 from enum import Enum
 
 from iot.core.timeseries_types import ConsumptionMeasurement
+from iot.infrastructure.appliance.run import Run
 from iot.infrastructure.appliance.appliance import Appliance
 
 
@@ -25,3 +26,9 @@ class ApplianceConsumptionEvent(ApplianceEvent):
     def __init__(self, appliance: Appliance, measurement: ConsumptionMeasurement):
         super().__init__(appliance)
         self.measurement = measurement
+
+
+class ApplianceRunFinishedEvent(ApplianceEvent):
+    def __init__(self, appliance: Appliance, run: Run):
+        super().__init__(appliance)
+        self.run = run
