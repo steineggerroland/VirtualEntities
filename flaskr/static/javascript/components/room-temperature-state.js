@@ -5,18 +5,18 @@ const RoomTemperatureState = function () {
     const room = JSON.parse(self.dataset.roomJson)
     const socketHandler = event => {
         const oldState = JSON.parse(self.dataset.roomJson)
-        self.dataset.roomJson = JSON.stringify(event.room)
-        if (oldState.temperature_rating !== event.room.temperature_rating) {
+        self.dataset.roomJson = JSON.stringify(event.entity)
+        if (oldState.temperature_rating !== event.entity.temperature_rating) {
             roomSocket.off(`${room.name}/indoor-climate/updated`, socketHandler);
             self.refresh()
         } else {
-            if (!!event.room.temperature.value) {
-                self.text = parseFloat(event.room.temperature.value).toPrecision(3) + "°C"
+            if (!!event.entity.temperature.value) {
+                self.text = parseFloat(event.entity.temperature.value).toPrecision(3) + "°C"
             } else {
                 self.text = "?°C"
             }
         }
-    };
+    }
     roomSocket.on(`${room.name}/indoor-climate/updated`, socketHandler);
     self.rating = room.temperature_rating
     if (!!room.temperature) {

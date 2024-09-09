@@ -523,7 +523,7 @@ def find_calendar(context, calendar_name: str):
         f"No calendar {calendar_name} of person {context.entity_name} found")
 
 
-@then(r'the (?P<option_name>\w+(?> \w+)*) is'
+@then(r'the (?P<option_name>\w+(?> \w+)*) (?>is|are)'
       r'(?>(?> still)? (?P<state>active|inactive)| set to (?P<value>\w+(?> \w+)*))')
 def verify_option_in_url(context, option_name, state=None, value=None):
     if option_name == 'dark mode':
@@ -535,7 +535,7 @@ def verify_option_in_url(context, option_name, state=None, value=None):
         assert (html.get_attribute('class').find('fullscreen') < 0) == (state == 'active')
 
     matcher = r'.*(\?|&)%s=%s(&.*)?' % (to_url_param(option_name),
-                                        'true' if state == 'active' else 'false' if state == 'inactive' else value)
+                                        'on' if state == 'active' else 'false' if state == 'inactive' else value)
     WebDriverWait(context.webdriver, 10).until(url_matches(matcher),
                                                "The option %s is not %s, the url looks as follows: %s" % (
                                                    option_name, state if state is not None else value,

@@ -5,12 +5,12 @@ const RoomHumidityState = function () {
     const room = JSON.parse(self.dataset.roomJson)
     const socketHandler = event => {
         const oldState = JSON.parse(self.dataset.roomJson)
-        self.dataset.roomJson = JSON.stringify(event.room)
-        if (oldState.humidity_rating !== event.room.humidity_rating) {
+        self.dataset.roomJson = JSON.stringify(event.entity)
+        if (oldState.humidity_rating !== event.entity.humidity_rating) {
             roomSocket.off(`${room.name}/indoor-climate/updated`, socketHandler);
             self.refresh()
         } else {
-            self.text = parseFloat(event.room.humidity).toPrecision(3) + "%"
+            self.text = parseFloat(event.entity.humidity).toPrecision(3) + "%"
         }
     };
     roomSocket.on(`${room.name}/indoor-climate/updated`, socketHandler);

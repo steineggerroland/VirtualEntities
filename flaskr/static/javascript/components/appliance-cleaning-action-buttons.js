@@ -34,9 +34,9 @@ const CleaningActionButtons = function () {
     }
     update()
     const socketHandler = (eventName, event) => {
-        if (!eventName.startsWith(self.appliance.name)) return
-        self.dataset.applianceJson = JSON.stringify(event.appliance)
-        self.appliance = event.appliance
+        if (event.entity_name !== self.appliance.name) return
+        self.dataset.applianceJson = JSON.stringify(event.entity)
+        self.appliance = event.entity
         update()
     }
     applianceSocket.onAny(socketHandler)

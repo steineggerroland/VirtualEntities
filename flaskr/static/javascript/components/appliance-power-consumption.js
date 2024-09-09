@@ -29,14 +29,14 @@ const PowerConsumption = function () {
     }
 
     const socketHandler = event => {
-        if (self.dataset.powerState !== event.appliance['power_state'] &&
-            (self.dataset.powerState === 'charging' || event.appliance['power_state'] === 'charging')) {
-            self.dataset.powerState = event.appliance['power_state']
-            self.dataset.watt = event.appliance.watt
+        if (self.dataset.powerState !== event.entity['power_state'] &&
+            (self.dataset.powerState === 'charging' || event.entity['power_state'] === 'charging')) {
+            self.dataset.powerState = event.entity['power_state']
+            self.dataset.watt = event.entity.watt
             applianceSocket.off(`${self.name}/power-consumption/updated`, socketHandler);
             self.refresh()
-        } else if (parseFloat(self.dataset.watt) !== event.appliance.watt) {
-            self.dataset.watt = event.appliance.watt
+        } else if (parseFloat(self.dataset.watt) !== event.entity.watt) {
+            self.dataset.watt = event.entity.watt
             update()
         }
     };

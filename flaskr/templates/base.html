@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="{{ lang }}" xml:lang="{{ lang }}" {% if session['dark_mode'] %}data-bs-theme="dark"{% endif %} xmlns="http://www.w3.org/1999/xhtml">
+<html lang="{{ lang }}" xml:lang="{{ lang }}" {% if session['dark_mode'] %}data-bs-theme="dark"{% endif %}
+      xmlns="http://www.w3.org/1999/xhtml">
 <head>
     {% block head %}
         <meta charset="utf-8">
@@ -60,22 +61,22 @@
         <div class="d-flex flex-wrap justify-content-between align-items-start">
             <aside class="col-md-4">
                 <div id="options">
-                    {%- if session['refresh_interval'] %}
-                        {% set action=url_for('options.toggle_param', refresh_interval='false') %}{% else %}
-                        {% set action=url_for('options.toggle_param', refresh_interval=30) %}{% endif %}
-                    <form action="{{ action }}" method="post" id="options-refresh-interval-form">
+                    {%- if session['browser_notifications'] %}
+                        {% set action=url_for('options.toggle_param', browser_notifications='false') %}{% else %}
+                        {% set action=url_for('options.toggle_param', browser_notifications='on') %}{% endif %}
+                    <form action="{{ action }}" method="post" id="options-browser-notifications-form">
                         <div class="form-check form-switch">
-                            <input class="form-check-input refresh-mode" type="checkbox" role="switch"
-                                   id="options-refresh-interval-toggle"
-                                   onchange="document.getElementById('options-refresh-interval-form').submit()"
-                                   {% if session['refresh_interval'] %}checked{% endif %}>
+                            <input class="form-check-input browser-notifications" type="checkbox" role="switch"
+                                   id="options-browser-notifications-toggle"
+                                   onchange="document.getElementById('options-browser-notifications-form').submit()"
+                                   {% if session['browser_notifications'] %}checked{% endif %}>
                             <label class="form-check-label"
-                                   for="options-refresh-interval-toggle">{{ _('Refresh every 30 seconds') }}</label>
+                                   for="options-browser-notifications-toggle">{{ _('Benachrichtigungen') }}</label>
                         </div>
                     </form>
                     {%- if session['fullscreen_mode'] %}
                         {% set action=url_for('options.toggle_param', fullscreen_mode='false') %}{% else %}
-                        {% set action=url_for('options.toggle_param', fullscreen_mode='true') %}{% endif %}
+                        {% set action=url_for('options.toggle_param', fullscreen_mode='on') %}{% endif %}
                     <form action="{{ action }}" method="post" id="options-fullscreen-form">
                         <div class="form-check form-switch">
                             <input class="form-check-input fullscreen-mode" type="checkbox" role="switch"
@@ -88,7 +89,7 @@
                     </form>
                     {%- if session['dark_mode'] %}
                         {% set action=url_for('options.toggle_param', dark_mode='false') %}{% else %}
-                        {% set action=url_for('options.toggle_param', dark_mode='true') %}{% endif %}
+                        {% set action=url_for('options.toggle_param', dark_mode='on') %}{% endif %}
                     <form action="{{ action }}" method="post" id="options-dark-mode-form">
                         <div class="form-check form-switch">
                             <input class="form-check-input dark-mode" type="checkbox"
@@ -117,6 +118,15 @@
 </footer>
 {% block scripts %}
     {{ bootstrap.load_js(with_popper=True) }}
+    <script language="JavaScript">
+        const styx = {
+            translations: {
+                {% for key in styx.translations %}
+                    '{{ key }}': '{{ styx.translations[key] }}',
+                {% endfor %}
+            }
+        }
+    </script>
     <script language="JavaScript" src="{{ url_for('static', filename='javascript/lemonade.min.js') }}"></script>
     <script language="JavaScript" src="{{ url_for('static', filename='javascript/app.js') }}" type="module"></script>
     {% block additional_scripts %}
