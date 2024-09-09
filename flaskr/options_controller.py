@@ -4,7 +4,7 @@ from http import HTTPStatus
 from flask import Blueprint, redirect, request, session, make_response
 from urllib3.util import Url, parse_url
 
-PARAMS = ['refresh_interval', 'fullscreen_mode', 'dark_mode']
+PARAMS = ['browser_notifications', 'fullscreen_mode', 'dark_mode']
 
 
 def options_blueprint():

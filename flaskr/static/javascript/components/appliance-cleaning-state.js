@@ -5,10 +5,10 @@ const ApplianceCleaningState = function () {
     self.appliance = JSON.parse(self.dataset.applianceJson)
     if (!self.appliance.is_cleanable) return '<></>'
     const socketHandler = (eventName, event) => {
-        if (!eventName.startsWith(self.appliance.name)) return
+        if (event.entity_name !== self.appliance.name) return
         const oldAppliance = JSON.parse(self.dataset.applianceJson)
-        self.dataset.applianceJson = JSON.stringify(event.appliance)
-        self.appliance = event.appliance
+        self.dataset.applianceJson = JSON.stringify(event.entity)
+        self.appliance = event.entity
         if (oldAppliance.needs_cleaning !== self.appliance.needs_cleaning) {
             update()
         }

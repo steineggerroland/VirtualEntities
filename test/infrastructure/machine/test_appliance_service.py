@@ -116,7 +116,9 @@ class AppliancePowerTest(unittest.TestCase):
 
     def test_finished_run(self):
         # given
-        self.entity.finish_run = Mock()
+        self.entity.finish_run = Mock(return_value=self.entity)
+        self.entity.started_run_at = datetime.now(tzlocal())
+        self.entity.finished_last_run_at = None
         self.appliance_depot_mock.stock = Mock()
         # when
         self.appliance_service.finish_run(self.entity_name)
@@ -261,7 +263,9 @@ class ChargeableApplianceTest(unittest.TestCase):
 
     def test_finished_run(self):
         # given
-        self.entity.finish_run = Mock()
+        self.entity.finish_run = Mock(return_value=self.entity)
+        self.entity.started_run_at = datetime.now(tzlocal())
+        self.entity.finished_last_run_at = None
         self.appliance_depot_mock.stock = Mock()
         # when
         self.appliance_service.finish_run(self.entity_name)

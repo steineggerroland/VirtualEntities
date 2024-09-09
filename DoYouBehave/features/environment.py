@@ -239,7 +239,7 @@ def before_all(context):
     }
 
     context.run_path = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'runs', str(uuid.uuid4()))))
-    print(f'Run path: {context.run_path}')
+    print(f'Run path: file://{context.run_path}')
     for app_name, app_base in applications.items():
         test_dir = create_test_directory(context.run_path, app_name)
         setattr(context, f'{app_name}_test_dir', test_dir)

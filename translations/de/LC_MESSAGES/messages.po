@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  0.1\n"
 "Report-Msgid-Bugs-To: roland@steinegger.one\n"
-"POT-Creation-Date: 2024-08-18 00:18+0200\n"
+"POT-Creation-Date: 2024-08-26 11:55+0200\n"
 "PO-Revision-Date: 2024-05-24 21:54+0200\n"
 "Last-Translator: Roland Steinegger <roland@steinegger.one>\n"
 "Language: de\n"
@@ -17,6 +17,14 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.15.0\n"
+
+#: flaskr/frontend_translations.py:4
+msgid "{name} finished run"
+msgstr "{name} ist fertig"
+
+#: flaskr/frontend_translations.py:5
+msgid "Ran for {run_time}"
+msgstr "Lief für {run_time}"
 
 #: flaskr/forms/ApplianceForm.py:8 flaskr/forms/PersonForm.py:8
 #: flaskr/forms/RoomForm.py:8
@@ -87,31 +95,63 @@ msgstr "Waschmaschine"
 msgid "Unknown entity"
 msgstr "Unbekanntes Ding"
 
-#: flaskr/templates/appliance.html:76
+#: flaskr/templates/appliance.html:70 flaskr/templates/person.html:46
+#: flaskr/templates/person.html:86 flaskr/templates/room.html:46
+#: flaskr/templates/snippets/appliance_sm.html:16
+#: flaskr/templates/snippets/person_sm.html:10
+#: flaskr/templates/snippets/room_sm.html:10
+msgid "Last seen"
+msgstr "Zuletzt gesehen"
+
+#: flaskr/templates/appliance.html:71 flaskr/templates/person.html:47
+#: flaskr/templates/person.html:87 flaskr/templates/room.html:47
+#: flaskr/templates/snippets/appliance_sm.html:17
+#: flaskr/templates/snippets/person_sm.html:11
+#: flaskr/templates/snippets/room_sm.html:11
+msgid "Online"
+msgstr "Online"
+
+#: flaskr/templates/appliance.html:72 flaskr/templates/person.html:48
+#: flaskr/templates/person.html:88 flaskr/templates/room.html:48
+#: flaskr/templates/snippets/appliance_sm.html:18
+#: flaskr/templates/snippets/person_sm.html:12
+#: flaskr/templates/snippets/room_sm.html:12
+msgid "Offline"
+msgstr "Offline"
+
+#: flaskr/templates/appliance.html:73 flaskr/templates/person.html:49
+#: flaskr/templates/person.html:89 flaskr/templates/room.html:49
+#: flaskr/templates/snippets/appliance_sm.html:19
+#: flaskr/templates/snippets/person_sm.html:13
+#: flaskr/templates/snippets/room_sm.html:13
+msgid "Online status not known"
+msgstr "Online status unbekannt"
+
+#: flaskr/templates/appliance.html:82
 #: flaskr/templates/snippets/appliance_sm.html:53
 #, python-format
 msgid "Running since %(xMinutes)s"
 msgstr "Läuft seit %(xMinutes)s"
 
-#: flaskr/templates/appliance.html:78
+#: flaskr/templates/appliance.html:84
 msgid "Needs to be unloaded"
 msgstr "Muss entladen werden"
 
-#: flaskr/templates/appliance.html:80
+#: flaskr/templates/appliance.html:86
 msgid "Currently idling"
 msgstr "Derzeit im Ruhezustand"
 
-#: flaskr/templates/appliance.html:88
+#: flaskr/templates/appliance.html:94
 #: flaskr/templates/snippets/appliance_sm.html:54
 #, python-format
 msgid "Finished last run %(xMinutesAgo)s"
 msgstr "Letzter Lauf beendet %(xMinutesAgo)s"
 
-#: flaskr/templates/appliance.html:97
+#: flaskr/templates/appliance.html:103
 msgid "Power consumption (Watt)"
 msgstr "Stromverbrauch (Watt)"
 
-#: flaskr/templates/appliance.html:106
+#: flaskr/templates/appliance.html:112
 #: flaskr/templates/snippets/appliance_sm.html:31
 msgid "Watt"
 msgstr "Watt"
@@ -141,23 +181,23 @@ msgstr "Abbrechen"
 msgid "Save"
 msgstr "Speichern"
 
-#: flaskr/templates/base.html:36
+#: flaskr/templates/base.html:37
 msgid "Overview"
 msgstr "Überblick"
 
-#: flaskr/templates/base.html:39 flaskr/templates/dashboard.html:5
+#: flaskr/templates/base.html:40 flaskr/templates/dashboard.html:5
 msgid "Dashboard"
 msgstr "Dashboard"
 
-#: flaskr/templates/base.html:73
+#: flaskr/templates/base.html:74
 msgid "Refresh every 30 seconds"
 msgstr "Alle 30 Sekunden aktualisieren"
 
-#: flaskr/templates/base.html:86
+#: flaskr/templates/base.html:87
 msgid "Fullscreen"
 msgstr "Vollbild"
 
-#: flaskr/templates/base.html:99
+#: flaskr/templates/base.html:100
 msgid "Dark mode"
 msgstr "Nachtmodus"
 
@@ -194,11 +234,11 @@ msgstr "%(person_name) bearbeiten"
 msgid "Configure %(person_name)s"
 msgstr "Konfiguration von %(person_name)s"
 
-#: flaskr/templates/person.html:51
+#: flaskr/templates/person.html:57
 msgid "Calendars"
 msgstr "Kalender"
 
-#: flaskr/templates/person.html:69
+#: flaskr/templates/person.html:75
 #: flaskr/templates/snippets/calendar_card_body_lg.html:12
 #: flaskr/templates/snippets/calendar_card_body_sm.html:8
 #, python-format
@@ -207,7 +247,7 @@ msgid_plural "%(num)d Appointments"
 msgstr[0] "%(num)d Termin"
 msgstr[1] "%(num)d Termine"
 
-#: flaskr/templates/person.html:86
+#: flaskr/templates/person.html:97
 msgid "7 days preview"
 msgstr "7 Tagesvorschau"
 
@@ -226,23 +266,23 @@ msgstr "%(room_name)s bearbeiten"
 msgid "Configure %(room_name)s"
 msgstr "Konfiguration von %(room_name)s"
 
-#: flaskr/templates/room.html:52 flaskr/templates/room.html:66
+#: flaskr/templates/room.html:58 flaskr/templates/room.html:72
 #: flaskr/templates/snippets/room_sm.html:28
 #: flaskr/templates/snippets/temperature.html:4
 msgid "Temperature"
 msgstr "Temperatur"
 
-#: flaskr/templates/room.html:58 flaskr/templates/room.html:72
+#: flaskr/templates/room.html:64 flaskr/templates/room.html:78
 #: flaskr/templates/snippets/humidity.html:4
 #: flaskr/templates/snippets/room_sm.html:52
 msgid "Humidity"
 msgstr "Luftfeuchte"
 
-#: flaskr/templates/room.html:67 flaskr/templates/snippets/room_sm.html:23
+#: flaskr/templates/room.html:73 flaskr/templates/snippets/room_sm.html:23
 msgid "Temperature [°C]"
 msgstr "Temperatur [°C]"
 
-#: flaskr/templates/room.html:73 flaskr/templates/snippets/room_sm.html:46
+#: flaskr/templates/room.html:79 flaskr/templates/snippets/room_sm.html:46
 #, python-format
 msgid "Humidity [%%]"
 msgstr "Luftfeuchte [%%]"
@@ -301,26 +341,6 @@ msgstr "Das Verzeichnis ist leer"
 msgid "Unknown type: %(type)s"
 msgstr "Unbekannter Typ: %(type)s"
 
-#: flaskr/templates/snippets/appliance_sm.html:16
-#: flaskr/templates/snippets/room_sm.html:10
-msgid "Last seen"
-msgstr "Zuletzt gesehen"
-
-#: flaskr/templates/snippets/appliance_sm.html:17
-#: flaskr/templates/snippets/room_sm.html:11
-msgid "Online"
-msgstr "Online"
-
-#: flaskr/templates/snippets/appliance_sm.html:18
-#: flaskr/templates/snippets/room_sm.html:12
-msgid "Offline"
-msgstr "Offline"
-
-#: flaskr/templates/snippets/appliance_sm.html:19
-#: flaskr/templates/snippets/room_sm.html:13
-msgid "Online status not known"
-msgstr "Online status unbekannt"
-
 #: flaskr/templates/snippets/appliance_sm.html:41
 msgid "Running"
 msgstr "Läuft"
@@ -357,7 +377,7 @@ msgstr "Ist verschmutzt"
 #: flaskr/templates/snippets/attribution_footer.html:3
 #: flaskr/templates/snippets/attribution_footer.html:7
 #: flaskr/templates/snippets/attribution_footer.html:12
-#: flaskr/templates/snippets/attribution_footer.html:33
+#: flaskr/templates/snippets/attribution_footer.html:32
 #, python-format
 msgid "Icons made by %(author)s from %(url)s"
 msgstr "Icons erstellt von %(author)s von %(url)s"

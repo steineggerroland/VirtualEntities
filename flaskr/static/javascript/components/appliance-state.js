@@ -5,13 +5,13 @@ const ApplianceState = function () {
     const appliance = JSON.parse(self.dataset.applianceJson)
     self.text = self.color = self.icon = null
     const socketHandler = (eventName, event) => {
-        if (!eventName.startsWith(appliance.name)) return
+        if (event.entity_name !== appliance.name) return
         const oldAppliance = JSON.parse(self.dataset.applianceJson)
-        self.dataset.applianceJson = JSON.stringify(event.appliance)
-        if (oldAppliance.running_state !== event.appliance.running_state ||
-            (oldAppliance.type !== event.appliance.type) ||
-            (oldAppliance.needs_unloading !== event.appliance.needs_unloading) ||
-            (oldAppliance.started_run_at !== event.appliance.started_run_at)) {
+        self.dataset.applianceJson = JSON.stringify(event.entity)
+        if (oldAppliance.running_state !== event.entity.running_state ||
+            (oldAppliance.type !== event.entity.type) ||
+            (oldAppliance.needs_unloading !== event.entity.needs_unloading) ||
+            (oldAppliance.started_run_at !== event.entity.started_run_at)) {
             refresh()
         }
     }

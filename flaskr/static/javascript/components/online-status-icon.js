@@ -43,8 +43,8 @@ const OnlineStatusIcon = function () {
     }
     update()
     const socketHandler = (eventName, event) => {
-        if (!eventName.startsWith(self.dataset.entityName)) return
-        const entity = event[self.dataset.entityType]
+        if (event.entity_name !== self.dataset.entityName) return
+        const entity = event.entity
         if (self.dataset.onlineStatus !== entity['online_status'] ||
             self.dataset.lastSeenAt !== entity['last_seen_at']) {
             self.dataset.onlineStatus = entity['online_status']

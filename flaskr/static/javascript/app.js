@@ -43,7 +43,10 @@ if (document.documentElement.lang === 'de') {
         dateFns.setDefaultOptions({locale: dateFns.locale.de})
     }))
 }
-loader.then(() => import('./components.js'))
+const are_notifications_enabled = true
+loader.then(() => import('./translations.js'))
+    .then(() => import('./components.js'))
     .then(() => import('./base.js'))
+    .then(() => import('./notifications-service.js'))
 
 export {socket, roomSocket, applianceSocket, personSocket, behave}
