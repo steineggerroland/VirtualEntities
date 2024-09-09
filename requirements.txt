@@ -24,7 +24,7 @@ python-dateutil==2.9.0.post0
 python-event-bus==1.2.0
 pytz==2024.1
 PyYAML==6.0.2
-recurring-ical-events==2.2.3
+recurring-ical-events==3.2.0
 requests==2.32.3
 six==1.16.0
 tzlocal==5.2
