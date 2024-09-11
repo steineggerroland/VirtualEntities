@@ -1,4 +1,4 @@
-# Virtual Entities [![Quality](https://github.com/steineggerroland/VirtualEntities/actions/workflows/quality.yml/badge.svg)](https://github.com/steineggerroland/VirtualEntities/actions/workflows/quality.yml) [![BehaviorTest](https://github.com/steineggerroland/VirtualEntities/actions/workflows/behavior_test.yml/badge.svg)](https://github.com/steineggerroland/VirtualEntities/actions/workflows/behavior_test.yml)
+# Virtual Entities [![Quality](https://github.com/steineggerroland/VirtualEntities/actions/workflows/quality.yml/badge.svg)](https://github.com/steineggerroland/VirtualEntities/actions/workflows/quality.yml) [![BehaviorTest](https://github.com/steineggerroland/VirtualEntities/actions/workflows/behavior_test.yml/badge.svg)](https://github.com/steineggerroland/VirtualEntities/actions/workflows/behavior_test.yml) [![Demo](https://img.shields.io/website.svg?down_color=red&down_message=demo%20down&up_color=green&up_message=demo%20up&url=http%3A%2F%2Fvirtualentities.onrender.com%2F)](https://virtualentities.onrender.com)
 
 Do you have a washing machine or dryer that is not smart? Make it smart!
 
