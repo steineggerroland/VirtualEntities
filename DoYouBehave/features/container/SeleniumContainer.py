@@ -1,4 +1,3 @@
-import logging
 from threading import Thread
 from time import sleep
 
@@ -39,7 +38,7 @@ class SeleniumContainer(DockerContainer):
 
         self.port_to_expose = 4444
         self.vnc_port_to_expose = 4444
-        super(SeleniumContainer, self).__init__(image=self.image, shm_size="2g",**kwargs)
+        super(SeleniumContainer, self).__init__(image=self.image, shm_size="6g", **kwargs)
         self.with_bind_ports(self.port_to_expose, self.vnc_port_to_expose)
         self.with_bind_ports(7900, 7900)
         if log_container_logs:
