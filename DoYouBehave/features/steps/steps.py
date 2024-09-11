@@ -19,7 +19,6 @@ use_step_matcher('re')
 
 @given(r'(?>the user goes|they go) to the (?P<page_name>\w+(?> \w+)*) page')
 def load_page(context, page_name: str):
-    context.webdriver.switch_to.new_window('tab')
     context.pages[page_name].navigate_to()
     context.pages[page_name].is_current_page()
 
@@ -29,7 +28,6 @@ def load_page_for_entity(context, page_name: str, entity_name: str):
     # "the" may be added to entity name because of grammar, thus, remove it
     entity_name = re.sub('^the ', '', entity_name)
     context.entity_name = entity_name
-    context.webdriver.switch_to.new_window('tab')
     context.pages[page_name].navigate_to_entity(entity_name)
     context.pages[page_name].is_current_page_for_entity(entity_name)
 
