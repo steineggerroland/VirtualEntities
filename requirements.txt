@@ -32,6 +32,6 @@ urllib3==2.2.3
 vobject==0.9.7
 waiting==1.4.1
 Werkzeug==3.0.6
-WTForms==3.1.2
+WTForms==3.2.1
 x-wr-timezone==0.0.7
 yamlenv==0.7.1
