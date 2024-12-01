@@ -1,6 +1,6 @@
 Babel==2.16.0
 blinker==1.8.2
-Bootstrap-Flask==2.4.0
+Bootstrap-Flask==2.4.1
 caldav==1.3.9
 certifi==2024.8.30
 charset-normalizer==3.3.2
