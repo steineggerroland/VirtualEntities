@@ -29,7 +29,7 @@ requests==2.32.3
 six==1.16.0
 tzlocal==5.2
 urllib3==2.2.3
-vobject==0.9.7
+vobject==0.9.8
 waiting==1.4.1
 Werkzeug==3.0.6
 WTForms==3.2.1
