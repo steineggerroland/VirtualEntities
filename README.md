@@ -4,7 +4,9 @@ Do you have a washing machine or dryer that is not smart? Make it smart!
 
 Do you have a problem with too high or too low humidity? One look and you know when to ventilate.
 
-Enhance your home and make it smart. 
+Enhance your home and make it smart.
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M81O8HB)
 
 ## Motivation
 
