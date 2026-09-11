@@ -1,8 +1,7 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 import pytz
-from dateutil.utils import today
 from flask import render_template, redirect, url_for, flash
 from flask.views import View, MethodView
 from flask_babel import gettext
@@ -13,6 +12,17 @@ from iot.infrastructure.person import Person
 from iot.infrastructure.register_of_persons import RegisterOfPersons
 
 
+def preview_days(person: Person, first_day: date, timezone: pytz.BaseTzInfo):
+    """Build the seven local calendar days shown on a person's detail page."""
+    days = []
+    for offset in range(7):
+        day = first_day + timedelta(days=offset)
+        start = timezone.localize(datetime.combine(day, datetime.min.time()))
+        end = timezone.localize(datetime.combine(day + timedelta(days=1), datetime.min.time()))
+        days.append((day, person.get_appointments_for(start, timedelta(days=1)), start, end))
+    return days
+
+
 class Details(View):
     def __init__(self, register_of_persons: RegisterOfPersons):
         self.register_of_persons = register_of_persons
@@ -20,12 +30,8 @@ class Details(View):
     def dispatch_request(self, name: str):
         person: Person = self.register_of_persons.locate(name)
         if person is not None:
-            days_to_appointments = list(map(lambda day: (
-                day, person.get_appointments_for(day, timedelta(days=1)),
-                datetime.combine(day, datetime.min.time(), pytz.timezone("Europe/Berlin")),
-                datetime.combine(day, datetime.max.time(), pytz.timezone("Europe/Berlin"))),
-                                            [today(pytz.timezone("Europe/Berlin")) + timedelta(days=offset) for offset
-                                             in range(0, 7)]))
+            timezone = pytz.timezone("Europe/Berlin")
+            days_to_appointments = preview_days(person, datetime.now(timezone).date(), timezone)
             return render_template("person.html", person=person,
                                    days_to_appointments=days_to_appointments)
         else:
