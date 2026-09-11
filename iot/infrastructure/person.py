@@ -9,9 +9,9 @@ from iot.infrastructure.virtual_entity import VirtualEntity
 
 
 class Person(VirtualEntity):
-    def __init__(self, name: str, calendars: List[Calendar] = (), last_updated_at: datetime = datetime.now(tzlocal()),
+    def __init__(self, name: str, calendars: List[Calendar] = (), last_updated_at: datetime | None = None,
                  last_seen_at: None | datetime = None):
-        super().__init__(name, "person", last_updated_at, last_seen_at, online_delta_in_seconds=60 * 10)
+        super().__init__(name, "person", last_updated_at if last_updated_at is not None else datetime.now(tzlocal()), last_seen_at, online_delta_in_seconds=60 * 10)
         self.calendars = calendars
 
     def set_calendars(self, calendars) -> 'Person':
@@ -26,7 +26,8 @@ class Person(VirtualEntity):
 
     def get_n_upcoming_appointments(self, n: int) -> List[Appointment]:
         all_appointments = reduce(lambda a, b: a + b, map(lambda c: c.appointments, self.calendars), [])
-        all_appointments.sort(key=lambda a: a.start_at)
+        all_appointments.sort(key=lambda a: (a.timezone.localize(datetime.combine(a.start_at, datetime.min.time()))
+                                              if a.is_all_day else a.start_at))
         return list(all_appointments)[:n]
 
     def to_dict(self):
