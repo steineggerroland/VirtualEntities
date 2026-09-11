@@ -1,8 +1,7 @@
 import json
 import logging
-import time
 from datetime import datetime
-from threading import Thread
+from threading import Thread, Event
 from typing import List
 
 from croniter import croniter
@@ -18,6 +17,7 @@ class MqttMediator:
         self.mqtt_client: MqttClient = mqtt_client
         self.logger = logging.getLogger(self.__class__.__qualname__)
         self.scheduled_update_threads: List[Thread] = []
+        self._stop = Event()
 
     def start(self):
         for thread in self.scheduled_update_threads:
@@ -25,8 +25,9 @@ class MqttMediator:
                 thread.start()
 
     def shutdown(self, timeout=2):
+        self._stop.set()
         for thread in self.scheduled_update_threads:
-            if not thread.is_alive():
+            if thread.is_alive():
                 thread.join(timeout)
 
     def handle_destinations(self, planned_notifications: List[PlannedNotification], get_dict_callback):
@@ -38,9 +39,10 @@ class MqttMediator:
     def _scheduled_updates(self, planned_notification: PlannedNotification, get_dict_callback):
         now = datetime.now(tzlocal())
         cron = croniter(planned_notification.cron_expression, now)
-        while True:
+        while not self._stop.is_set():
             delta = cron.get_next(datetime) - datetime.now(tzlocal())
-            time.sleep(max(0, delta.total_seconds()))
+            if self._stop.wait(max(0, delta.total_seconds())):
+                return
             try:
                 self.mqtt_client.publish(planned_notification.mqtt_topic, get_dict_callback())
                 self.logger.debug("Sent update to '%s'", planned_notification.mqtt_topic)

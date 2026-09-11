@@ -54,8 +54,10 @@ class Appointment:
 class Calendar(VirtualEntity):
     def __init__(self, name: str, url: str, color: str, appointments: List[Appointment] | None = None,
                  last_updated_at: datetime | None = None,
-                 last_seen_at: None | datetime = None):
+                 last_seen_at: None | datetime = None, loaded_from=None, loaded_until=None):
         super().__init__(name, "calendar", last_updated_at if last_updated_at is not None else datetime.now(tzlocal()), last_seen_at, online_delta_in_seconds=60 * 30)
+        self.loaded_from = loaded_from
+        self.loaded_until = loaded_until
         self.url = url
         self.color = color.lower()
         self.appointments = list(appointments) if appointments is not None else []

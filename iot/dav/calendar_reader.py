@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from typing import List
 
 from caldav import CalendarObjectResource
@@ -26,7 +26,8 @@ class GlobalCalendarConfig:
 
 
 class CalendarLoader:
-    def __init__(self, config: CalendarsConfig):
+    def __init__(self, config: CalendarsConfig, timezone: str = "Europe/Berlin"):
+        self.timezone = timezone
         self.config = GlobalCalendarConfig(config.calendars, config.categories)
         self.logger = logging.getLogger(self.__class__.__name__)
 
@@ -37,18 +38,25 @@ class CalendarLoader:
             try:
                 appointment = self._convert_to_appointment(default_color, event)
                 appointments.append(appointment)
-            except AttributeError:
-                self.logger.debug('Could not parse event as appointment "%s"', event)
+            except (AttributeError, KeyError, TypeError, ValueError) as error:
+                raise ValueError("Calendar import incomplete: invalid event") from error
         return Calendar(name, url, default_color, appointments, last_seen_at=datetime.now(tzlocal()))
 
     def _convert_to_appointment(self, default_color, event):
         ical_component = event.icalendar_component
-        summary = str(ical_component['SUMMARY'])
+        summary = str(ical_component.get('SUMMARY', ''))
         description = str(ical_component['DESCRIPTION']) if 'DESCRIPTION' in ical_component else ''
         start_at = ical_component['DTSTART'].dt
-        end_at = ical_component['DTEND'].dt
+        if 'DTEND' in ical_component:
+            end_at = ical_component['DTEND'].dt
+        elif 'DURATION' in ical_component:
+            end_at = start_at + ical_component['DURATION'].dt
+        elif isinstance(start_at, date) and not isinstance(start_at, datetime):
+            end_at = start_at + timedelta(days=1)
+        else:
+            end_at = start_at
         color = self.search_color_for_category(default_color, ical_component)
-        appointment = Appointment(summary, start_at, end_at, color, description)
+        appointment = Appointment(summary, start_at, end_at, color, description, timezone=self.timezone)
         return appointment
 
     def search_color_for_category(self, default_color: str, ical_component) -> str:
