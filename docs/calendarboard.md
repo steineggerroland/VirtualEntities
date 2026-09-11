@@ -10,13 +10,13 @@ through the application. The firmware maps them to physical rows in this order.
 
 ```yaml
 calendar_boards:
-  - id: calendar-board-1
+  - id: example-board
     timezone: Europe/Berlin
     rows:
-      - {id: roland, person: roland}
-      - {id: christina, person: christina}
-      - {id: nora, person: nora}
-      - {id: per, person: per}
+      - {id: person1, person: person1}
+      - {id: person2, person: person2}
+      - {id: person3, person: person3}
+      - {id: person4, person: person4}
 ```
 
 `calendars.timezone` optionally sets the source timezone for floating timestamps

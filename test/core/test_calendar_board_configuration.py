@@ -7,8 +7,8 @@ from iot.core.configuration_manager import _read_configuration
 
 class BoardConfigurationTest(unittest.TestCase):
     def config(self):
-        return {'mqtt': {'url': 'localhost'}, 'entities': [{'name': 'Roland', 'type': 'person'}],
-                'calendar_boards': [{'id': 'board', 'rows': [{'id': 'roland', 'person': 'Roland'}]}]}
+        return {'mqtt': {'url': 'localhost'}, 'entities': [{'name': 'Person1', 'type': 'person'}],
+                'calendar_boards': [{'id': 'board', 'rows': [{'id': 'person1', 'person': 'Person1'}]}]}
 
     def test_roundtrip_preserves_board_and_source_timezone(self):
         raw = self.config()

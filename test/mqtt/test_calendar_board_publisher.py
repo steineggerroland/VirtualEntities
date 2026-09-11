@@ -17,8 +17,8 @@ class BoardPublisherTest(unittest.TestCase):
         self.service.calendar_snapshot.return_value = ((self.calendar,), frozenset())
         self.mqtt = Mock()
         self.mqtt.publish.return_value = Mock(rc=0, is_published=Mock(return_value=True))
-        config = CalendarBoardConfig('board', (BoardRowConfig('roland', 'Roland'),))
-        self.publisher = CalendarBoardPublisher(self.mqtt, config, {'Roland': self.service}, lambda: self.now)
+        config = CalendarBoardConfig('board', (BoardRowConfig('person1', 'Person1'),))
+        self.publisher = CalendarBoardPublisher(self.mqtt, config, {'Person1': self.service}, lambda: self.now)
 
     def messages(self):
         return [(call.args[0], json.loads(call.args[1]), call.kwargs) for call in self.mqtt.publish.call_args_list]
