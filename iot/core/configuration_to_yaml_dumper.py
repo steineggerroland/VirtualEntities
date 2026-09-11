@@ -12,9 +12,10 @@ class ConfigDumpers:
         to_dict = {'mqtt': c.mqtt,
                    'entities': [entity for entity in c.entities]}
         if c.time_series: to_dict['time_series'] = c.time_series
-        if c.calendars_config and (c.calendars_config.categories or c.calendars_config.calendars): to_dict[
+        if c.calendars_config and (c.calendars_config.categories or c.calendars_config.calendars or c.calendars_config.timezone != "Europe/Berlin"): to_dict[
             'calendars'] = c.calendars_config
         if c.flaskr: to_dict['flaskr'] = c.flaskr
+        if c.calendar_boards: to_dict['calendar_boards'] = [board.to_dict() for board in c.calendar_boards]
         return dumper.represent_dict(
             _sort_keys(OrderedDict(to_dict), ['mqtt', 'time_series', 'entities', 'calendars', 'flaskr']).items())
 
@@ -78,8 +79,10 @@ class ConfigDumpers:
         return dumper.represent_dict(_sort_keys(OrderedDict(dict__), ['name', 'color_hex']).items())
 
     def calendars_dumper(dumper: Dumper, o) -> Node:
-        return dumper.represent_dict(OrderedDict({'categories': [cat for cat in o.categories],
-                                                  'caldav': [cal for cal in o.calendars]}).items())
+        values = {'categories': list(o.categories), 'caldav': list(o.calendars)}
+        if o.timezone != 'Europe/Berlin':
+            values['timezone'] = o.timezone
+        return dumper.represent_dict(values)
 
     def sources_dumper(dumper: Dumper, o) -> Node:
         return dumper.represent_list([source for source in o.list])

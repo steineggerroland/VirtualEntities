@@ -68,7 +68,7 @@ class MqttClientTest(unittest.TestCase):
         # when
         mqtt_client.publish(topic, {})
         # then
-        paho_mqtt_client_mock.publish.assert_called_once_with(topic, payload="{}")
+        paho_mqtt_client_mock.publish.assert_called_once_with(topic, payload="{}", qos=0, retain=False)
 
 
 if __name__ == '__main__':

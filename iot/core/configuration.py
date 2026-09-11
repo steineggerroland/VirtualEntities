@@ -1,4 +1,7 @@
 from typing import List, Optional
+from dataclasses import dataclass
+import re
+from zoneinfo import ZoneInfo
 
 
 class IncompleteConfiguration(Exception):
@@ -102,7 +105,9 @@ class CategoryConfig:
 
 
 class CalendarsConfig:
-    def __init__(self, categories: list[CategoryConfig], calendars: list[CaldavConfig]):
+    def __init__(self, categories: list[CategoryConfig], calendars: list[CaldavConfig], timezone="Europe/Berlin"):
+        ZoneInfo(timezone)
+        self.timezone = timezone
         self.categories = categories
         self.calendars = calendars
 
@@ -173,12 +178,38 @@ class VirtualEntityConfig:
 
 class Configuration:
     def __init__(self, mqtt: MqttConfiguration, entities: [VirtualEntityConfig], time_series: TimeSeriesConfig | None,
-                 calendars_config: CalendarsConfig, flaskr: dict):
+                 calendars_config: CalendarsConfig, flaskr: dict, calendar_boards=None):
         self.mqtt = mqtt
         self.entities = entities
         self.time_series = time_series
         self.calendars_config = calendars_config
         self.flaskr = flaskr
+        self.calendar_boards = list(calendar_boards or [])
 
     def __str__(self):
         return f"{self.mqtt}, {self.entities}, {self.time_series}, {self.calendars_config}"
+
+
+@dataclass(frozen=True)
+class BoardRowConfig:
+    id: str
+    person: str
+
+
+@dataclass(frozen=True)
+class CalendarBoardConfig:
+    id: str
+    rows: tuple[BoardRowConfig, ...]
+    timezone: str = 'Europe/Berlin'
+
+    def __post_init__(self):
+        for value in [self.id] + [row.id for row in self.rows]:
+            if not isinstance(value, str) or not re.fullmatch(r'[A-Za-z0-9_-]{1,32}', value):
+                raise IncompleteConfiguration('Board and row IDs must be ASCII topic segments, length 1..32')
+        if not self.rows or len({row.id for row in self.rows}) != len(self.rows):
+            raise IncompleteConfiguration('Board rows must be nonempty and have unique IDs')
+        ZoneInfo(self.timezone)
+
+    def to_dict(self):
+        return {'id': self.id, 'timezone': self.timezone,
+                'rows': [{'id': row.id, 'person': row.person} for row in self.rows]}

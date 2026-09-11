@@ -50,3 +50,8 @@ Some of my power plugs support Zigbee and are connected using Zigbee2MQTT. On th
 OpenHAB is used to read the new features / status of the now smart entities. The status messages send by this project are consumed by OpenHAB.
 Additionally, OpenHAB handles physical buttons in my home and converts their actions to MQTT messages which are consumed to manipulate the virtual entities. I have buttons attached to my dishwasher, washing machine etc.
 For example, when I press the button on my washing machine, the virtual washing machine is triggered to be unloaded AND some lights in my home are triggered to celebrate the done house work.
+
+
+## CalendarBoard
+
+See [CalendarBoard v1 setup and MQTT contract](docs/calendarboard.md) for the optional daily-view and time publisher.

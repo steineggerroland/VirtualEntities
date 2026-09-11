@@ -155,7 +155,7 @@ def _read_calendars_configuration(entity_config: dict) -> CalendarsConfig:
     calendars = _read_caldav_configuration(calendars_config["caldav"]) if "caldav" in calendars_config else []
     categories = _read_calendar_categories_configuration(
         calendars_config["categories"]) if "categories" in calendars_config else []
-    return CalendarsConfig(categories, calendars)
+    return CalendarsConfig(categories, calendars, calendars_config.get("timezone", "Europe/Berlin"))
 
 
 def _read_entity(entity_config: dict, calendars) -> VirtualEntityConfig:
@@ -184,13 +184,31 @@ def _read_time_series_config(time_series_config) -> TimeSeriesConfig:
                             time_series_config['password'], time_series_config['bucket_name'])
 
 
+def _read_calendar_boards(conf_dict):
+    boards = []
+    persons = {entity['name'] for entity in conf_dict.get('entities', []) if entity.get('type') == 'person'}
+    for entry in conf_dict.get('calendar_boards', []):
+        _verify_keys(entry, ['id', 'rows'], 'calendar_boards[]')
+        rows = []
+        for row in entry['rows']:
+            _verify_keys(row, ['id', 'person'], 'calendar_boards[].rows[]')
+            if row['person'] not in persons:
+                raise IncompleteConfiguration('Board row references unknown person')
+            rows.append(BoardRowConfig(row['id'], row['person']))
+        boards.append(CalendarBoardConfig(entry['id'], tuple(rows), entry.get('timezone', 'Europe/Berlin')))
+    if len({board.id for board in boards}) != len(boards):
+        raise IncompleteConfiguration('Duplicate calendar board ID')
+    return boards
+
+
 def _read_configuration(conf_dict: dict) -> Configuration:
     calendars_config = _read_calendars_configuration(conf_dict)
     return Configuration(_read_mqtt_configuration(conf_dict),
                          _read_entities(conf_dict, calendars_config.calendars),
                          _read_time_series_config(conf_dict['time_series']) if 'time_series' in conf_dict else None,
                          calendars_config,
-                         conf_dict['flaskr'] if 'flaskr' in conf_dict else {})
+                         conf_dict['flaskr'] if 'flaskr' in conf_dict else {},
+                         _read_calendar_boards(conf_dict))
 
 
 def _verify_keys_set(yaml_dict, key_sets, prefix=None):
@@ -261,6 +279,10 @@ class ConfigurationManager:
         if new_name != old_name:
             entity = list(filter(lambda t: t.name == old_name, self.configuration.entities)).pop()
             entity.name = new_name
+            self.configuration.calendar_boards = [
+                CalendarBoardConfig(board.id, tuple(BoardRowConfig(row.id, new_name if row.person == old_name else row.person)
+                                                    for row in board.rows), board.timezone)
+                for board in self.configuration.calendar_boards]
             self.save()
             EventBus.call("person/changed_config_name", name=new_name, old_name=old_name)
 

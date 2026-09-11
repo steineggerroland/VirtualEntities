@@ -61,6 +61,7 @@ class MqttClient:
 
         self.loop_thread: Thread = Thread(target=self._loop_forever, daemon=True)
         self.subscriptions = Subscriptions()
+        self._connected_callbacks = []
         self.mqtt_client.connect(self.mqtt_config.url, self.mqtt_config.port)
 
     def _on_socket_error(self, *args):
@@ -84,6 +85,8 @@ class MqttClient:
             self.logger.debug("Connected with result code %s", str(reason_code))
             for subscribed_topic in self.subscriptions.get_topics():
                 client.subscribe(subscribed_topic)
+            for callback in tuple(self._connected_callbacks):
+                callback()
         elif reason_code == 1:
             self.logger.debug("Connection refused - unacceptable protocol version")
         elif reason_code == 2:
@@ -120,9 +123,20 @@ class MqttClient:
         for sub in set(filter(lambda s: s.topic not in all_topics, removed_subscriptions)):
             self.mqtt_client.unsubscribe(sub.topic)
 
-    def publish(self, topic: str, payload: str | dict = None):
+    def is_connected(self):
+        return self.mqtt_client.is_connected()
+
+    def add_connected_callback(self, callback):
+        self._connected_callbacks.append(callback)
+
+    def remove_connected_callback(self, callback):
+        self._connected_callbacks.remove(callback)
+
+    def publish(self, topic: str, payload: str | dict = None, *, qos=0, retain=False):
         msg = json.dumps(payload) if isinstance(payload, dict) else payload
-        self.mqtt_client.publish(topic, payload=msg)
+        return self.mqtt_client.publish(topic, payload=msg, qos=qos, retain=retain)
 
     def stop(self, timeout=5):
-        self.loop_thread.join(timeout)
+        self.mqtt_client.disconnect()
+        if self.loop_thread.is_alive():
+            self.loop_thread.join(timeout)

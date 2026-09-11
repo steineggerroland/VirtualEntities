@@ -21,6 +21,7 @@ from iot.infrastructure.room_service import RoomService, supports_entity_type as
 from iot.mqtt.mqtt_client import MqttClient
 from iot.mqtt.mqtt_appliance_mediator import MqttApplianceMediator
 from iot.mqtt.mqtt_person_mediator import MqttPersonMediator
+from iot.mqtt.calendar_board_publisher import CalendarBoardPublisher
 from iot.mqtt.mqtt_room_mediator import MqttRoomMediator
 
 DEFAULT_FLASK_CONFIG_FILE_NAME = "default_flask.yaml"
@@ -48,6 +49,7 @@ def run():
     appliance_service = ApplianceService(appliance_depot, time_series_storage, config_manager)
     appliance_service.add_appliance_by_config(machine_configs)
     mqtt_mediators = []
+    person_services = {}
     logger.debug("Machine service for loaded")
     mqtt_machine_mediator = MqttApplianceMediator(appliance_service, client)
     mqtt_mediators.append(mqtt_machine_mediator)
@@ -64,12 +66,16 @@ def run():
             logger.debug("Mqtt room mediator for '%s' loaded" % entity_config.name)
         elif person_service_supports_entity_type(entity_type=entity_config.type):
             person_service = PersonService(register_of_persons, entity_config)
+            person_services[entity_config.name] = person_service
             logger.debug("Person service for '%s' loaded" % entity_config.name)
             mqtt_mediators.append(
-                MqttPersonMediator(client, person_service, entity_config, CalendarLoader(config.calendars_config)))
+                MqttPersonMediator(client, person_service, entity_config, CalendarLoader(config.calendars_config, config.calendars_config.timezone)))
             logger.debug("Mqtt person mediator for '%s' loaded" % entity_config.name)
         elif not appliance_service_supports_entity_type(entity_type=entity_config.type):
             logger.error('Unsupported entity of type %s' % entity_config.type)
+
+    for board in config.calendar_boards:
+        mqtt_mediators.append(CalendarBoardPublisher(client, board, person_services))
 
     try:
         storage.start()
