@@ -1,0 +1,26 @@
+mqtt:
+  url: ${MQTT_URL:-localhost}
+  port: ${MQTT_PORT:-1883}
+  username: ${MQTT_USERNAME:-admin}
+  password: ${MQTT_PASSWORD:-secret}
+  clientId: ${MQTT_CLIENT_ID:-client-id}
+time_series:
+  url: ${INFLUXDB_URL:-localhost}
+  username: ${INFLUXDB_USERNAME:-user}
+  password: ${INFLUXDB_PASSWORD:-password}
+  bucket_name: ${INFLUXDB_BUCKET_NAME:-power-consumptions}
+entities:
+  - name: ${ENTITY_NAME:-washing_machine}
+    type: ${ENTITY_TYPE:-washing_machine}
+    sources:
+      - mqtt_topic: ${MQTT_INPUT_CONSUMPTION:-measurements/thing/power}
+        type: consumption
+      - mqtt_topic: ${MQTT_INPUT_LOADING:-things/washing_machine/load}
+        type: loading
+      - mqtt_topic: ${MQTT_INPUT_UNLOADING:-things/washing_machine/unload}
+        type: unloading
+    destinations:
+      planned_notification:
+        - mqtt_topic: ${MQTT_UPDATE_TOPIC:-things/washing_machine/state}
+          # use cron expression to schedule the notification. seconds are supported as well.
+          cron_expression: "* * * * * */20"
