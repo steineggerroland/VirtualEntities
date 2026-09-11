@@ -6,7 +6,7 @@ from datetime import datetime, timezone, timedelta
 from threading import Event, Thread
 from zoneinfo import ZoneInfo
 
-from iot.infrastructure.time.day_view import project_day
+from iot.infrastructure.time.day_view import project_all_day, project_day
 
 
 def utc_text(value):
@@ -97,18 +97,19 @@ class CalendarBoardPublisher:
             timedelta(0) <= now - calendar.last_seen_at <= timedelta(minutes=30) for calendar in calendars)
         previous = self._last_complete.get(row_id)
         if fresh:
-            slots = project_day((appointment for calendar in calendars for appointment in calendar.appointments),
-                                day, self.config.timezone)
-            self._last_complete[row_id] = (day, slots, checked)
+            appointments = tuple(appointment for calendar in calendars for appointment in calendar.appointments)
+            slots = project_day(appointments, day, self.config.timezone)
+            all_day = project_all_day(appointments, day)
+            self._last_complete[row_id] = (day, slots, all_day, checked)
             status = 'ok'
         elif previous and previous[0] == day:
-            _, slots, checked = previous
+            _, slots, all_day, checked = previous
             status = 'stale'
         else:
-            slots, status = None, 'unavailable'
+            slots, all_day, status = None, None, 'unavailable'
         return {'schema_version': 1, 'date': day.isoformat(), 'timezone': self.config.timezone,
                 'generated_at': utc_text(now), 'source_checked_at': utc_text(checked) if checked else None,
-                'status': status, 'slots': slots}
+                'status': status, 'slots': slots, 'all_day': all_day}
 
     def tick(self):
         """One serialized worker step; injectable time keeps protocol tests deterministic."""
@@ -130,7 +131,7 @@ class CalendarBoardPublisher:
             try:
                 payload = self._snapshot(row_id, service, now)
                 # Source polling timestamps alone must not generate network traffic.
-                fingerprint = (payload['date'], payload['status'], payload['slots'])
+                fingerprint = (payload['date'], payload['status'], payload['slots'], payload['all_day'])
                 if force or self._last_sent.get(row_id) != fingerprint:
                     self._publish(f'rows/{row_id}/day', payload, True)
                     self._last_sent[row_id] = fingerprint

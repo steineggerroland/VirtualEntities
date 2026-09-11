@@ -35,3 +35,19 @@ def project_day(appointments: Iterable[Appointment], day: date,
                 if slots[hour] != IMPORTANT_COLOR:
                     slots[hour] = color
     return slots
+
+
+def project_all_day(appointments: Iterable[Appointment], day: date) -> str | None:
+    """Return the compact indicator for the 25th LED of a board row.
+
+    Calendar end dates are exclusive. Important events take precedence, just as
+    they do for the hourly projection.
+    """
+    indicator = None
+    for appointment in appointments:
+        if not appointment.is_all_day or not appointment.start_at <= day < appointment.end_at:
+            continue
+        color = IMPORTANT_COLOR if appointment.summary.startswith('Wichtig:') else NORMAL_COLOR
+        if indicator != IMPORTANT_COLOR:
+            indicator = color
+    return indicator

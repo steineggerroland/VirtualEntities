@@ -29,6 +29,7 @@ class BoardPublisherTest(unittest.TestCase):
         self.assertFalse(self.messages()[0][2]['retain'])
         self.assertEqual('2026-09-11T14:00:00+02:00', self.messages()[0][1]['local'])
         self.assertEqual([None] * 24, self.messages()[1][1]['slots'])
+        self.assertIsNone(self.messages()[1][1]['all_day'])
         self.assertEqual({'qos': 1, 'retain': True}, self.messages()[1][2])
         self.calendar.last_seen_at += timedelta(seconds=1)
         self.now += timedelta(seconds=1)
@@ -43,6 +44,13 @@ class BoardPublisherTest(unittest.TestCase):
         self.publisher._request(Mock(retain=False, payload=b'{"schema_version":1}'))
         self.publisher.tick()
         self.assertEqual(5, len(self.messages()))
+
+    def test_all_day_event_updates_indicator_without_filling_hours(self):
+        self.calendar.appointments = [Appointment('Wichtig: Urlaub', date(2026, 9, 11), date(2026, 9, 12), '')]
+        self.publisher.tick()
+        payload = self.messages()[-1][1]
+        self.assertEqual('ff0000', payload['all_day'])
+        self.assertEqual([None] * 24, payload['slots'])
 
     def test_failed_import_retains_last_complete_then_recovers(self):
         self.publisher.tick()

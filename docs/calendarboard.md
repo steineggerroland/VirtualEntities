@@ -34,15 +34,16 @@ Topics are under `calendarboard/v1/{board_id}`. Board and row IDs must contain
   `timezone` (IANA name). Date and time are one atomic observation.
 - `rows/{row_id}/day`: retained QoS 1, acknowledged before considering delivery
   successful. Fields: `schema_version: 1`, local `date`, `timezone`,
-  `generated_at`, `source_checked_at`, `status`, `slots`.
+  `generated_at`, `source_checked_at`, `status`, `all_day`, `slots`.
 - `sync/request`: non-retained request `{"schema_version":1}` from the board on
   boot, reconnect or date change. Replies contain fresh time and all current rows.
   Only the current day view is supported. Retained and malformed requests are ignored.
 
 A day has 24 slots, each null, `ffffff` (ordinary appointment) or `ff0000`
-(title starts exactly with `Wichtig:`). Red wins overlaps. All-day events do not
-occupy slots. Spring's missing hour remains empty; autumn's repeated hour shares
-one slot. Physical LED positions and night mode are firmware responsibilities.
+(title starts exactly with `Wichtig:`). Red wins overlaps. `all_day` is null,
+`ffffff` or `ff0000` and controls the 25th LED of the row. All-day events do not
+occupy hourly slots. Spring's missing hour remains empty; autumn's repeated hour
+shares one slot. Physical LED positions and night mode are firmware responsibilities.
 
 A complete successful import with no appointments produces 24 nulls and `ok`.
 A failed or more than 30-minute-old source uses the last complete projection of

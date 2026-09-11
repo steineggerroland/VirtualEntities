@@ -2,7 +2,7 @@ import unittest
 from datetime import date, datetime
 
 from iot.infrastructure.time.calendar import Appointment, Calendar
-from iot.infrastructure.time.day_view import project_day
+from iot.infrastructure.time.day_view import project_all_day, project_day
 
 
 def event(start, end, title='Normal'):
@@ -18,11 +18,19 @@ class DayViewTest(unittest.TestCase):
         for appointments in ([normal, important], [important, normal]):
             self.assertEqual(expected, project_day(appointments, date(2026, 9, 11)))
 
-    def test_all_day_preserved_but_ignored_by_board(self):
+    def test_all_day_is_projected_to_the_indicator_but_not_hour_slots(self):
         appointment = Appointment('Wichtig: Urlaub', date(2026, 9, 11), date(2026, 9, 12), 'ff0000')
         self.assertEqual('2026-09-11', appointment.to_dict()['start_at'])
         self.assertEqual([None] * 24, project_day([appointment], date(2026, 9, 11)))
+        self.assertEqual('ff0000', project_all_day([appointment], date(2026, 9, 11)))
+        self.assertIsNone(project_all_day([appointment], date(2026, 9, 12)))
         self.assertFalse(appointment.covers_interval(datetime(2026, 9, 12), datetime(2026, 9, 13)))
+
+    def test_all_day_indicator_prioritizes_important_events(self):
+        ordinary = Appointment('Urlaub', date(2026, 9, 11), date(2026, 9, 12), '')
+        important = Appointment('Wichtig: Urlaub', date(2026, 9, 11), date(2026, 9, 12), '')
+        self.assertEqual('ffffff', project_all_day([ordinary], date(2026, 9, 11)))
+        self.assertEqual('ff0000', project_all_day([ordinary, important], date(2026, 9, 11)))
 
     def test_midnight_and_zero_duration(self):
         appointment = event('2026-09-10T23:30:00+02:00', '2026-09-11T00:30:00+02:00')
