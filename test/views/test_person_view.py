@@ -1,5 +1,7 @@
 import unittest
+import gettext
 from datetime import date, datetime, timedelta
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytz
@@ -11,6 +13,13 @@ from iot.infrastructure.time.calendar import Calendar
 
 
 class PersonPreviewTest(unittest.TestCase):
+    def test_german_person_edit_translation_accepts_the_person_name(self):
+        catalog = Path(__file__).parents[2] / 'translations/de/LC_MESSAGES/messages.mo'
+        with catalog.open('rb') as file:
+            translation = gettext.GNUTranslations(file)
+        self.assertEqual('Example bearbeiten',
+                         translation.gettext('Edit %(person_name)s') % {'person_name': 'Example'})
+
     def test_details_renders_calendar_preview_without_passing_dates_as_timestamps(self):
         register = RegisterOfPersons()
         register.enlist(Person('Example', [Calendar('Personal', 'https://calendar.example.test', 'ffffff')]))

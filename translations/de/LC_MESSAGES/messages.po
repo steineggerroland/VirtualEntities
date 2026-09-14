@@ -227,7 +227,7 @@ msgstr "Personenverzeichnis"
 #: flaskr/templates/person.html:26
 #, python-format
 msgid "Edit %(person_name)s"
-msgstr "%(person_name) bearbeiten"
+msgstr "%(person_name)s bearbeiten"
 
 #: flaskr/templates/person.html:29
 #, python-format
@@ -521,4 +521,3 @@ msgstr "Raumdaten erfolgreich aktualisiert"
 #: flaskr/views/Room.py:62
 msgid "Failed to change room, see errors in the form"
 msgstr "Raumdaten nicht aktualisiert, siehe Fehler im Formular"
-
