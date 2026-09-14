@@ -237,6 +237,10 @@ msgstr ""
 msgid "Calendars"
 msgstr ""
 
+#: flaskr/templates/person.html:113
+msgid "All day"
+msgstr ""
+
 #: flaskr/templates/person.html:75
 #: flaskr/templates/snippets/calendar_card_body_lg.html:12
 #: flaskr/templates/snippets/calendar_card_body_sm.html:8
@@ -512,4 +516,3 @@ msgstr ""
 #: flaskr/views/Room.py:62
 msgid "Failed to change room, see errors in the form"
 msgstr ""
-

@@ -110,20 +110,26 @@
                                 <div class="d-flex flex-column m-0">
                                     {% for appointment in appointments %}
                                         <div class="appointment appointment-look p-2">
-                                            {% if appointment.start_at > start_of_day %}
-                                                <span class="start-at">{{ appointment.start_at|timeformat('short') }}</span>
+                                            {% if appointment.is_all_day %}
+                                                <span class="start-at">{{ _('All day') }}</span>
+                                                <span class="spacer"></span>
+                                                <span class="end-at"></span>
                                             {% else %}
-                                                <span class="start-at"
-                                                      data-bs-title="{{ appointment.start_at|datetimeformat('short') }}"
-                                                      data-bs-toggle="tooltip">...</span>
-                                            {% endif %}
-                                            <span class="spacer"> - </span>
-                                            {% if appointment.end_at < end_of_day %}
-                                                <span class="end-at">{{ appointment.end_at|timeformat('short') }}</span>
-                                            {% else %}
-                                                <span class="end-at"
-                                                      data-bs-title="{{ appointment.end_at|datetimeformat('short') }}"
-                                                      data-bs-toggle="tooltip">...</span>
+                                                {% if appointment.start_at > start_of_day %}
+                                                    <span class="start-at">{{ appointment.start_at|timeformat('short') }}</span>
+                                                {% else %}
+                                                    <span class="start-at"
+                                                          data-bs-title="{{ appointment.start_at|datetimeformat('short') }}"
+                                                          data-bs-toggle="tooltip">...</span>
+                                                {% endif %}
+                                                <span class="spacer"> - </span>
+                                                {% if appointment.end_at < end_of_day %}
+                                                    <span class="end-at">{{ appointment.end_at|timeformat('short') }}</span>
+                                                {% else %}
+                                                    <span class="end-at"
+                                                          data-bs-title="{{ appointment.end_at|datetimeformat('short') }}"
+                                                          data-bs-toggle="tooltip">...</span>
+                                                {% endif %}
                                             {% endif %}
 
                                             <strong class="summary overflow-hidden text-truncate"

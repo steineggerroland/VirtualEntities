@@ -238,6 +238,10 @@ msgstr "Konfiguration von %(person_name)s"
 msgid "Calendars"
 msgstr "Kalender"
 
+#: flaskr/templates/person.html:113
+msgid "All day"
+msgstr "Ganztägig"
+
 #: flaskr/templates/person.html:75
 #: flaskr/templates/snippets/calendar_card_body_lg.html:12
 #: flaskr/templates/snippets/calendar_card_body_sm.html:8
