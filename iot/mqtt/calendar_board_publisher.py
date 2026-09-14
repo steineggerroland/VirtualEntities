@@ -29,6 +29,7 @@ class CalendarBoardPublisher:
         self._last_complete = {}
         self._pending = {}
         self._last_time_sent = None
+        self._last_night_mode = None
         self._thread = Thread(target=self._run, daemon=True)
         self.mqtt.subscribe(self.base, self.base + '/sync/request', self._request)
         self.mqtt.add_connected_callback(self._sync.set)
@@ -111,12 +112,32 @@ class CalendarBoardPublisher:
                 'generated_at': utc_text(now), 'source_checked_at': utc_text(checked) if checked else None,
                 'status': status, 'slots': slots, 'all_day': all_day}
 
+    def _publish_night_mode(self, enabled):
+        if not self.mqtt.is_connected():
+            raise ConnectionError('MQTT disconnected')
+        result = self.mqtt.publish(f'home/things/{self.config.id}/nightmode', 'on' if enabled else 'off',
+                                   qos=1, retain=False)
+        if result.rc != 0:
+            raise ConnectionError('MQTT night mode publish rejected')
+
+    def _night_mode_active(self, now):
+        if self.config.night_mode is None:
+            return None
+        return self.config.night_mode.is_active_at(now.astimezone(self.zone).time())
+
     def tick(self):
         """One serialized worker step; injectable time keeps protocol tests deterministic."""
         force = self._sync.is_set()
         self._sync.clear()
         now = self.clock()
         monotonic_now = time.monotonic()
+        night_mode = self._night_mode_active(now)
+        if night_mode is not None and (force or self._last_night_mode is None or night_mode != self._last_night_mode):
+            try:
+                self._publish_night_mode(night_mode)
+                self._last_night_mode = night_mode
+            except Exception:
+                self.logger.exception('Board night mode publish failed for %s', self.config.id)
         if force or self._last_time_sent is None or monotonic_now - self._last_time_sent >= 30:
             try:
                 self._publish('time', {'schema_version': 1, 'utc': utc_text(now),

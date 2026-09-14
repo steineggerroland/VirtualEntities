@@ -1,6 +1,7 @@
 from typing import List, Optional
 from dataclasses import dataclass
 import re
+from datetime import time
 from zoneinfo import ZoneInfo
 
 
@@ -197,10 +198,29 @@ class BoardRowConfig:
 
 
 @dataclass(frozen=True)
+class NightModeConfig:
+    start: time
+    end: time
+
+    def __post_init__(self):
+        if not isinstance(self.start, time) or not isinstance(self.end, time) or self.start == self.end:
+            raise IncompleteConfiguration('Night mode start and end must be different times')
+
+    def is_active_at(self, value: time) -> bool:
+        if self.start < self.end:
+            return self.start <= value < self.end
+        return value >= self.start or value < self.end
+
+    def to_dict(self):
+        return {'start': self.start.strftime('%H:%M'), 'end': self.end.strftime('%H:%M')}
+
+
+@dataclass(frozen=True)
 class CalendarBoardConfig:
     id: str
     rows: tuple[BoardRowConfig, ...]
     timezone: str = 'Europe/Berlin'
+    night_mode: NightModeConfig | None = None
 
     def __post_init__(self):
         for value in [self.id] + [row.id for row in self.rows]:
@@ -211,5 +231,8 @@ class CalendarBoardConfig:
         ZoneInfo(self.timezone)
 
     def to_dict(self):
-        return {'id': self.id, 'timezone': self.timezone,
-                'rows': [{'id': row.id, 'person': row.person} for row in self.rows]}
+        result = {'id': self.id, 'timezone': self.timezone,
+                  'rows': [{'id': row.id, 'person': row.person} for row in self.rows]}
+        if self.night_mode:
+            result['night_mode'] = self.night_mode.to_dict()
+        return result

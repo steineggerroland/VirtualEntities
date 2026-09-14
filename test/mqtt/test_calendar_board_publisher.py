@@ -3,7 +3,7 @@ import unittest
 from datetime import date, datetime, timedelta, timezone
 from unittest.mock import Mock
 
-from iot.core.configuration import CalendarBoardConfig, BoardRowConfig
+from iot.core.configuration import CalendarBoardConfig, BoardRowConfig, NightModeConfig
 from iot.infrastructure.time.calendar import Calendar, Appointment
 from iot.mqtt.calendar_board_publisher import CalendarBoardPublisher
 
@@ -22,6 +22,9 @@ class BoardPublisherTest(unittest.TestCase):
 
     def messages(self):
         return [(call.args[0], json.loads(call.args[1]), call.kwargs) for call in self.mqtt.publish.call_args_list]
+
+    def night_mode_messages(self):
+        return [call for call in self.mqtt.publish.call_args_list if call.args[0].endswith('/nightmode')]
 
     def test_start_and_no_traffic_for_unchanged_poll(self):
         self.publisher.tick()
@@ -44,6 +47,28 @@ class BoardPublisherTest(unittest.TestCase):
         self.publisher._request(Mock(retain=False, payload=b'{"schema_version":1}'))
         self.publisher.tick()
         self.assertEqual(5, len(self.messages()))
+
+    def test_night_mode_is_published_at_transitions_and_on_sync(self):
+        config = CalendarBoardConfig('board', (BoardRowConfig('person1', 'Person1'),),
+                                     night_mode=NightModeConfig(datetime.strptime('22:00', '%H:%M').time(),
+                                                                datetime.strptime('06:00', '%H:%M').time()))
+        publisher = CalendarBoardPublisher(self.mqtt, config, {'Person1': self.service}, lambda: self.now)
+        publisher.tick()
+        self.assertEqual(('home/things/board/nightmode', 'off'),
+                         (self.night_mode_messages()[0].args[0], self.night_mode_messages()[0].args[1]))
+        self.assertEqual({'qos': 1, 'retain': False}, self.night_mode_messages()[0].kwargs)
+        self.now = datetime(2026, 9, 11, 21, tzinfo=timezone.utc)  # 23:00 in Berlin
+        publisher.tick()
+        self.assertEqual(('home/things/board/nightmode', 'on'),
+                         (self.night_mode_messages()[-1].args[0], self.night_mode_messages()[-1].args[1]))
+        publisher._request(Mock(retain=False, payload=b'{"schema_version":1}'))
+        publisher.tick()
+        self.assertEqual(('home/things/board/nightmode', 'on'),
+                         (self.night_mode_messages()[-1].args[0], self.night_mode_messages()[-1].args[1]))
+        self.now = datetime(2026, 9, 12, 5, tzinfo=timezone.utc)  # 07:00 in Berlin
+        publisher.tick()
+        self.assertEqual(('home/things/board/nightmode', 'off'),
+                         (self.night_mode_messages()[-1].args[0], self.night_mode_messages()[-1].args[1]))
 
     def test_all_day_event_updates_indicator_without_filling_hours(self):
         self.calendar.appointments = [Appointment('Wichtig: Urlaub', date(2026, 9, 11), date(2026, 9, 12), '')]

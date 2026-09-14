@@ -14,10 +14,12 @@ class BoardConfigurationTest(unittest.TestCase):
         raw = self.config()
         raw['calendars'] = {'timezone': 'UTC'}
         raw['calendar_boards'][0]['timezone'] = 'America/New_York'
+        raw['calendar_boards'][0]['night_mode'] = {'start': '22:15', 'end': '06:30'}
         config = _read_configuration(raw)
         restored = _read_configuration(yaml.safe_load(yaml.safe_dump(config)))
         self.assertEqual(config.calendar_boards, restored.calendar_boards)
         self.assertEqual('UTC', restored.calendars_config.timezone)
+        self.assertTrue(restored.calendar_boards[0].night_mode.is_active_at(restored.calendar_boards[0].night_mode.start))
 
     def test_unknown_person_and_unsafe_topic_id_are_rejected(self):
         for key, value in [('id', 'bad/#'), ('person', 'missing')]:
@@ -32,3 +34,11 @@ class BoardConfigurationTest(unittest.TestCase):
         raw['calendar_boards'][0]['rows'] *= 2
         with self.assertRaises(IncompleteConfiguration):
             _read_configuration(raw)
+
+    def test_night_mode_requires_two_valid_different_times(self):
+        for value in [{}, {'start': '22:00'}, {'start': '22:00', 'end': '22:00'},
+                      {'start': '24:00', 'end': '06:00'}, {'start': '22:0', 'end': '06:00'}, []]:
+            raw = self.config()
+            raw['calendar_boards'][0]['night_mode'] = value
+            with self.assertRaises(IncompleteConfiguration):
+                _read_configuration(raw)

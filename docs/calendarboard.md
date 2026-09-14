@@ -12,6 +12,9 @@ through the application. The firmware maps them to physical rows in this order.
 calendar_boards:
   - id: example-board
     timezone: Europe/Berlin
+    night_mode:
+      start: "22:00"
+      end: "06:00"
     rows:
       - {id: person1, person: person1}
       - {id: person2, person: person2}
@@ -44,6 +47,11 @@ A day has 24 slots, each null, `ffffff` (ordinary appointment) or `ff0000`
 `ffffff` or `ff0000` and controls the 25th LED of the row. All-day events do not
 occupy hourly slots. Spring's missing hour remains empty; autumn's repeated hour
 shares one slot. Physical LED positions and night mode are firmware responsibilities.
+
+`night_mode` is optional. If configured, `start` and `end` are local board times
+in strict `HH:MM` notation and must differ. The interval can cross midnight. The
+publisher sends `on` to `home/things/{board_id}/nightmode` at the start, `off` at
+the end, and the current value for every board synchronization request.
 
 A complete successful import with no appointments produces 24 nulls and `ok`.
 A failed or more than 30-minute-old source uses the last complete projection of

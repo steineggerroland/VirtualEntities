@@ -1,4 +1,5 @@
 from typing import Any
+from datetime import time
 
 import yaml
 import yamlenv
@@ -195,10 +196,26 @@ def _read_calendar_boards(conf_dict):
             if row['person'] not in persons:
                 raise IncompleteConfiguration('Board row references unknown person')
             rows.append(BoardRowConfig(row['id'], row['person']))
-        boards.append(CalendarBoardConfig(entry['id'], tuple(rows), entry.get('timezone', 'Europe/Berlin')))
+        night_mode = entry.get('night_mode')
+        if night_mode is not None:
+            if not isinstance(night_mode, dict):
+                raise IncompleteConfiguration('calendar_boards[].night_mode must be a mapping')
+            _verify_keys(night_mode, ['start', 'end'], 'calendar_boards[].night_mode')
+            night_mode = NightModeConfig(_read_board_time(night_mode['start'], 'start'),
+                                         _read_board_time(night_mode['end'], 'end'))
+        boards.append(CalendarBoardConfig(entry['id'], tuple(rows), entry.get('timezone', 'Europe/Berlin'), night_mode))
     if len({board.id for board in boards}) != len(boards):
         raise IncompleteConfiguration('Duplicate calendar board ID')
     return boards
+
+
+def _read_board_time(value, name):
+    if not isinstance(value, str) or not re.fullmatch(r'\d{2}:\d{2}', value):
+        raise IncompleteConfiguration(f'calendar_boards[].night_mode.{name} must be in HH:MM format')
+    hour, minute = map(int, value.split(':'))
+    if hour > 23 or minute > 59:
+        raise IncompleteConfiguration(f'calendar_boards[].night_mode.{name} must be a valid time')
+    return time(hour, minute)
 
 
 def _read_configuration(conf_dict: dict) -> Configuration:
@@ -281,7 +298,7 @@ class ConfigurationManager:
             entity.name = new_name
             self.configuration.calendar_boards = [
                 CalendarBoardConfig(board.id, tuple(BoardRowConfig(row.id, new_name if row.person == old_name else row.person)
-                                                    for row in board.rows), board.timezone)
+                                                    for row in board.rows), board.timezone, board.night_mode)
                 for board in self.configuration.calendar_boards]
             self.save()
             EventBus.call("person/changed_config_name", name=new_name, old_name=old_name)
